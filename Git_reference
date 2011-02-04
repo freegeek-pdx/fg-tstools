@@ -1,0 +1,71 @@
+Git
+===
+
+setup
+=====
+
+clone remote:
+git clone -o tstools ssh://devo/~paulm/tstools.git
+git add remote tstools ssh://devo/~paulm/tstools.git  --add shortcut
+
+
+push
+=====
+
+git push <target> <local>     local = branch
+git push tstools master
+
+
+git fetch
+========
+git fetch tstools	updates local copy
+
+git pull
+========
+git pull tstools 	updates local copy and merges any change
+
+Editing Files
+=============
+
+cd (dir)
+(edit files)
+git add (files)
+git commit [-m 'Explain what I changed']
+($ git format-patch origin/master)
+
+
+Creating and Commiting a New Project
+====================================
+
+cd (project-directory)
+git init
+(add some files)
+git add .
+git commit -m 'Initial commit'
+
+Branches
+=======
+git branch experimental  	(create branch)
+git branch 			(view branch)
+git checkout experimental	(Switch to experimental branch)
+git merge experimental		(merge experimental into master)
+git branch -d experimental	(delete branch  - ensures changes in place)
+git branch -D crazy-idea	(delete branch -- deos not change anything else)
+git reset --hard HEAD		(undo merge)
+
+
+Mis
+====
+git diff --cached  see whats about to change
+git status
+git log
+git log --stat  (what files and lines have changed)
+git commit -a commit all (no need to add)
+git diff
+
+
+
+
+
+
+
