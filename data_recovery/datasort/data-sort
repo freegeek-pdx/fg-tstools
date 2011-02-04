@@ -94,21 +94,10 @@ echo "Building file list..."
 
 # create list of source directories and the filetypes they contain
 
-# 	original:
-# 		for dir in $(find  recovered/ -type  d  -print); do ls $dir | awk -F \. '{print $2}' ; done | sort | uniq > recovered/file.types
-# 		cat recovered/file.types | while read line; do mkdir -p vw/$line; done
-
-#dir_list=$(find $basedir -type d -print)
-
-
-#file_list=$(for dir in $dir_list; do ls $dir | awk -F \. '{print $2}' ; done | sort | uniq )
 dir_list=$(find $basedir -type  d  -print)
 file_list=$(for dir in $dir_list; do ls $dir | awk -F \. '{print $2}' ; done | sort | uniq)
 
 # Create destination directories to sort files into
-
-#	original:
-#		cat recovered/file.types | while read line; do mkdir -p vw/$line; done
 
 echo -n "Making destination directories"
 for file in $file_list;do
@@ -121,9 +110,6 @@ done
 
 echo 
 # Copy files to destination directories
-
-#	original:
-#		for dir in $(find  recovered/ -type  d  -print); do for file in $(ls $dir) ; do filetype=$(echo $file | awk -F \. '{print $2}'); if [[ -e vw/$filetype ]] ; then cp $dir/$file vw/$filetype; fi ; done  ; done 
 
 echo -n "Copying files"
 i=0
@@ -148,8 +134,4 @@ done
 echo
 
 
-# RANDOM NOTES : PLEASE IGNORE
-
-#bar=z; if  ((! bar++)); then echo foo;fi
-# array=( ${array[@]-} $(echo "$variable") )   # append to an array
 
