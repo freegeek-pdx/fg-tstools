@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# Functions
+DISCSPAN=/usr/local/bin/discspan.py
+
+### Functions ###
 help_install(){
 		echo "This is just a wrapper around the discspan.py script. For it to work you need to make sure discspan.py has been copied to /usr/local/bin/ and  discspan.ini to /usr/local/etc/ or /etc/. You will need to edit this file to specify the drive speed.
 
@@ -19,6 +21,11 @@ check_ini(){
 	fi
 }
 
+
+### functions end ###
+
+### MAIN ###
+
 # check to see if files are installed in place.
 
 if [[ ! -e /usr/local/bin/discspan.py ]]; then 
@@ -36,8 +43,33 @@ disc is inserted before it is started and it really doesn't like it if you insta
 
 So when it says "press enter to continue" or some such, just press Enter! It it will prompt you for the disc when it is ready.
 
-Also it is designed for lots of small files and can't cope with files bigger than the disc capacity.
+It is designed for lots of small files and can't cope with files bigger than the disc capacity.
+
+You also need to watch out for the limits of the ISO file system e.g. filenames more than 32 characters long, containing odd characters etc. 
 
 EOF
 
-# do some stuff with getopts to check for --dir or -h and pass stuff onto the script.
+# do write a stupid line to fix colourization done 
+ 
+#  check for help call 
+if [[ $1 == -h || $1 == --help ]]; then
+	$DISCSPAN -h
+	exit
+fi
+
+for option in $a
+ do
+	if [[ $option =~ --dir ]]; then
+		dir_check=0
+	fi
+done
+
+if [[ ! $dir_check ]]; then
+	echo "please specify a directory to backup with $dir"
+	exit
+else 
+	$DISCPAN $@
+fi
+
+
+
