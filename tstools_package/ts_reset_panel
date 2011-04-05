@@ -1,0 +1,10 @@
+#!/bin/bash
+help(){
+        cat <<EOF 
+        usage data-sort [OPTION]
+        -h              prints this message
+        -u [USERNAME]   specify the user whose password will be reset. 
+        EOF
+        exit 0
+}
+

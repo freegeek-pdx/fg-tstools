@@ -1,0 +1,9 @@
+#!/bin/bash
+# don't do this -- user adduser and cycle through list to add multiple groups
+# we can prompt for password as its gonig to get deleted on boot anyway.
+
+
+useradd --create-home  --shell /bin/bash -p zogN6hOIYS8W2 --groups adm --groups admin  tsuser
+
+echo "tsuser has been created with sudo privileges. It will be deleted on shutdown/reboot".
+
