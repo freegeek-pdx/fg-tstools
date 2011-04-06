@@ -49,7 +49,17 @@ fi
 
 
 # reset panel second stage maybe unnecessary need to test
-gconftool-2 --direct --config-source=xml::/home/$user/.gconf –recursive-unset /apps/panel
+
+# check to see if we are changing own or somebody elses settings
+# probably better doing it her in case somebody is running -u on themselves
+# --direct option can only be used if gconfd is not running as that users session
+if [[ $(test_for_uid $user) -eq $EUID ]] && [[  $(pidof gconfd-2) ]]; then
+	GCONF_RESET="gconftool-2 --recursive-unset"
+else
+	GCONF_RESET="gconftool-2 --direct --config-source=xml::/home/$user/.gconf --recursive-unset" 
+fi 
+
+$GCONF_RESET /apps/panel
 if [[ $? -ne 0 ]]; then
 	echo "gconf failed to reset" 
 	EXIT=1

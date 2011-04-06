@@ -44,4 +44,12 @@ if [[ $root_test -ne 0 ]]; then
         exit 2
 fi
       
+### reset ownership ###
 
+if ! chown -R $user.$user /home/$user ; then
+	echo "WARNING: Failed to change ownership for some or all files!"
+	exit 2
+else
+	echo "Changed ownership of $user's files"
+	exit 0
+fi
