@@ -1,0 +1,47 @@
+#!/bin/bash
+help(){
+        cat <<EOF 
+        usage ts_ rechown[OPTION]
+        -h              prints this message
+        -u [USERNAME]   specify the user.
+	
+	Restores correct ownership  of a users files.
+EOF
+        exit 0
+}
+
+# source common functions
+FUNCTIONS=ts_functions.sh # /path/to../
+source $FUNCTIONS
+
+### MAIN ###
+
+### Process options ###
+
+while getopts ":hu:" option; do
+        case $option in
+                h) help
+                   exit
+                ;;
+                b) user=$OPTARG
+
+                /?) help
+                    exit
+                ;;
+        esac
+done
+
+
+uid_test=$(test_for_uid $user)
+if [[ -z $uid_test ]]; then
+	echo "$user not found! exiting..."
+        exit 2
+fi
+
+root_test=$(test_for_root)
+if [[ $root_test -ne 0 ]]; then
+        echo "You are not root! exiting..."
+        exit 2
+fi
+      
+

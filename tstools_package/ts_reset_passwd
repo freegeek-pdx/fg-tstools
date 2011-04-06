@@ -1,41 +1,18 @@
 #!/bin/bash
 help(){
 	cat <<EOF 
-	usage data-sort [OPTION]
+	usage ts_reset_passwd [OPTION]
 	-h		prints this message
 	-u [USERNAME]	specify the user whose password will be reset. 
-	EOF
+	
+EOF
 	exit 0
 }
 
-choose_username(){
-	declare -a user_list
-	for file in /home/*; do
-		if [[ -d $file ]]; then
-			name=$(echo $file | awk -F/ '{print $3}')
-			user_list=$user_list" $name"
-		fi
-	done
+# source common functions
+FUNCTIONS=ts_functions.sh # /path/to../
+source $FUNCTIONS
 
-	PS3="Select a user "
-	select user_name in $user_list; do
-		break
-	done
-echo $user_name
-}
-
-reset_password(){
-	user=$1
-	if ! usermod --password zyrSQxJlOIQTo $user; then 
-		echo "WARNING: user's password not changed"
-		echo "Are you root?"
-		exit 2
-	fi
-	if ! passwd -e $user; then 
-		echo "WARNING: user's password will not expire automatically"
-		EXIT=1
-	fi
-}
 
 ### MAIN ###
 
@@ -52,19 +29,35 @@ while getopts ":hu:" option; do
 	esac
 done
 
+root_test=$(test_for_root)
+if [[ $root_test -ne 0 ]]; then
+        echo "Could not proceed"
+        echo "are you root?"
+        exit 2
+fi
+
 if [[ -z $user ]]; then 
 	user=$(choose_username)
 fi
 
-reset_password $user 
-
-cat <<EOF
-password for $user has been set to freegeek. 
-It will expire on the next login and the user will be prompted to reset it.
-EOF
-
-if [[ -z $EXIT ]]; then
-	EXIT=0
+uid_test=$(test_for_uid $user)
+if [[ -z $uid_test ]]; then
+        echo "$user not found! exiting..."
+                exit 2
 fi
 
-exit $EXIT
+
+passwd_reset=$(reset_password $user)
+if (( $passwd_reset != 0 )); then
+	echo "password for $user could not be reset"
+	exit 2
+fi
+
+passwd_expire=$(expire_password $user)
+if (( $passwd_expire != 0 )); then
+	echo "WARNING:Password for $user has been reset to freegeek. It will not expire"
+	exit 1
+else
+	echo "password for $user has been set to freegeek. It will expire on the next login and the user will be prompted to reset it."
+	exit 0
+fi

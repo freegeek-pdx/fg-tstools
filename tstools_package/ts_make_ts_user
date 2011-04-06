@@ -1,9 +1,24 @@
 #!/bin/bash
-# don't do this -- user adduser and cycle through list to add multiple groups
-# we can prompt for password as its gonig to get deleted on boot anyway.
+
+# source common functions
+FUNCTIONS=ts_functions.sh # /path/to../
+source $FUNCTIONS
+
+### MAIN ###
+
+root_test=$(test_for_root)
+if [[ $root_test -ne 0 ]]; then
+        echo "Could not proceed"
+        echo "are you root?"
+        exit 2
+fi
 
 
-useradd --create-home  --shell /bin/bash -p zogN6hOIYS8W2 --groups adm --groups admin  tsuser
+add_user=$(useradd --create-home  --shell /bin/bash -p zogN6hOIYS8W2 --groups adm --groups admin  tsuser)
 
-echo "tsuser has been created with sudo privileges. It will be deleted on shutdown/reboot".
-
+if [[ $add_user -ne 0 ]]; then 
+	echo "WARNING: Could not adduser, exiting..."
+	exit 2
+else	
+	echo "tsuser has been created with sudo privileges. It will be deleted on shutdown/reboot."
+fi

@@ -1,10 +1,46 @@
 #!/bin/bash
 help(){
         cat <<EOF 
-        usage data-sort [OPTION]
+        usage ts_reset_panel [OPTION]
         -h              prints this message
-        -u [USERNAME]   specify the user whose password will be reset. 
-        EOF
+        -u [USERNAME]   specify the user whose panels will be reset.
+
+	Resets gnome panels to their default state. 
+EOF
         exit 0
 }
 
+# source common functions
+FUNCTIONS=ts_functions.sh # /path/to../
+source $FUNCTIONS
+
+### MAIN ###
+
+while getopts ":hu:" option; do
+        case $option in
+                h) help
+                   exit
+                ;;
+                b) user=$OPTARG
+
+                /?) help
+                    exit
+                ;;
+        esac
+done
+
+if [[ -z $user ]]; then
+        user=$EUID
+else
+        uid_test=$(test_for_uid $user)
+        if [[ -z $uid_test ]]; then
+                echo "$user not found! exiting..."
+                exit 2
+        else
+                root_test=$(test_for_root)
+                if [[ $root_test -ne 0 ]]; then
+                        echo "You are not root! exiting..."
+                        exit 2  
+                fi
+        fi
+fi
