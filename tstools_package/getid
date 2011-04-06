@@ -1,9 +1,0 @@
-#!/bin/bash
-
-if [[ -e /var/lib/freegeek-extras/printme/system_id ]] 
-then 
-	cat /var/lib/freegeek-extras/printme/system_id 
-else 
-	echo "system id not found"; fi
-
-
