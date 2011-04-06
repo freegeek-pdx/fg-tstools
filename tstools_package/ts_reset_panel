@@ -16,6 +16,8 @@ source $FUNCTIONS
 
 ### MAIN ###
 
+### process options ###
+
 while getopts ":hu:" option; do
         case $option in
                 h) help
@@ -44,3 +46,29 @@ else
                 fi
         fi
 fi
+
+
+# reset panel second stage maybe unnecessary need to test
+gconftool-2 --direct --config-source=xml::/home/$user/.gconf –recursive-unset /apps/panel
+if [[ $? -ne 0 ]]; then
+	echo "gconf failed to reset" 
+	EXIT=1
+fi
+
+rm -rf /home/$user/.gconf/apps/panel
+if [[ $? -ne 0 ]]; then
+        echo "gconf failed to reset" 
+        EXIT=1
+fi
+
+pkill gnome-panel 
+if [[ $? -ne 0 ]]; then
+        echo "failed to restart gnome-panel" 
+        EXIT=1
+fi
+ 
+if [[ -z  $EXIT ]] ; then
+	exit $EXIT
+else
+	exit 0
+fi  
