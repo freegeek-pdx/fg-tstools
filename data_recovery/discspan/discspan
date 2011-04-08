@@ -57,7 +57,7 @@ if [[ $1 == -h || $1 == --help ]]; then
 	exit
 fi
 
-for option in $a
+for option in $@
  do
 	if [[ $option =~ --dir ]]; then
 		dir_check=0
@@ -68,7 +68,8 @@ if [[ ! $dir_check ]]; then
 	echo "please specify a directory to backup with $dir"
 	exit
 else 
-	$DISCPAN $@
+
+	$DISCSPAN "$@"
 fi
 
 

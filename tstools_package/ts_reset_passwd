@@ -21,8 +21,8 @@ while getopts ":hu:" option; do
 		h) help
 		   exit
 		;;
-		b) user=$OPTARG
-
+		u) user=$OPTARG
+		;;
 		/?) help
 		    exit
 		;;

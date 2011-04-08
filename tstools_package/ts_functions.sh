@@ -66,6 +66,14 @@ backup_passwords(){
                 echo "user passwords not changed"
                 exit 2
         fi
+
+        if ! cp /etc/gropu /etc/group.ts_bak; then
+                echo "WARNING: backup for  /etc/group could not be created"
+                echo "Are you root?"
+                echo "user passwords not changed"
+                exit 2
+        fi
+
 }
 
 

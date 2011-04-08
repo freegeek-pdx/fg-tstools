@@ -1,0 +1,92 @@
+#!/bin/bash
+
+#!/bin/bash
+help(){
+        cat <<EOF 
+Usage: ts_network_backup  [OPTION]
+Create or restore network backup.
+
+        -h              	prints this message
+        -c [ticket number] 	create network backup
+	-r [date-ticket number] restore network backup
+	-d 			Data only. Use of this option is strongly discouraged.
+	-u 			Users and data only. Use of this option is discouraged.		
+	Use this to create or restore network backups. By default it will attempt to restore users, their data and settings, and the progams installed on the machine. 
+EOF
+        exit 0
+}
+
+
+
+# source common functions
+FUNCTIONS=ts_functions.sh # /path/to../
+source $FUNCTIONS
+
+backup_passwords(){
+        # backup password files
+        if ! cp /etc/passwd /home/passwd; then
+                echo "WARNING: backup for  /etc/passwd could not be created"
+                exit 2
+        fi
+
+        if ! cp /etc/shadow /home/shadow; then
+                echo "WARNING: backup for  /etc/shadow could not be created"
+                exit 2
+        fi
+	if ! cp /etc/group /home/group; then
+                echo "WARNING: backup for  /etc/passwd could not be created"
+                exit 2
+        fi
+}
+backup_apt(){
+	if  ! dpkg --get-selections > /home/dpkg.out ; then
+		echo 2
+	else
+		echo 0
+	fi 
+}
+
+restore_apt(){
+        if  ! dpkg --set-selections < /home/dpkg.out ; then
+                exit=2
+        else
+                exit=0
+        fi
+	
+	echo $exit
+	`#dpkg --set-selections < /home/dpkg.out
+	#apt-get -u dselect-upgrade
+}
+
+### MAIN ###
+
+while getopts ":hc:r:du" option; do
+        case $option in
+                h) help
+                   exit
+                ;;
+                c) 
+		;;
+		r)
+		;;
+		d)
+		;;
+		u)
+		;;
+                /?) help
+                    exit
+                ;;
+        esac
+done
+
+
+
+# create
+#rsync -avzh home/ tsbackup@tsbackup:/var/tsbackup/[date-ticketnumber] 2>rsync.out 
+#  dpkg --get-selections > dpkg.out 
+
+# restore
+#  sudo rsync -avzh  tsbackup@tsbackup:/var/tsbackup/[date-ticketnumber] /home
+#dpkg --set-selections < dpkg.out
+#apt-get -u dselect-upgrade
+
