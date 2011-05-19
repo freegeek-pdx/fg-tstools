@@ -67,7 +67,7 @@ backup_passwords(){
                 exit 2
         fi
 
-        if ! cp /etc/gropu /etc/group.ts_bak; then
+        if ! cp /etc/group /etc/group.ts_bak; then
                 echo "WARNING: backup for  /etc/group could not be created"
                 echo "Are you root?"
                 echo "user passwords not changed"
@@ -75,5 +75,22 @@ backup_passwords(){
         fi
 
 }
+
+
+## gconf related
+set_gconf(){
+	# checks to see if we are changing our own or somebody elses settings
+	# --direct option can only be used if gconfd is not running as that 
+	# users session
+	my_user=$1
+        my_uid=$(grep $my_user /etc/passwd | awk -F: '{print $3}')
+	# test to see if self change and if gconfd-2 is running
+	if [[ $my_uid -eq $EUID ]] && [[  $(pidof gconfd-2) ]]; then
+        	echo "gconftool-2 --recursive-unset"
+	else
+        	echo "gconftool-2 --direct --config-source=xml::/home/$my_user/.gconf --recursive-unset"
+	fi
+}
+
 
 

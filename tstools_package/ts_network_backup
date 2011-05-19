@@ -17,29 +17,62 @@ EOF
 }
 
 
+# config options
+group_file="/home/group"
+password_file="/home/passwords"
+shadow_file="/home/shadows"
+dkpg_file="/home/dpkg.out"
 
 # source common functions
 FUNCTIONS=ts_functions.sh # /path/to../
 source $FUNCTIONS
 
-backup_passwords(){
-        # backup password files
-        if ! cp /etc/passwd /home/passwd; then
-                echo "WARNING: backup for  /etc/passwd could not be created"
-                exit 2
-        fi
 
-        if ! cp /etc/shadow /home/shadow; then
-                echo "WARNING: backup for  /etc/shadow could not be created"
-                exit 2
-        fi
-	if ! cp /etc/group /home/group; then
-                echo "WARNING: backup for  /etc/passwd could not be created"
-                exit 2
-        fi
+# script specific functions
+
+backup_paswords(){
+	cat /etc/passwd| while read line ; do 
+		user=$(echo $line | awk -F : '{print $1}')
+		user_uid=$(echo $line | awk -F : '{print $3}')
+		# if UID >999 then is normal (non-system) user
+		if [[ $user_uid -gt 999 ]] ; then
+			# unless user is a nobody :)
+			if [[ ! $user == "nobody" ]]; then
+				id $user >>$group_file
+				echo $line >>$password_file
+				# /etc/shadow contains the date of last password
+				# change. Having this be older than the install
+				# should not be a problem, but noting just in case
+				grep $user /etc/shadow >>$shadow_file
+			fi
+		fi
+	done
 }
+
+#### TODO TODO TODO #######
+restore_passwords(){
+	# note that copying files back across is not sufficient 
+	# need to extract values form files and added to new copies
+
+#	# read /home/password file 
+#	# if user not in /etc/ password then append to /etc/password /etc/shadow
+#	# else (e.g. oem) usermod uid gid, check home ownership  passwd -e oem or 
+#	# overwrite shadow
+#	#fi
+#	# read /home/group usermod to addusers to groups 	
+}
+
+
+#### TODO TODO TODO #######
+backup_groups(){
+}
+
+#### TODO TODO TODO #######
+restore_groups(){
+}
+
 backup_apt(){
-	if  ! dpkg --get-selections > /home/dpkg.out ; then
+	if  ! dpkg --get-selections > $dpkg_file ; then
 		echo 2
 	else
 		echo 0
@@ -47,15 +80,23 @@ backup_apt(){
 }
 
 restore_apt(){
-        if  ! dpkg --set-selections < /home/dpkg.out ; then
+        if  ! dpkg --set-selections < $dpkg_file ; then
                 exit=2
         else
                 exit=0
         fi
 	
 	echo $exit
-	`#dpkg --set-selections < /home/dpkg.out
-	#apt-get -u dselect-upgrade
+}
+
+restore_packages(){
+	if  ! apt-get -u dselect-upgrade  ; then
+                exit=2
+        else
+                exit=0
+        fi
+
+        echo $exit
 }
 
 ### MAIN ###
@@ -63,22 +104,30 @@ restore_apt(){
 while getopts ":hc:r:du" option; do
         case $option in
                 h) help
-                   exit
+                   exit 0
                 ;;
-                c) 
+                c) create_backup="true"
+                   ticket_number=$OPTARG
 		;;
-		r)
+		r) restore_backup="true"
+                   backup_dir=$OPTARG
 		;;
 		d)
 		;;
 		u)
 		;;
                 /?) help
-                    exit
+                    exit 1
                 ;;
         esac
-done
+	done
 
+root_test=$(test_for_root)
+if [[ $root_test -ne 0 ]]; then
+        echo "Could not proceed!"
+        echo "Are you root?"
+        exit 2
+fi
 
 
 # create
