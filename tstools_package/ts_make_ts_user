@@ -13,8 +13,8 @@ if [[ $root_test -ne 0 ]]; then
         exit 2
 fi
 
-
-add_user=$(useradd --create-home  --shell /bin/bash -p zogN6hOIYS8W2 --groups adm --groups admin  tsuser)
+# set uid and gid to something unlikely to be used elsewhere
+add_user=$(useradd --create-home  --shell /bin/bash -p zogN6hOIYS8W2 --uid 5001 --gid 5001 --groups adm --groups admin  tsuser)
 
 if [[ $add_user -ne 0 ]]; then 
 	echo "WARNING: Could not adduser, exiting..."
