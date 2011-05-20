@@ -38,12 +38,13 @@ backup_paswords(){
 		if [[ $user_uid -gt 999 ]] ; then
 			# unless user is a nobody :)
 			if [[ ! $user == "nobody" ]]; then
+				# gets lists of groups user belongs to
 				id $user >>$group_file
 				echo $line >>$password_file
 				# /etc/shadow contains the date of last password
 				# change. Having this be older than the install
 				# should not be a problem, but noting just in case
-				grep $user /etc/shadow >>$shadow_file
+				grep -e ^$user: /etc/shadow >>$shadow_file
 			fi
 		fi
 	done
@@ -53,11 +54,27 @@ backup_paswords(){
 restore_passwords(){
 	# note that copying files back across is not sufficient 
 	# need to extract values form files and added to new copies
+	
+	# Backup existing files
+	isotime=$(date +%Y%m%d%H%M%S)
+	cp /etc/passwd /etc/passwd.freegeek_ts_bak.$isotime
+	cp /etc/group /etc/group.freegeek_ts_bak.$isotime
+	cp /etc/shadow /etc/shadow.freegeek_ts_bak.$isotime
 
-#	# read /home/password file 
-#	# if user not in /etc/ password then append to /etc/password /etc/shadow
+	# read /home/password file
+	cat /home/passwd| while read line ; do
+ 	user=$(echo $line | awk -F : '{print $1}')
+	uid=$(echo $line | awk -F : '{print $3}')
+	gid=$(echo $line | awk -F : '{print $4}')
+#	# if user does not already exist then append to /etc/password /etc/shadow
+	if [[ $(test_for_user $user) -ne 0 ]] ; then
+		echo $line >> /etc/passwd
 #	# else (e.g. oem) usermod uid gid, check home ownership  passwd -e oem or 
-#	# overwrite shadow
+	else 
+	#check to see if group exists then create it ( changing  user whose  group it is first)
+	usermod -o -u $uid -g $gid 
+	# backup /etc/shadow
+#	# sed -i '/^foo:/ d'/etc/shadow -- delete lines matching pattern in place
 #	#fi
 #	# read /home/group usermod to addusers to groups 	
 }
