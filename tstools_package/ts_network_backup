@@ -71,7 +71,8 @@ restore_passwords(){
 		echo $line >> /etc/passwd
 #	# else (e.g. oem) usermod uid gid, check home ownership  passwd -e oem or 
 	else 
-	#check to see if group exists then create it ( changing  user whose  group it is first)
+	#check to see if group exists, delete if necesasary then create it 
+	#this shouldn't matter, but there is a chance someone is doing this as OEM or has created a tsbackuop user that will get overwiped.
 	usermod -o -u $uid -g $gid 
 	# backup /etc/shadow
 #	# sed -i '/^foo:/ d'/etc/shadow -- delete lines matching pattern in place
