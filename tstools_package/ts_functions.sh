@@ -27,8 +27,14 @@ echo $user_name
 
 test_for_uid(){
 	my_user=$1
-	my_uid=$(grep $my_user /etc/passwd | awk -F: '{print $3}')
+	my_uid=$(id -u)
 	echo $my_uid
+}
+
+test_for_user(){
+	my_user=$1
+	id $my_user
+	echo $?
 }
 
 # password functions
