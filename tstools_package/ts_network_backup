@@ -131,13 +131,40 @@ backup_config(){
 
 }
 
-### TODO ###
+check_log_write(){
+	if [[ $1 ]]; then
+		log_file=$1
+	else
+		log_file=/home/backup.log
+	fi
+
+	if ! touch $log_file; then
+		exit=2
+	else
+		exit=0
+	fi
+
+	echo $exit
+}
+
 create_backup(){
 	ticket="$1-$(date +%Y%m%d)"
-	if ! touch /home/rsync.log; then
-		echo "couldn't create log file"
-		rsync -avzh home/ tsbackup@tsbackup:/var/tsbackup/$ticket 2>/home/rsync.log
+
+	if [[ $2 ]]; then
+		mylogfile=$2
+	else
+		mylogfile=/home/backup.log
+	fi
+
+	if ! rsync -avzh home/ tsbackup@tsbackup:/var/tsbackup/$ticket 2>>$mylogfile; then
+	 exit=2
+        else
+                exit=0
+        fi
+        echo $exit
 }
+
+
 
 ###TODO###
 restore_backup(){
