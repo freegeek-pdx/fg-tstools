@@ -50,7 +50,6 @@ backup_paswords(){
 	done
 }
 
-#### TODO TODO TODO #######
 restore_passwords(){
 	# note that copying files back across is not sufficient 
 	# need to extract values form files and added to new copies
@@ -92,14 +91,6 @@ restore_passwords(){
 }
 
 
-#### TODO TODO TODO #######
-backup_groups(){
-}
-
-#### TODO TODO TODO #######
-restore_groups(){
-}
-
 backup_apt(){
 	if  ! dpkg --get-selections > $dpkg_file ; then
 		echo 2
@@ -128,6 +119,29 @@ restore_packages(){
         echo $exit
 }
 
+
+backup_config(){
+       if  ! tar -cvzf /home/etc_backup.tar.gz /etc/; then
+                exit=2
+        else
+                exit=0
+        fi
+
+        echo $exit
+
+}
+
+### TODO ###
+create_backup(){
+	ticket="$1-$(date +%Y%m%d)"
+	if ! touch /home/rsync.log; then
+		echo "couldn't create log file"
+		rsync -avzh home/ tsbackup@tsbackup:/var/tsbackup/$ticket 2>/home/rsync.log
+}
+
+###TODO###
+restore_backup(){
+}
 ### MAIN ###
 
 while getopts ":hc:r:du" option; do
