@@ -152,22 +152,44 @@ create_backup(){
 
 	if [[ $2 ]]; then
 		mylogfile=$2
+		if ! rsync -avzh home/ tsbackup@tsbackup:/var/tsbackup/$ticket 2>>$mylogfile 
+		then
+	 		exit=2
+        	else
+         		exit=0
+        	fi
 	else
-		mylogfile=/home/backup.log
+		if ! rsync -avzh home/ tsbackup@tsbackup:/var/tsbackup/$ticket
+		then
+                        exit=2
+                else
+                        exit=0
+                fi
 	fi
-
-	if ! rsync -avzh home/ tsbackup@tsbackup:/var/tsbackup/$ticket 2>>$mylogfile; then
-	 exit=2
-        else
-                exit=0
-        fi
         echo $exit
 }
 
 
 
-###TODO###
 restore_backup(){
+	backupdir=$1
+	 if [[ $2 ]]; then
+        	mylogfile=$2
+        	if ! rsync -avzh tsbackup@tsbackup:/var/tsbackup/$backupdir/ home/ 2>>$mylogfile
+		then
+         		exit=2
+        	else
+                	exit=0
+        	fi
+	else
+                if ! rsync -avzh tsbackup@tsbackup:/var/tsbackup/$backupdir/ home/ 
+                then
+                        exit=2
+                else
+                        exit=0
+                fi
+	fi
+        echo $exit
 }
 ### MAIN ###
 
