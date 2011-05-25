@@ -152,45 +152,39 @@ create_backup(){
 
 	if [[ $2 ]]; then
 		mylogfile=$2
-		if ! rsync -avzh home/ tsbackup@tsbackup:/var/tsbackup/$ticket 2>>$mylogfile 
-		then
-	 		exit=2
-        	else
-         		exit=0
-        	fi
+		RSYNC=" -avzh home/ tsbackup@tsbackup:/var/tsbackup/$ticket 2>>$mylogfile"
 	else
-		if ! rsync -avzh home/ tsbackup@tsbackup:/var/tsbackup/$ticket
-		then
-                        exit=2
-                else
-                        exit=0
-                fi
+		RSYNC="rsync -avzh home/ tsbackup@tsbackup:/var/tsbackup/$ticket"
+	fi	
+	
+	if ! $RSYNC; then
+                exit=2
+        else
+                exit=0
 	fi
-        echo $exit
+        
+	echo $exit
 }
-
-
 
 restore_backup(){
 	backupdir=$1
 	 if [[ $2 ]]; then
         	mylogfile=$2
-        	if ! rsync -avzh tsbackup@tsbackup:/var/tsbackup/$backupdir/ home/ 2>>$mylogfile
-		then
-         		exit=2
-        	else
-                	exit=0
-        	fi
+        	RESTORE="rsync -avzh tsbackup@tsbackup:/var/tsbackup/$backupdir/ home/ 2>>$mylogfile"
 	else
-                if ! rsync -avzh tsbackup@tsbackup:/var/tsbackup/$backupdir/ home/ 
-                then
-                        exit=2
-                else
-                        exit=0
-                fi
+                RESTORE="rsync -avzh tsbackup@tsbackup:/var/tsbackup/$backupdir/ home/"
 	fi
+
+        if ! $RESTORE; then
+ 		exit=2
+        else
+                exit=0
+        fi
+
         echo $exit
 }
+
+
 ### MAIN ###
 
 while getopts ":hc:r:du" option; do
