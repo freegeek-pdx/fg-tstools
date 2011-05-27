@@ -59,16 +59,30 @@ backup_paswords(){
 	done
 }
 
-restore_passwords(){
-	# note that copying files back across is not sufficient 
-	# need to extract values form files and added to new copies
-	
+backup_password_files(){	
 	# Backup existing files
 	isotime=$(date +%Y%m%d%H%M%S)
+	
 	cp /etc/passwd /etc/passwd.freegeek_ts_bak.$isotime
 	cp /etc/group /etc/group.freegeek_ts_bak.$isotime
 	cp /etc/shadow /etc/shadow.freegeek_ts_bak.$isotime
-
+	for file in passwd group shadow ; do
+			if ! cp /etc/$file /etc/$file.fregeek_ts_backup.isotime;
+ 			then
+                                failarray=( ${failarray[@]-} $(echo "$file") )                          fi
+                done
+                # check length of failarray if >0 then something failed
+         if [[ ${#fail_array[@]} -ne 0 ]]; then
+		echo -n "could not backup"
+                for name in ${failarray[@]}; do
+			echo -n "/etc/$name"
+                done
+                exit 3
+        fi   
+}
+restore_passwords(){
+	# note that copying files back across is not sufficient 
+	# need to extract values form files and added to new copies
 	# read /home/password file
 	cat $password_file| while read line ; do
  		user=$(echo $line | awk -F : '{print $1}')
@@ -222,34 +236,31 @@ while getopts ":hl:c:r:du" option; do
 if [[ $create_backup  &&  $restore_backup ]]; then 
 	echo "Only one of the c or r options can be used";
 	exit 2
-fi
 
-
-if [[ ! $create_backup && ! $restore_backup ]]; then 
+elif [[ ! $create_backup && ! $restore_backup ]]; then 
         echo "One of the c or r options must  be used";
         exit 2
-fi
 
-if [[ $create_backup  &&  ! $ticket_number ]]; then 
+elif [[ $create_backup  &&  ! $ticket_number ]]; then 
         echo "You must supply a ticket number with the c option";
         exit 2
-fi
 
-if [[ $restore_backup && ! $backup_dir ]]; then
+elif [[ $restore_backup && ! $backup_dir ]]; then
         echo "You must supply a backup directory with the r option";
         exit 2
-fi
-if [[ $data_only  &&  $users_and_data_only ]]; then
+
+elif [[ $data_only  &&  $users_and_data_only ]]; then
         echo "The u or d options are mutually exclusive";
         exit 2
-fi
-root_test=$(test_for_root)
-if [[ $root_test -ne 0 ]]; then
-        echo "Could not proceed!"
-        echo "Are you root?"
-        exit 2
-fi
+else
 
+	root_test=$(test_for_root)
+	if [[ $root_test -ne 0 ]]; then
+        	echo "Could not proceed!"
+        	echo "Are you root?"
+        	exit 2
+	fi
+fi
 # 
 
 
@@ -285,7 +296,7 @@ if [[ $create_backup ]]; then
 				echo -n "$name"
 			done
 			exit 3 
-		if 
+		fi 
 		# difficult to check except by checking write  (as above)
 		backup_paswords
 	fi
@@ -293,10 +304,45 @@ if [[ $create_backup ]]; then
 	if [[ config_check -ne 0 ]]; then
 		echo "Could not backup /etc"
 		exit $config_check
-	fi 
-	backup_check=$(create_backup)
+	fi
+	if [[ $use_log ]]; then	
+		if [[ ! $log_file ]]; then
+			log_file="rsync.log"
+		backup_check=$(create_backup $ticket_number $log_file)
+	else
+		backup_check=$(create_backup $ticket_number)
+	fi
 	if [[ backup_check -ne 0 ]]; then
 		echo "Could not backup data!!!"
+		if [[ $log_file ]]; then
+			echo "error messages are recorded in $log_file"
+		fi
 		exit $backup_check
 	fi
-fi
+
+
+elif [[ $restore_backup ]] ; then
+        if [[ $use_log ]]; then
+                if [[ ! $log_file ]]; then
+                        log_file="restore.log"
+                restore_check=$(restore_backup $ticket_number $log_file)
+        else
+                restore_check=$(restore_backup $ticket_number)
+        fi
+        if [[ restore_check -ne 0 ]]; then
+                echo "Could not restore backup!!!"
+                if [[ $log_file ]]; then
+                        echo "error messages are recorded in $log_file"
+                fi
+                exit restore_check
+        fi
+
+	# not the same as backup_passwords
+	# does its own error handling
+	backup_password_files
+
+else	
+	# Should never get here as we should have caught it 
+	# at the top of the sanity check
+	echo "You should never see this message. If you are reading it now this script is broken."
+fi 
