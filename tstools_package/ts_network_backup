@@ -117,16 +117,17 @@ restore_passwords(){
                 addgroup --gid $gid $user
 
 		# read /home/group usermod to addusers to groups 	
-		groups=$(grep -e '/^$user:/' $group_file | cut -f2- -d, -)
-		#number_of_groups=$(echo $groups  | awk -F, '{print NF}')
-		IFS=, #????
-		for entry in $groups; do
-			group=$(echo $entry | cut -f2 -d'(' - | sed 's/)//')
-			usergroups=( ${usergroups[@]-} $(echo "$entry") ) 
-		done
-		unset IFS #????	
-		usermod -a -G "${usergroup[@]}" $user # check syntax
-		done
+		groups=$(grep -e "\<$user\>" $group_file | cut -f1 -d: -)
+                for entry in $groups; do
+                        if [[ $entry != $user ]]; then
+ 				if [[ ! $usergroups ]]; then
+                                        usergroups=$entry
+                                else
+                                        usergroups="$entry,$usergroups"
+                                fi
+			fi
+                done 
+		usermod -a -G "$usergroups" $user 
 	done
 }
 
