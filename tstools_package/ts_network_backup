@@ -7,17 +7,31 @@ Usage: ts_network_backup  [OPTION(S)]
 Create or restore network backup.
 
         -h              	prints this message
-	-l log file		be careful not to use the same path for backing
-				up and restoring, or the  log file may get 
-				overwritten.
         -c ticket number 	create network backup
 	-r backup directory 	restore network backup. The backup directory 
 				should be in the format date-ticket_number.
 	-d 			Data only. 
 				Use of this option is strongly discouraged.
 	-u 			Users and data only. 
-				Use of this option is discouraged.		
+				Use of this option is discouraged.
+	-l log file		be careful not to use the same path for backing
+				up and restoring, or the  log file may get 
+				overwritten.
+	-a /path/to/directory   Alternative directory to backup. implies -d
+				Use this if you want to backup something
+				other than the home directory.
+	-A /path/to/directory	Use this to restore the backup to somewhere
+				other than the default (/home)
+	-p /path/to/home	Use this if the home folder you want to
+				backup is not in its usual place i.e. if you
+				to backup an external drive rather than /home.
+				You do not need to add home on the end but the
+				script does not mind either way. 
+				Can be used with or without -u and -d. 	
+	
 	Use this to create or restore network backups. By default it will attempt to restore users, their data and settings, and the progams installed on the machine. 
+
+
 EOF
         exit 0
 }
@@ -105,10 +119,13 @@ restore_passwords(){
 		# read /home/group usermod to addusers to groups 	
 		groups=$(grep -e '/^$user:/' $group_file | cut -f2- -d, -)
 		#number_of_groups=$(echo $groups  | awk -F, '{print NF}')
-		IFS=,
+		IFS=, #????
 		for entry in $groups; do
 			group=$(echo $entry | cut -f2 -d'(' - | sed 's/)//')
-			usermod -a -G $group $user
+			usergroups=( ${usergroups[@]-} $(echo "$entry") ) 
+		done
+		unset IFS #????	
+		usermod -a -G "${usergroup[@]}" $user # check syntax
 		done
 	done
 }
@@ -168,12 +185,12 @@ check_file_write(){
 
 create_backup(){
 	ticket="$1-$(date +%Y%m%d)"
-
-	if [[ $2 ]]; then
-		mylogfile=$2
-		RSYNC=" -avzh home/ tsbackup@tsbackup:/var/tsbackup/$ticket 2>>$mylogfile"
+	cpath=$2
+	if [[ $3 ]]; then
+		mylogfile=$3
+		RSYNC=" -avzh $cpath tsbackup@tsbackup:/var/tsbackup/$ticket 2>>$mylogfile"
 	else
-		RSYNC="rsync -avzh home/ tsbackup@tsbackup:/var/tsbackup/$ticket"
+		RSYNC="rsync -avzh $cpath tsbackup@tsbackup:/var/tsbackup/$ticket"
 	fi	
 	
 	if ! $RSYNC; then
@@ -206,20 +223,29 @@ restore_backup(){
 
 ### MAIN ###
 
-while getopts ":hl:c:r:du" option; do
+while getopts ":hc:r:l:a:A:p:du" option; do
        case $option in
                 h) help
                    exit 0
                 ;;
                 c) create_backup="true"
-                   ticket_number=$OPTARG
+                   ticket_number="$OPTARG"
+		;;
+		r) restore_backup="true"
+                   backup_dir="$OPTARG"
 		;;
 		l) use_log="true"
-		   log_file=$OPTARG
-		r) restore_backup="true"
-                   backup_dir=$OPTARG
+		   log_file="$OPTARG"
 		;;
-		d) no_apt="true"
+		a) no_apt="true"
+                   no_user_passwords="true"
+                   data_only="true"
+		   path="$OPTARG"
+		;;
+		A) rpath="$OPTARG"
+		;;
+		p) cut_path=$(echo "$OPTARG" | sed -r 's:/home/?$:/:')
+		   path="${cut_pat no_apt="true"
 		   no_user_passwords="true"
 		   data_only="true"
 		;;
@@ -254,8 +280,7 @@ elif [[ $data_only  &&  $users_and_data_only ]]; then
         exit 2
 else
 
-	root_test=$(test_for_root)
-	if [[ $root_test -ne 0 ]]; then
+	if [[ $(test_for_root) -ne 0 ]]; then
         	echo "Could not proceed!"
         	echo "Are you root?"
         	exit 2
@@ -267,13 +292,11 @@ fi
 if [[ $create_backup ]]; then
 	# unless no_apt is set back up record of packages installed
 	if [[ ! $no_apt ]]; then
-		apt_write=$(check_file_write $dkpg_file)
-		if [[ $apt_write -ne 0 ]] ; then
+		if [[ $(check_file_write $dkpg_file) -ne 0 ]] ; then
 			echo "Couldn't write to $dpkg_file. Check permissions?"
 			exit 3
 		fi
-		apt_backup=$(backup_apt)
-		if [[ $apt_backup -ne 0]] ; then
+		if [[ $backup_apt -ne 0]] ; then
 			echo "Backing up package files list failed!"
 			eho "dpkg --get-selections exited with error code $apt_backup" 
 			exit 2
@@ -284,8 +307,7 @@ if [[ $create_backup ]]; then
 		# check we can wrtite to the backup files
 		declare -a failarray
 		for file in "$group_file" "$password_file" "$shadow_file"; do
-			writecheck=$(check_file_write "$file")
-			if [[ writecheck -ne 0 ]]; then
+			if [[ $(check_file_write "$file") -ne 0 ]]; then
 				# if we cant write to file add to array		
 				failarray=( ${failarray[@]-} $(echo "$file") )				fi			
 		done
@@ -300,14 +322,18 @@ if [[ $create_backup ]]; then
 		# difficult to check except by checking write  (as above)
 		backup_paswords
 	fi
-	config_check=$(backup_config)
-	if [[ config_check -ne 0 ]]; then
+	if [[ $(backup_config) -ne 0 ]]; then
 		echo "Could not backup /etc"
 		exit $config_check
 	fi
 	if [[ $use_log ]]; then	
 		if [[ ! $log_file ]]; then
 			log_file="rsync.log"
+		fi
+		if [[ $(check_file_write "$log_file") -ne 0 ]]; then
+			echo "Couldn't write to $log_file"
+			exit 3
+		fi
 		backup_check=$(create_backup $ticket_number $log_file)
 	else
 		backup_check=$(create_backup $ticket_number)
@@ -325,6 +351,11 @@ elif [[ $restore_backup ]] ; then
         if [[ $use_log ]]; then
                 if [[ ! $log_file ]]; then
                         log_file="restore.log"
+		fi
+ 		if [[ $(check_file_write "$log_file") -ne 0 ]]; then
+ 			echo "Couldn't write to $log_file"
+ 			exit 3
+		fi
                 restore_check=$(restore_backup $ticket_number $log_file)
         else
                 restore_check=$(restore_backup $ticket_number)
