@@ -127,7 +127,9 @@ restore_passwords(){
                                 fi
 			fi
                 done 
-		usermod -a -G "$usergroups" $user 
+		if [[ ${#usergroups} -ne 0 ]] ; then
+			usermod -a -G "$usergroups" $user 
+		fi
 	done
 }
 
