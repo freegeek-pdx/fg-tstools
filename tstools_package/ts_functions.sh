@@ -8,6 +8,17 @@ test_for_root(){
 	fi
 }
 
+check_file_write(){
+        file=$1
+
+        if ! touch $file; then
+                exit=$?
+        else
+                exit=0
+        fi
+
+        echo $exit
+}
 
 choose_username(){
         declare -a user_list
@@ -58,28 +69,19 @@ expire_password(){
 }
 
 backup_passwords(){
-        # backup password files
-        if ! cp /etc/passwd /etc/passwd.ts_bak; then
-                echo "WARNING: backup for  /etc/passwd could not be created"
-                echo "Are you root?"
-                echo "user's password not changed"
-                exit 2
+	for file in passwd group shadow ; do
+		if ! cp /etc/$file /etc/$file.fregeek_ts_backup.isotime;then
+			failarray=( ${failarray[@]-} $(echo "$file") )
+		fi
+	done
+	# check length of failarray if >0 then something failed
+         if [[ ${#fail_array[@]} -ne 0 ]]; then
+                echo -n "could not backup"
+                for name in ${failarray[@]}; do
+                        echo -n "/etc/$name"
+                done
+                exit 3
         fi
-
-        if ! cp /etc/shadow /etc/shadow.ts_bak; then
-                echo "WARNING: backup for  /etc/shadow could not be created"
-                echo "Are you root?"
-                echo "user passwords not changed"
-                exit 2
-        fi
-
-        if ! cp /etc/group /etc/group.ts_bak; then
-                echo "WARNING: backup for  /etc/group could not be created"
-                echo "Are you root?"
-                echo "user passwords not changed"
-                exit 2
-        fi
-
 }
 
 
