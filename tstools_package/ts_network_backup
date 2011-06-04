@@ -53,7 +53,7 @@ source $FUNCTIONS
 
 # script specific functions
 
-backup_paswords(){
+backup_users(){
 	groupfile=$1 
 	passwordfile=$2
 	shadowfile=$3
@@ -75,29 +75,7 @@ backup_paswords(){
 		fi
 	done
 }
-
-backup_password_files(){	
-	# Backup existing files
-	isotime=$(date +%Y%m%d%H%M%S)
-	
-	cp /etc/passwd /etc/passwd.freegeek_ts_bak.$isotime
-	cp /etc/group /etc/group.freegeek_ts_bak.$isotime
-	cp /etc/shadow /etc/shadow.freegeek_ts_bak.$isotime
-	for file in passwd group shadow ; do
-			if ! cp /etc/$file /etc/$file.fregeek_ts_backup.isotime;
- 			then
-                                failarray=( ${failarray[@]-} $(echo "$file") )                          fi
-                done
-                # check length of failarray if >0 then something failed
-         if [[ ${#fail_array[@]} -ne 0 ]]; then
-		echo -n "could not backup"
-                for name in ${failarray[@]}; do
-			echo -n "/etc/$name"
-                done
-                exit 3
-        fi   
-}
-restore_passwords(){
+restore_users(){
 	# note that copying files back across is not sufficient 
 	# need to extract values form files and added to new copies
 
@@ -188,17 +166,6 @@ backup_config(){
 
 }
 
-check_file_write(){
-	file=$1
-	
-	if ! touch $file; then
-		exit=$?
-	else
-		exit=0
-	fi
-
-	echo $exit
-}
 
 create_backup(){
 	ticket="$1-$(date +%Y%m%d)"
@@ -364,7 +331,7 @@ if [[ $create_backup ]]; then
 			exit 3 
 		fi 
 		# difficult to check except by checking write  (as above)
-		backup_paswords
+		backup_users
 	fi
 	if [[ $(backup_config) -ne 0 ]]; then
 		echo "Could not backup /etc"
@@ -393,9 +360,9 @@ if [[ $create_backup ]]; then
 
 elif [[ $restore_backup ]] ; then
 
-        # not the same as backup_passwords
+        # not the same as backup_password_files
         # does its own error handling
-        backup_password_files
+        backup_passwords
 
         if [[ $use_log ]]; then
                 if [[ ! $log_file ]]; then
