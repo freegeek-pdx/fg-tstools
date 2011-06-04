@@ -1,6 +1,4 @@
 #!/bin/bash
-
-#!/bin/bash
 help(){
         cat <<EOF 
 Usage: ts_network_backup  [OPTION(S)]
@@ -20,14 +18,18 @@ Create or restore network backup.
 	-a /path/to/directory   Alternative directory to backup. implies -d
 				Use this if you want to backup something
 				other than the home directory.
+				suggests the use of -A for restoring backups.
 	-A /path/to/directory	Use this to restore the backup to somewhere
 				other than the default (/home)
+                                Can be used with or without -u or -d 
+				suggests the later (required if needed). 
+
 	-p /path/to/home	Use this if the home folder you want to
 				backup is not in its usual place i.e. if you
 				to backup an external drive rather than /home.
 				You do not need to add home on the end but the
 				script does not mind either way. 
-				Can be used with or without -u and -d. 	
+				Can be used with or without -u or -d. 	
 	
 	Use this to create or restore network backups. By default it will attempt to restore users, their data and settings, and the progams installed on the machine. 
 
@@ -38,10 +40,11 @@ EOF
 
 
 # config options
-group_file="/home/groups"
-password_file="/home/passwords"
-shadow_file="/home/shadows"
-dkpg_file="/home/dpkg.out"
+#group_file="groups"
+#$password_file="passwords"
+#shadow_file="shadows"
+#dkpg_file="dpkg.out"
+#sources_file="sources.list"
 
 # source common functions
 FUNCTIONS=ts_functions.sh # /path/to../
@@ -97,7 +100,8 @@ backup_password_files(){
 restore_passwords(){
 	# note that copying files back across is not sufficient 
 	# need to extract values form files and added to new copies
-	# read /home/password file
+
+	# read /home/password file or equivalent)
 	cat $password_file| while read line ; do
  		user=$(echo $line | awk -F : '{print $1}')
 		uid=$(echo $line | awk -F : '{print $3}')
@@ -133,6 +137,16 @@ restore_passwords(){
 	done
 }
 
+backup_sources(){
+        if  !cp /etc/apt/sources.list $sources_file; then
+                echo $?
+        else
+                echo 0
+        fi
+}
+### TODO ###
+restore_sources(){
+}
 
 backup_apt(){
 	if  ! dpkg --get-selections > $dpkg_file ; then
@@ -207,11 +221,12 @@ create_backup(){
 
 restore_backup(){
 	backupdir=$1
-	 if [[ $2 ]]; then
-        	mylogfile=$2
-        	RESTORE="rsync -avzh tsbackup@tsbackup:/var/tsbackup/$backupdir/ home/ 2>>$mylogfile"
+	backup_path=$2
+	 if [[ $3 ]]; then
+        	mylogfile=$3
+        	RESTORE="rsync -avzh tsbackup@tsbackup:/var/tsbackup/$backupdir/ $backup_path/ 2>>$mylogfile"
 	else
-                RESTORE="rsync -avzh tsbackup@tsbackup:/var/tsbackup/$backupdir/ home/"
+                RESTORE="rsync -avzh tsbackup@tsbackup:/var/tsbackup/$backupdir/ $backup_path/"
 	fi
 
         if ! $RESTORE; then
@@ -237,6 +252,16 @@ while getopts ":hc:r:l:a:A:p:du" option; do
 		r) restore_backup="true"
                    backup_dir="$OPTARG"
 		;;
+		d)
+		   data_only="true"
+                   no_apt="true"
+                   no_user_passwords="true"
+                   data_only="true"
+                ;;
+                u) no_apt="true"
+                   users_and_data_only="true"
+                ;;
+                
 		l) use_log="true"
 		   log_file="$OPTARG"
 		;;
@@ -247,15 +272,10 @@ while getopts ":hc:r:l:a:A:p:du" option; do
 		;;
 		A) rpath="$OPTARG"
 		;;
-		p) cut_path=$(echo "$OPTARG" | sed -r 's:/home/?$:/:')
-		   path="${cut_pat no_apt="true"
-		   no_user_passwords="true"
-		   data_only="true"
+		p) cut_path=$(echo "$OPTARG" |sed -r -e 's:/home/?$::' -e 's/\/*$//') 
+		   path="${cut_path}/home"
 		;;
-		u) no_apt="true"
-		   users_and_data_only="true"
-		;;
-                /?) help
+		/?) help
                     exit 1
                 ;;
         esac
@@ -289,7 +309,23 @@ else
         	exit 2
 	fi
 fi
-# 
+# TODO
+        # add test if -A and not -d (-or u) then  warn and set ignore variable
+
+
+# set paths etc
+if [[ ! $path ]]; then 
+	path="/home"
+fi
+
+if [[ ! $rpath ]]; then
+        rpath="/home"
+fi
+
+group_file="/${path}/groups"
+password_file="/${path}/passwords"
+shadow_file="/${path}/shadows"
+dkpg_file="/${path}/dpkg.out"
 
 
 if [[ $create_backup ]]; then
@@ -299,6 +335,11 @@ if [[ $create_backup ]]; then
 			echo "Couldn't write to $dpkg_file. Check permissions?"
 			exit 3
 		fi
+                if [[ $backup_sources -ne 0]] ; then
+                        echo "Backing up sources.list failed!"
+                        exit 3
+                fi
+
 		if [[ $backup_apt -ne 0]] ; then
 			echo "Backing up package files list failed!"
 			eho "dpkg --get-selections exited with error code $apt_backup" 
@@ -337,9 +378,9 @@ if [[ $create_backup ]]; then
 			echo "Couldn't write to $log_file"
 			exit 3
 		fi
-		backup_check=$(create_backup $ticket_number $log_file)
+		backup_check=$(create_backup $ticket_number $path $log_file)
 	else
-		backup_check=$(create_backup $ticket_number)
+		backup_check=$(create_backup $ticket_number $path)
 	fi
 	if [[ backup_check -ne 0 ]]; then
 		echo "Could not backup data!!!"
@@ -351,6 +392,11 @@ if [[ $create_backup ]]; then
 
 
 elif [[ $restore_backup ]] ; then
+
+        # not the same as backup_passwords
+        # does its own error handling
+        backup_password_files
+
         if [[ $use_log ]]; then
                 if [[ ! $log_file ]]; then
                         log_file="restore.log"
@@ -359,9 +405,9 @@ elif [[ $restore_backup ]] ; then
  			echo "Couldn't write to $log_file"
  			exit 3
 		fi
-                restore_check=$(restore_backup $ticket_number $log_file)
+                restore_check=$(restore_backup $ticket_number $rpath $log_file)
         else
-                restore_check=$(restore_backup $ticket_number)
+                restore_check=$(restore_backup $ticket_number $rpath)
         fi
         if [[ restore_check -ne 0 ]]; then
                 echo "Could not restore backup!!!"
@@ -371,10 +417,12 @@ elif [[ $restore_backup ]] ; then
                 exit restore_check
         fi
 
-	# not the same as backup_passwords
-	# does its own error handling
-	backup_password_files
 
+	###TODO###
+	#if [[ ! $no_apt ]]; then
+	#if [[ ! $no_user_passwords ]]; then
+	# add test [if -A and not -d (-or u) then] do the user etc/apt files
+	# exist? no? warn / ignore
 else	
 	# Should never get here as we should have caught it 
 	# at the top of the sanity check
