@@ -35,9 +35,10 @@ if [[ $root_test -ne 0 ]]; then
         exit 2
 fi
 
-
-password_backup=$(backup_passwords)
+backup_passwords
+password_backup=$?
 if [[ $password_backup -ne 0 ]]; then
+	echo $password_backup
         echo "WARNING:Password files could not be backed up! exiting..."
         exit 2
 fi
