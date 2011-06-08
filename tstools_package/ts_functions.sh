@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # user functions
 
 test_for_root(){
@@ -23,7 +25,7 @@ check_file_write(){
 choose_username(){
         declare -a user_list
         for file in /home/*; do
-                if [[ -d $file ]]; then
+              if [[ -d $file ]]; then
                         name=$(echo $file | awk -F/ '{print $3}')
                         user_list=$user_list" $name"
                 fi
@@ -80,12 +82,12 @@ backup_passwords(){
                 for name in ${failarray[@]}; do
                         echo -n "/etc/$name"
                 done
-                return 2
+                return 3
         fi
 }
 
 
-## gconf related
+# gconf related
 set_gconf(){
 	# checks to see if we are changing our own or somebody elses settings
 	# --direct option can only be used if gconfd is not running as that 
@@ -101,4 +103,18 @@ set_gconf(){
 }
 
 
+# write to error log and/or standard out 
+write_msg(){
+local msg="$1"
+if [[ $2 ]]; then
+        local logfile=$2
+fi
+echo $msg
+if [[ $logfile ]]; then
+        if ! echo $msg >>$logfile; then
+        echo "Could not write to Log File: $logfile"
+        exit 1
+        fi
+fi
+}
 
