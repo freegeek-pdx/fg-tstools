@@ -80,7 +80,7 @@ backup_passwords(){
                 for name in ${failarray[@]}; do
                         echo -n "/etc/$name"
                 done
-                exit 3
+                return 2
         fi
 }
 
