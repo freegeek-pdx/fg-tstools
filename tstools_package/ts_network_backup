@@ -52,6 +52,28 @@ source $FUNCTIONS
 
 
 # script specific functions
+backup_users_test(){
+	groupfile=$1 
+	passwordfile=$2
+	shadowfile=$3
+		# check we can wrtite to the backup files
+	declare -a failarray
+	for file in "$group_file" "$password_file" "$shadow_file"; do
+		if [[ $(check_file_write "${file}") -ne 0 ]]; then
+			# if we cant write to file add to array		
+			failarray=( ${failarray[@]-} $(echo "$file") )				fi			
+	done
+	# check length of failarray if >0 then something failed
+	if [[ ${#failarray[@]} -ne 0 ]]; then
+		echo -n "error writing to "
+		for name in ${failarray[@]}; do
+			echo -n "$name"
+		done
+		return 3 
+	fi 	
+	return 0
+}
+
 
 backup_users(){
 	groupfile=$1 
@@ -71,10 +93,13 @@ backup_users(){
 				# change. Having this be older than the install
 				# should not be a problem, but noting just in case
 				grep -e ^$user: /etc/shadow >>$shadowfile
+				userlist="$userlist $user"
 			fi
 		fi
 	done
+echo "backed up passwords for $userlist"
 }
+
 restore_users(){
 	# note that copying files back across is not sufficient 
 	# need to extract values form files and added to new copies
@@ -116,55 +141,38 @@ restore_users(){
 }
 
 backup_sources(){
-        if  !cp /etc/apt/sources.list $sources_file; then
-                echo $?
-        else
-                echo 0
-        fi
+        cp /etc/apt/sources.list $sources_file 2>&1
+        local retval=$?
+        exit $retval
 }
 ### TODO ###
 restore_sources(){
 }
 
 backup_apt(){
-	if  ! dpkg --get-selections > $dpkg_file ; then
-		echo $?
-	else
-		echo 0
-	fi 
+	dpkg --get-selections > $dpkg_file   2>&1
+	local retval=$?
+        exit $retval
 }
 
 restore_apt(){
-        if  ! dpkg --set-selections < $dpkg_file ; then
-                exit=$?
-        else
-                exit=0
-        fi
-	
-	echo $exit
+        dpkg --set-selections < $dpkg_file  2>&1
+	local retval=$?
+        exit $retval
 }
 
 restore_packages(){
-	if  ! apt-get -u dselect-upgrade  ; then
-                exit=$?
-        else
-                exit=0
-        fi
-
-        echo $exit
+	apt-get -u dselect-upgrade   2>&1
+        local retval=$?
+        exit $retval
 }
-
 
 backup_config(){
-       if  ! tar -cvzf /home/etc_backup.tar.gz /etc/; then
-                exit=$?
-        else
-                exit=0
-        fi
-
-        echo $exit
-
+        tar -czf ${path}/etc_backup.tar.gz /etc/  2>&1
+        local retval=$?
+        exit $retval
 }
+
 
 
 create_backup(){
@@ -191,9 +199,9 @@ restore_backup(){
 	backup_path=$2
 	 if [[ $3 ]]; then
         	mylogfile=$3
-        	RESTORE="rsync -avzh tsbackup@tsbackup:/var/tsbackup/$backupdir/ $backup_path/ 2>>$mylogfile"
+        	RESTORE="rsync -avh tsbackup@tsbackup:/var/tsbackup/$backupdir/ $backup_path/ 2>>$mylogfile"
 	else
-                RESTORE="rsync -avzh tsbackup@tsbackup:/var/tsbackup/$backupdir/ $backup_path/"
+                RESTORE="rsync -avh tsbackup@tsbackup:/var/tsbackup/$backupdir/ $backup_path/"
 	fi
 
         if ! $RESTORE; then
@@ -289,6 +297,18 @@ if [[ ! $rpath ]]; then
         rpath="/home"
 fi
 
+if [[ $use_log ]]; then	
+	if [[ ! $log_file ]]; then
+		log_file="rsync.log"
+	fi
+	if [[ $(check_file_write "$log_file") -ne 0 ]]; then
+		echo "Couldn't write to $log_file"
+		exit 3
+	fi
+fi
+
+
+
 group_file="/${path}/groups"
 password_file="/${path}/passwords"
 shadow_file="/${path}/shadows"
@@ -296,60 +316,46 @@ dkpg_file="/${path}/dpkg.out"
 
 
 if [[ $create_backup ]]; then
+
 	# unless no_apt is set back up record of packages installed
 	if [[ ! $no_apt ]]; then
 		if [[ $(check_file_write $dkpg_file) -ne 0 ]] ; then
-			echo "Couldn't write to $dpkg_file. Check permissions?"
+			write_msg "Couldn't write to $dpkg_file Check permissions?" $log_file
 			exit 3
 		fi
-                if [[ $backup_sources -ne 0]] ; then
-                        echo "Backing up sources.list failed!"
+                backup_sources
+		if [[ $? -ne 0]] ; then
+                        write_msg "Backing up sources.list failed!" $log_file
                         exit 3
                 fi
+		aptbackup=$(backup_apt)
+		aptbackup_return=$?
+		if [[ $aptbackup_return -ne 0]] ; then
 
-		if [[ $backup_apt -ne 0]] ; then
-			echo "Backing up package files list failed!"
-			eho "dpkg --get-selections exited with error code $apt_backup" 
-			exit 2
+			write_msg "$aptbackup" $log_file
+			write_msg "Backing up package files list failed!" $log_file
+			write_msg "dpkg --get-selections exited with error code $aptbackup_return" $log_file 
+			exit 3
 		fi
 	fi 
 	
 	if [[ ! $no_user_passwords ]]; then
-		# check we can wrtite to the backup files
-		declare -a failarray
-		for file in "$group_file" "$password_file" "$shadow_file"; do
-			if [[ $(check_file_write "$file") -ne 0 ]]; then
-				# if we cant write to file add to array		
-				failarray=( ${failarray[@]-} $(echo "$file") )				fi			
-		done
-		# check length of failarray if >0 then something failed
-		if [[ ${#failarray[@]} -ne 0 ]]; then
-			echo -n "error writing to "
-			for name in ${failarray[@]}; do
-				echo -n "$name"
-			done
-			exit 3 
-		fi 
-		# difficult to check except by checking write  (as above)
-		backup_users
+		backup_user_check=$(backup_user_test $group_file $password_file $shadow_file)
+		if [[ $? -ne 0 ]]; then
+			write_msg $backup_user_check
+			exit 3
+		else
+			  
+		user_backup=$(backup_users $group_file $password_file $shadow_file)
+		write_msg $user_backup $log_file
 	fi
-	if [[ $(backup_config) -ne 0 ]]; then
-		echo "Could not backup /etc"
+
+	if [[ $(backup_config $log_file) -ne 0 ]]; then
+		write_msg "Could not backup /etc" $log_file
 		exit $config_check
 	fi
-	if [[ $use_log ]]; then	
-		if [[ ! $log_file ]]; then
-			log_file="rsync.log"
-		fi
-		if [[ $(check_file_write "$log_file") -ne 0 ]]; then
-			echo "Couldn't write to $log_file"
-			exit 3
-		fi
-		backup_check=$(create_backup $ticket_number $path $log_file)
-	else
-		backup_check=$(create_backup $ticket_number $path)
-	fi
-	if [[ backup_check -ne 0 ]]; then
+
+	if [[ $(create_backup $ticket_number $path $log_file) -ne 0 ]]; then
 		echo "Could not backup data!!!"
 		if [[ $log_file ]]; then
 			echo "error messages are recorded in $log_file"
@@ -361,8 +367,12 @@ if [[ $create_backup ]]; then
 elif [[ $restore_backup ]] ; then
 
         # not the same as backup_password_files
-        # does its own error handling
-        backup_passwords
+        backup_passwords_check=$(backup_passwords)
+	if [[$? -ne 0 ]]; then
+		echo $backup_passwords_check
+		echo "failed to backup password files ..exiting"
+		exit 2
+	fi
 
         if [[ $use_log ]]; then
                 if [[ ! $log_file ]]; then
@@ -372,10 +382,9 @@ elif [[ $restore_backup ]] ; then
  			echo "Couldn't write to $log_file"
  			exit 3
 		fi
-                restore_check=$(restore_backup $ticket_number $rpath $log_file)
-        else
-                restore_check=$(restore_backup $ticket_number $rpath)
-        fi
+	fi
+        
+	restore_check=$(restore_backup $ticket_number $rpath $log_file)
         if [[ restore_check -ne 0 ]]; then
                 echo "Could not restore backup!!!"
                 if [[ $log_file ]]; then
@@ -390,6 +399,21 @@ elif [[ $restore_backup ]] ; then
 	#if [[ ! $no_user_passwords ]]; then
 	# add test [if -A and not -d (-or u) then] do the user etc/apt files
 	# exist? no? warn / ignore
+	# if user had multiverse enabled
+	grep multiverse $sources_file
+	multiverse_test=$?
+	# if user had partner software enabled
+	grep partner $sources_file
+	partner_test=$?
+	codename=$(lsb_release -c |  awk '{print $2}') # lucid etc
+	if [[ $multiverse_test -eq 0 ]]; then
+	#identify and comment out  relevant lines 
+		multiverse_check=$(restore_multiverse $codename)
+		if [[multiverse_check
+	fi
+}
+
+
 else	
 	# Should never get here as we should have caught it 
 	# at the top of the sanity check
