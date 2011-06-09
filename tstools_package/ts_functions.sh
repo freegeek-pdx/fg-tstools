@@ -109,9 +109,9 @@ local msg="$1"
 if [[ $2 ]]; then
         local logfile=$2
 fi
-echo $msg
+echo "$msg"
 if [[ $logfile ]]; then
-        if ! echo $msg >>$logfile; then
+        if ! echo "$msg" >>$logfile; then
         echo "Could not write to Log File: $logfile"
         exit 1
         fi
