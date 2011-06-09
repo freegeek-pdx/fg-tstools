@@ -90,29 +90,30 @@ while getopts ":hc:r:l:a:A:p:du" option; do
 #sanity checks
 if [[ $create_backup  &&  $restore_backup ]]; then 
 	echo "Only one of the c or r options can be used";
-	exit 2
+	exit 3
 
 elif [[ ! $create_backup && ! $restore_backup ]]; then 
         echo "One of the c or r options must  be used";
-        exit 2
+        exit 3
 
 elif [[ $create_backup  &&  ! $ticket_number ]]; then 
         echo "You must supply a ticket number with the c option";
-        exit 2
+        exit 3
 
 elif [[ $restore_backup && ! $backup_dir ]]; then
         echo "You must supply a backup directory with the r option";
-        exit 2
+        exit 3
 
 elif [[ $data_only  &&  $users_and_data_only ]]; then
         echo "The u or d options are mutually exclusive";
-        exit 2
+        exit 3
 else
 
-	if [[ $(test_for_root) -ne 0 ]]; then
-        	echo "Could not proceed!"
+        test_for_root
+	if [[ $? -ne 0 ]]; then
+		echo "Could not proceed!"
         	echo "Are you root?"
-        	exit 2
+        	exit 3
 	fi
 fi
 # TODO
@@ -202,7 +203,7 @@ elif [[ $restore_backup ]] ; then
 	if [[$? -ne 0 ]]; then
 		echo $backup_passwords_check
 		echo "failed to backup password files ..exiting"
-		exit 2
+		exit 3
 	fi
 
         if [[ $use_log ]]; then

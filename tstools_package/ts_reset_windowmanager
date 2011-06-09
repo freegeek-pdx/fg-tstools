@@ -34,17 +34,17 @@ done
 if [[ -z $user ]]; then
         user=$EUID
 else
-	uid_test=$(test_for_uid $user)
-	if [[ -z $uid_test ]]; then
-		echo "$user not found! exiting..."
-		exit 2
-	else
-		root_test=$(test_for_root)
-		if [[ $root_test -ne 0 ]]; then
-			echo "You are not root! exiting..."
-			exit 2	
-		fi
+	test_for_user $user
+	if (( $? != 0 )); then
+        	echo "$user not found! exiting..."
+        	exit 3
 	fi
+
+	test_for_root
+	if [[ $? -ne 0 ]]; then
+		echo "You are not root! exiting..."
+		exit 3	
+		fi
 fi
 
 ### reset desktop ###
@@ -57,7 +57,7 @@ for setting in /apps/compiz /apps/metacity /desktop/gnome/session /schemas/deskt
 do	
 	$GCONF_RESET $setting 
 	if [[ $? -ne 0 ]]; then
-        	echo "gconf failed to reset" 
+        	echo "gconf failed to reset $setting" 
         	EXIT=1
 	fi
 done

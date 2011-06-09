@@ -3,8 +3,8 @@ help(){
         cat <<EOF 
         usage ts_reset_panel [OPTION]
         -h              prints this message
-        -u [USERNAME]   specify the user whose panels will be reset.
-
+        -u [USERNAME]   specify the user whose panels will be reset,
+			defaults to the user running the command.
 	Resets gnome panels to their default state. 
 EOF
         exit 0
@@ -35,17 +35,16 @@ done
 if [[ -z $user ]]; then
         user=$EUID
 else
-        uid_test=$(test_for_uid $user)
-        if [[ -z $uid_test ]]; then
-                echo "$user not found! exiting..."
-                exit 2
-        else
-                root_test=$(test_for_root)
-                if [[ $root_test -ne 0 ]]; then
-                        echo "You are not root! exiting..."
-                        exit 2  
-                fi
-        fi
+	test_for_user $user
+	if (( $? != 0 )); then
+        	echo "$user not found! exiting..."
+        	exit 3
+	fi
+	test_for_root
+	if [[ $? -ne 0 ]]; then
+		echo "You are not root! exiting..."
+		exit 3  
+      fi
 fi
 
 
@@ -56,7 +55,7 @@ GCONF_RESET=$(set_gconf $user)
 
 $GCONF_RESET /apps/panel
 if [[ $? -ne 0 ]]; then
-	echo "gconf failed to reset" 
+	echo "gconf failed to reset panel" 
 	EXIT=1
 fi
 

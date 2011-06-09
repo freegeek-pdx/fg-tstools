@@ -28,11 +28,11 @@ while getopts ":hu:" option; do
 	esac
 done
 
-root_test=$(test_for_root)
-if [[ $root_test -ne 0 ]]; then
+test_for_root
+if [[ $? -ne 0 ]]; then
         echo "Could not proceed!"
         echo "are you root?"
-        exit 2
+        exit 3
 fi
 
 backup_passwords
@@ -40,24 +40,24 @@ password_backup=$?
 if [[ $password_backup -ne 0 ]]; then
 	echo $password_backup
         echo "WARNING:Password files could not be backed up! exiting..."
-        exit 2
+        exit 3
 fi
 
 if [[ -z $user ]]; then 
 	user=$(choose_username)
 fi
 
-uid_test=$(test_for_uid $user)
-if [[ -z $uid_test ]]; then
-	echo "$user not found! exiting..."
-                exit 2
+test_for_user $user
+if (( $? != 0 )); then
+        echo "$user not found! exiting..."
+        exit 3
 fi
 
 
 password_reset=$(change_password $user)
 if [[ password_reset -ne 0 ]]; then
 	echo "WARNING:Password could not be reset, exiting..."
-	exit 2
+	exit 3
 else 
 	cat <<EOF
 password for $user has been set to freegeek. It will revert to the user's original password next time the machine is rebooted or shutdown.

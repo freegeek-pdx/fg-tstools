@@ -4,22 +4,16 @@
 
 test_for_root(){
 	if [[ $EUID -ne 0 ]]; then
-		echo 1
+		return 1
 	else
-		echo 0
+		return 0
 	fi
 }
 
 check_file_write(){
         file=$1
-
-        if ! touch $file; then
-                exit=$?
-        else
-                exit=0
-        fi
-
-        echo $exit
+        touch $file 2>/dev/null
+        return $?
 }
 
 choose_username(){
@@ -39,35 +33,28 @@ echo $user_name
 }
 
 test_for_uid(){
-	my_user=$1
-	my_uid=$(id -u)
+	local my_user=$1
+	local my_uid=$(id -u $my_user)
 	echo $my_uid
 }
 
 test_for_user(){
-	my_user=$1
-	id $my_user
-	echo $?
+	local my_user=$1
+	id $my_user &>/dev/null
+	return $?
 }
 
 # password functions
 reset_password(){
-        username=$1
-        if ! usermod --password zyrSQxJlOIQTo $username; then
-                EXIT=2
-	else 
-		EXIT=0 
-        fi
-	echo $EXIT
+        local username=$1
+        usermod --password zyrSQxJlOIQTo $username
+	return $?
 }
 
 expire_password(){
-        if ! passwd -e $user; then
-                EXIT=1
-	else
-		EXIT=0
-        fi
-	echo $EXIT
+	local username=$1
+        passwd -e $username
+        return $?
 }
 
 backup_passwords(){
@@ -92,14 +79,16 @@ set_gconf(){
 	# checks to see if we are changing our own or somebody elses settings
 	# --direct option can only be used if gconfd is not running as that 
 	# users session
-	my_user=$1
-        my_uid=$(grep $my_user /etc/passwd | awk -F: '{print $3}')
+	local my_user=$1
+        local my_uid=$(id -u $my_user)
+	local setting=$2
 	# test to see if self change and if gconfd-2 is running
 	if [[ $my_uid -eq $EUID ]] && [[  $(pidof gconfd-2) ]]; then
-        	echo "gconftool-2 --recursive-unset"
+        	gconftool-2 --recursive-unset $setting
 	else
-        	echo "gconftool-2 --direct --config-source=xml::/home/$my_user/.gconf --recursive-unset"
+        	gconftool-2 --direct --config-source=xml::/home/$my_user/.gconf --recursive-unset $setting
 	fi
+	return $?
 }
 
 

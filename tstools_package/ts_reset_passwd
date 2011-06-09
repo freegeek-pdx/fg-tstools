@@ -29,32 +29,32 @@ while getopts ":hu:" option; do
 	esac
 done
 
-root_test=$(test_for_root)
-if [[ $root_test -ne 0 ]]; then
-        echo "Could not proceed"
+test_for_root
+if [[ $? -ne 0 ]]; then       
+	echo "Could not proceed"
         echo "are you root?"
-        exit 2
+        exit 3
 fi
 
 if [[ -z $user ]]; then 
 	user=$(choose_username)
 fi
 
-uid_test=$(test_for_uid $user)
-if [[ -z $uid_test ]]; then
-        echo "$user not found! exiting..."
-                exit 2
+test_for_user $user
+if (( $? != 0 )); then        
+	echo "$user not found! exiting..."
+        exit 3
 fi
 
 
-passwd_reset=$(reset_password $user)
-if (( $passwd_reset != 0 )); then
+reset_password $user
+if (( $? != 0 )); then
 	echo "password for $user could not be reset"
-	exit 2
+	exit 3
 fi
 
-passwd_expire=$(expire_password $user)
-if (( $passwd_expire != 0 )); then
+expire_password $user
+if (( $? != 0 )); then
 	echo "WARNING:Password for $user has been reset to freegeek. It will not expire"
 	exit 1
 else

@@ -1,3 +1,4 @@
+#!/bin/bash
 #functions for ts_network_backup
 #split our for convinience
 backup_users_test(){

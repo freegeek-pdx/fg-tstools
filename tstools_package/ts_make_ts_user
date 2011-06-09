@@ -5,12 +5,11 @@ FUNCTIONS=ts_functions.sh # /path/to../
 source $FUNCTIONS
 
 ### MAIN ###
-
-root_test=$(test_for_root)
-if [[ $root_test -ne 0 ]]; then
+test_for_root
+if [[ $? -ne 0 ]]; then
         echo "Could not proceed"
         echo "are you root?"
-        exit 2
+        exit 3
 fi
 
 # set uid and gid to something unlikely to be used elsewhere
@@ -18,7 +17,7 @@ add_user=$(useradd --create-home  --shell /bin/bash -p zogN6hOIYS8W2 --uid 5001 
 
 if [[ $add_user -ne 0 ]]; then 
 	echo "WARNING: Could not adduser, exiting..."
-	exit 2
+	exit 3
 else	
 	echo "tsuser has been created with sudo privileges. It will be deleted on shutdown/reboot."
 fi

@@ -32,23 +32,26 @@ while getopts ":hu:" option; do
 done
 
 
-uid_test=$(test_for_uid $user)
-if [[ -z $uid_test ]]; then
-	echo "$user not found! exiting..."
-        exit 2
+
+test_for_root
+if [[ $? -ne 0 ]]; then
+        echo "You are not root! exiting..."
+        exit 3
 fi
 
-root_test=$(test_for_root)
-if [[ $root_test -ne 0 ]]; then
-        echo "You are not root! exiting..."
-        exit 2
+test_for_user $user
+if (( $? != 0 )); then
+        echo "$user not found! exiting..."
+        exit 3
 fi
+
+
       
 ### reset ownership ###
 
 if ! chown -R $user.$user /home/$user ; then
 	echo "WARNING: Failed to change ownership for some or all files!"
-	exit 2
+	exit 3
 else
 	echo "Changed ownership of $user's files"
 	exit 0
