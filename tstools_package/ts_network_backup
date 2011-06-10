@@ -145,7 +145,9 @@ group_file="/${path}/groups"
 password_file="/${path}/passwords"
 shadow_file="/${path}/shadows"
 dkpg_file="/${path}/dpkg.out"
-
+backup_user="tsbackup"
+backup_host="tsbackup"
+backup_path="/var/tsbackup"
 
 if [[ $create_backup ]]; then
 
@@ -193,7 +195,7 @@ if [[ $create_backup ]]; then
 		exit $config_check
 	fi
 
-	make_backup="$(create_backup $ticket_number $path)"
+	make_backup="$(create_backup  $path $backup_user $backup_host $backup_path $ticket_number )"
 	backup_check=$? 
 	if (($backup_check != 0)); then
 		write_msg "$make_backup" $log_file
@@ -214,7 +216,7 @@ elif [[ $restore_backup ]] ; then
 	fi
 
         
-	restorebackup=$(restore_backup $ticket_number $rpath)
+	restorebackup=$(restore_backup $backup_user $backup_host $backup_path $ticket_number $rpath)
 	restore_check=$?
 	write_msg $restorebackup
         if (( $restore_check != 0 )); then

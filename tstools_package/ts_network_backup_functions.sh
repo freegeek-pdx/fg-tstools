@@ -25,7 +25,7 @@ backup_users_test(){
 
 backup_users(){
         local groupfile=$1
-        local passwordfile=$2
+        local password/file=$2
         local shadowfile=$3
         cat /etc/passwd| while read line ; do
                 user=$(echo $line | awk -F : '{print $1}')
@@ -107,7 +107,7 @@ restore_users(){
 
 
                 # read /home/group usermod to addusers to groups        
-                groups=$(grep -e "\<$user\>" $group_file | cut -f1 -d: -)
+                local groups=$(grep -e "\<$user\>" $group_file | cut -f1 -d: -)
                 for entry in $groups; do
                         if [[ $entry != $user ]]; then
                                 if [[ ! $usergroups ]]; then
@@ -153,16 +153,22 @@ backup_config(){
 }
 
 create_backup(){
-        ticket="$1-$(date +%Y%m%d)"
-        cpath=$2
-        rsync -azh $cpath "tsbackup@tsbackup:/var/tsbackup/$ticket" 2>&1
+        local cpath=$1
+	local user=$2
+	local host=$3
+	local bpath=$4
+	local ticket="$5-$(date +%Y%m%d)"
+        rsync -azh $cpath "${user}@${host}:${bpath}/${ticket}" 2>&1
 	return $?	
 }
 
 restore_backup(){
-        backupdir=$1
-        backup_path=$2
-                rsync -azh "tsbackup@tsbackup:/var/tsbackup/$backupdir/" "$backup_path/"
+        local user=$1
+        local host=$2
+        local spath=$3
+        local backupdir=$4
+        local rpath=$5
+                rsync -azh "${user}@${host}:${spath}/${backupdir}/" "$rpath/"
 	return $?
 	
 }
