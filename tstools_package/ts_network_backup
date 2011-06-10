@@ -110,7 +110,7 @@ elif [[ $data_only  &&  $users_and_data_only ]]; then
 else
 
         test_for_root
-	if [[ $? -ne 0 ]]; then
+	if (( $? != 0 )); then
 		echo "Could not proceed!"
         	echo "Are you root?"
         	exit 3
@@ -156,13 +156,13 @@ if [[ $create_backup ]]; then
 			exit 3
 		fi
                 backup_sources
-		if [[ $? -ne 0]] ; then
+		if (( $? != 0 )) ; then
                         write_msg "Backing up sources.list failed!" $log_file
                         exit 3
                 fi
 		aptbackup=$(backup_apt)
 		aptbackup_return=$?
-		if [[ $aptbackup_return -ne 0]] ; then
+		if (( $aptbackup_return != 0 )) ; then
 
 			write_msg "$aptbackup" $log_file
 			write_msg "Backing up package files list failed!" $log_file
@@ -173,26 +173,33 @@ if [[ $create_backup ]]; then
 	
 	if [[ ! $no_user_passwords ]]; then
 		backup_user_check=$(backup_user_test $group_file $password_file $shadow_file)
-		if [[ $? -ne 0 ]]; then
+		if (( $? -ne 0 )); then
 			write_msg $backup_user_check
 			exit 3
 		else
 			  
 		user_backup=$(backup_users $group_file $password_file $shadow_file)
-		write_msg $user_backup $log_file
+		if (( $? != 0 ))then
+			write_msg $user_backup $log_file
+			exit 3
+		else
+			write_msg $user_backup $log_file
+		fi
 	fi
-
-	if [[ $(backup_config $log_file) -ne 0 ]]; then
+	backup_config
+	config_check=$?
+	if (( $config_check !=  0 )); then
 		write_msg "Could not backup /etc" $log_file
 		exit $config_check
 	fi
 
-	if [[ $(create_backup $ticket_number $path $log_file) -ne 0 ]]; then
-		echo "Could not backup data!!!"
-		if [[ $log_file ]]; then
-			echo "error messages are recorded in $log_file"
-		fi
+	make_backup="$(create_backup $ticket_number $path)"
+	backup_check=$? 
+	if (($backup_check != 0)); then
+		write_msg "$make_backup" $log_file
 		exit $backup_check
+	else
+		write_msg "$make_backup" $log_file
 	fi
 
 
@@ -200,52 +207,52 @@ elif [[ $restore_backup ]] ; then
 
         # not the same as backup_password_files
         backup_passwords_check=$(backup_passwords)
-	if [[$? -ne 0 ]]; then
-		echo $backup_passwords_check
-		echo "failed to backup password files ..exiting"
+	if (( $? != 0)); then
+		write_msg "$backup_passwords_check"$ log_file
+		write_msg "failed to backup password files ..exiting" $log_file
 		exit 3
 	fi
 
-        if [[ $use_log ]]; then
-                if [[ ! $log_file ]]; then
-                        log_file="restore.log"
-		fi
- 		if [[ $(check_file_write "$log_file") -ne 0 ]]; then
- 			echo "Couldn't write to $log_file"
- 			exit 3
-		fi
-	fi
         
-	restore_check=$(restore_backup $ticket_number $rpath $log_file)
-        if [[ restore_check -ne 0 ]]; then
-                echo "Could not restore backup!!!"
-                if [[ $log_file ]]; then
-                        echo "error messages are recorded in $log_file"
-                fi
-                exit restore_check
+	restorebackup=$(restore_backup $ticket_number $rpath)
+	restore_check=$?
+	write_msg $restorebackup
+        if (( $restore_check != 0 )); then
+                write_msg "Could not restore backup!!!"
+                exit $restore_check
         fi
 
 
 	###TODO###
-	#if [[ ! $no_apt ]]; then
-	#if [[ ! $no_user_passwords ]]; then
-	# add test [if -A and not -d (-or u) then] do the user etc/apt files
-	# exist? no? warn / ignore
-	# if user had multiverse enabled
-	grep multiverse $sources_file
-	multiverse_test=$?
-	# if user had partner software enabled
-	grep partner $sources_file
-	partner_test=$?
-	codename=$(lsb_release -c |  awk '{print $2}') # lucid etc
-	if [[ $multiverse_test -eq 0 ]]; then
-	#identify and comment out  relevant lines 
-		multiverse_check=$(restore_multiverse $codename)
-		if [[multiverse_check
+	if [[ ! $no_apt ]]; then
+		# add test [if -A and not -d (-or u) then] do the user etc/apt files
+		# exist? no? warn / ignore
+		# if user had multiverse enabled
+		grep multiverse $sources_file
+		multiverse_test=$?
+		# if user had partner software enabled
+		grep partner $sources_file
+		partner_test=$?
+		codename=$(lsb_release -c |  awk '{print $2}') # lucid etc
+		if (( $multiverse_test == 0 )); then
+		#identify and comment out  relevant lines 
+			restore_multiverse $codename
+			if (( $? != 0 )); then
+				write_msg "unable to add multiverse to sources list" $log_file
+			fi
+		fi
+		if (( $partner_test == 0 )); then
+			 #identify and comment out  relevant lines 
+			restore_multiverse $codename
+			if (( $? != 0 )); then
+				write_msg "unable to add Canonical partners to sources list" $log_file
+			fi
+        	fi
 	fi
-}
-
-
+	
+	###TODO###
+	#        #if [[ ! $no_user_passwords ]]; then
+ 
 else	
 	# Should never get here as we should have caught it 
 	# at the top of the sanity check
