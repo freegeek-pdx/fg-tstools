@@ -2,12 +2,10 @@
 #functions for ts_network_backup
 #split our for convinience
 backup_users_test(){
-        groupfile=$1
-        passwordfile=$2
-        shadowfile=$3
-                # check we can wrtite to the backup files
+        local path=$1        
+	# check we can wrtite to the backup files
         declare -a failarray
-        for file in "$group_file" "$password_file" "$shadow_file"; do
+        for file in "${path}/group" "${path}/passwd" "${path}/shadow"; do
                 if [[ $(check_file_write "${file}") -ne 0 ]]; then
                         # if we cant write to file add to array         
                         failarray=( ${failarray[@]-} $(echo "$file") )                          fi
@@ -24,9 +22,7 @@ backup_users_test(){
 }
 
 backup_users(){
-        local groupfile=$1
-        local password/file=$2
-        local shadowfile=$3
+        local path=$1
         cat /etc/passwd| while read line ; do
                 user=$(echo $line | awk -F : '{print $1}')
                 user_uid=$(echo $line | awk -F : '{print $3}')
@@ -35,21 +31,21 @@ backup_users(){
                         # unless user is a nobody :)
                         if [[ ! $user == "nobody" ]]; then
                                 # gets lists of groups user belongs to
-                                echo "$user: $(id $user)" >>$groupfile
+                                echo "$user: $(id $user)" >>"${path}/group"
 				if (( $? != 0 )); then
 					local fail="${fail} ${groupfile} "
 				fi
-                                echo $line >>$passwordfile
+                                echo $line >>${path}/passwd
 				if (( $? != 0 )); then
-                                        local fail="${fail} ${passwordfile} "
+                                        local fail="${fail} ${path}/passwd "
                                 fi
 
                                 # /etc/shadow contains the date of last password
                                 # change. Having this be older than the install
                                 # should not be a problem, but noting just in case
-                                grep -e ^$user: /etc/shadow >>$shadowfile
+                                grep -e ^$user: /etc/shadow >>"${path}/shadow"
 				if (( $? != 0 )); then
-                                        local fail="${fail} ${shadowfile} "
+                                        local fail="${fail} ${path}/shadow "
                                 fi
 				if [[ $fail ]]; then 
 					for file in $fail; do
@@ -61,53 +57,43 @@ backup_users(){
                         fi
                 fi
         done
-if [[ $userlist ]]; then
-	echo "backed up passwords for $userlist"
-fi        return $?
-if [[ $fail_list ]]]; then
-	echo "$fail_list"
-	return 3
-else
-	return 0
-fi
+	if [[ $userlist ]]; then
+		echo "backed up passwords for $userlist"
+		return $?
+	fi
+	if [[ $fail_list ]]; then
+		echo "$fail_list"
+		return 3
+	else
+		return 0
+	fi
 }
 
+restore_user(){
+        local path=$1        
+	local user=$2
+	local uid=$3
+	local gid=$4
+	local password=$5
 
-restore_users(){
-	local $passwordfile=$1
-        # note that copying files back across is not sufficient 
-        # need to extract values form files and added to new copies
+	#N.B. users may not be in file
+	# delete matching lines in /etc/passwd 
+        sed -i '/^$user:/ d' /etc/passwd
+	# delete existing encypted password 
+	sed -i '/^$user:/ d' /etc/shadow
+	# delete matching lines/existing groups
+	sed -i '/:$gid:/ d' /etc/group
 
-        # read /home/password file or equivalent)
-        cat $password_file| while read line ; do
-                user=$(echo $line | awk -F : '{print $1}')
-                uid=$(echo $line | awk -F : '{print $3}')
-                gid=$(echo $line | awk -F : '{print $4}')
-
-                # delete matchinf lines in /etc/passwd 
-                sed -i '/^$user:/ d' /etc/passwd
-                # delete existing encypted password 
-                sed -i '/^$user:/ d' /etc/shadow
-                # delete matching lines/existing groups
-                sed -i '/:$gid:/ d' /etc/group
-
-                #copy relevant lines to /etc/passwd& shadow 
-                if ! echo $line >> /etc/passwd; then
-			local $faillist="$failist \nproblem adding $user to /etc/password"
-		fi
-                
-		if ! grep -e '/^$user:/' home/shadow >> /etc/shadows; then
-			local $faillist="$failist \nproblem adding $user to /etc/shadow"
-		fi
-
-                # create group for  user
-                if ! addgroup --gid $gid $user; then
-			local $faillist="$failist \nproblem creating ${user}'s group"
-                fi
-
-
-                # read /home/group usermod to addusers to groups        
-                local groups=$(grep -e "\<$user\>" $group_file | cut -f1 -d: -)
+	if ! addgroup --gid $gid $user; then
+       		echo "problem creating ${user}'s group"
+		return 3
+	fi
+ 	if ! useradd -N --gid $gid --uid $uid -d /home/$user --password $password $user; then
+		echo "problem creating user: $user"
+		return 3
+	fi
+        # read /home/group usermod to addusers to groups        
+	local groups=$(grep -e "\<$user\>" $path/group | cut -f1 -d: -)
                 for entry in $groups; do
                         if [[ $entry != $user ]]; then
                                 if [[ ! $usergroups ]]; then
@@ -117,19 +103,51 @@ restore_users(){
                                 fi
                         fi
                 done
-                if [[ ${#usergroups} -ne 0 ]] ; then
-                        usermod -a -G "$usergroups" $user
+	if [[ ${#usergroups} -ne 0 ]] ; then
+		if ! usermod -a -G "$usergroups" $user; then
+			echo "problem adding ${user}'s groups"
                 fi
-        done
+	fi
 }
 
+restore_users(){
+	local $path=$1
+        # note that copying files back across is not sufficient 
+        # need to extract values form files and added to new copies
+
+        # read /home/password file or equivalent)
+        cat "${path/passwd}" | while read line ; do
+                user=$(echo $line | awk -F : '{print $1}')
+                uid=$(echo $line | awk -F : '{print $3}')
+                gid=$(echo $line | awk -F : '{print $4}')
+		password=$(grep $user /$password/shadow | awk -F: '{print $2}')
+		if ! user_restore=$(restore_user $path $user $uid $gid $password); then
+			echo "$user_restore"
+			return $3
+		fi
+	done
+}
+
+
 backup_sources(){
-	local $sources_file=$1
-        cp /etc/apt/sources.list $sources_file 2>&1
-        return $?
+	local $sourcespath=$1
+	if ! mkdir $sourcespath/; then
+		echo "Couldn't make $sourcespath"
+		return 3
+	fi
+	if ! check_file_write $sourcespath/apt ; then
+		echo "Couldn't write to $sourcespath/apt Check permissions?" 
+		return 3
+	fi	
+
+        if ! cp -R /etc/apt/sources.list.d/ $sourcespath/apt/  ; then
+		echo "problem copying over /etc/apt/sourceslist.d"
+        	return 3
+	fi
 }
 ### TODO ###
 restore_sources(){
+}restore_partners(){
 }
 
 backup_apt(){
