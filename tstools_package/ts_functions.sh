@@ -17,14 +17,17 @@ check_file_write(){
 }
 
 choose_username(){
-        for file in /home/*; do
-              if [[ -d $file ]]; then
-                        local name=$(echo $file | awk -F/ '{print $3}')
-                        local user_list="$user_list $name"
-                fi
-        done
-
-        PS3="Select a user "
+	cat /etc/passwd| while read line ; do
+		local user=$(echo $line | awk -F : '{print $1}')
+		local user_list
+		if [[ $user_uid -gt 999 ]] ; then
+                        # unless user is a nobody :)
+                        if [[ ! $user == "nobody" ]]; then
+        			user_list="$user_list $user"
+			fi
+		fi
+	done	
+	PS3="Select a user "
         select user_name in $user_list; do
                 break
         done
