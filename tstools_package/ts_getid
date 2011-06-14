@@ -5,6 +5,7 @@ then
 	echo -n "System ID:"
 	cat /var/lib/freegeek-extras/printme/system_id 
 else 
-	echo "system id not found"; fi
+	echo "system id not found" 
+fi
 
 
