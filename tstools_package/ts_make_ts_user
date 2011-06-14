@@ -6,16 +6,22 @@ source $FUNCTIONS
 
 ### MAIN ###
 test_for_root
-if [[ $? -ne 0 ]]; then
+if (( $? != 0 )); then
         echo "Could not proceed"
         echo "are you root?"
         exit 3
 fi
 
-# set uid and gid to something unlikely to be used elsewhere
-add_user=$(useradd --create-home  --shell /bin/bash -p zogN6hOIYS8W2 --uid 5001 --gid 5001 --groups adm --groups admin  tsuser)
+if ! password_backup=$(backup_passwords_for_reset); then
+        echo $password_backup
+	echo "WARNING:Password files could not be backed up! exiting..."
+        exit 3
+fi
 
-if [[ $add_user -ne 0 ]]; then 
+# set uid and gid to something unlikely to be used elsewhere
+useradd --create-home  --shell /bin/bash -p zogN6hOIYS8W2 --uid 5001 --gid 5001 --groups adm --groups admin  tsuser
+
+if (( $add_user != 0 )); then 
 	echo "WARNING: Could not adduser, exiting..."
 	exit 3
 else	

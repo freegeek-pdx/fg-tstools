@@ -17,11 +17,10 @@ check_file_write(){
 }
 
 choose_username(){
-        declare -a user_list
         for file in /home/*; do
               if [[ -d $file ]]; then
-                        name=$(echo $file | awk -F/ '{print $3}')
-                        user_list=$user_list" $name"
+                        local name=$(echo $file | awk -F/ '{print $3}')
+                        local user_list="$user_list $name"
                 fi
         done
 
@@ -58,9 +57,10 @@ expire_password(){
 }
 
 backup_passwords(){
+	local isotime=$(date +%Y%m%d%H%M)
 	for file in passwd group shadow ; do
-		if ! cp /etc/$file /etc/$file.fregeek_ts_backup.isotime;then
-			failarray=( ${failarray[@]-} $(echo "$file") )
+		if ! cp /etc/$file /etc/$file.fregeek_ts_backup.$isotime;then
+			local failarray=( ${failarray[@]-} $(echo "$file") )
 		fi
 	done
 	# check length of failarray if >0 then something failed
@@ -73,7 +73,21 @@ backup_passwords(){
         fi
 }
 
-
+backup_passwords_for_reset(){
+        for file in passwd group shadow ; do
+                if ! cp /etc/$file /etc/$file.fregeek_ts_bak;then
+                        local failarray=( ${failarray[@]-} $(echo "$file") )
+                fi
+        done
+        # check length of failarray if >0 then something failed
+         if [[ ${#fail_array[@]} -ne 0 ]]; then
+                echo -n "could not backup"
+                for name in ${failarray[@]}; do
+                        echo -n "/etc/$name"
+                done
+                return 3
+        fi
+}
 # gconf related
 set_gconf(){
 	# checks to see if we are changing our own or somebody elses settings

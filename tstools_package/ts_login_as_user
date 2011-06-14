@@ -28,16 +28,13 @@ while getopts ":hu:" option; do
 	esac
 done
 
-test_for_root
-if [[ $? -ne 0 ]]; then
+if ! test_for_root; then
         echo "Could not proceed!"
         echo "are you root?"
         exit 3
 fi
 
-backup_passwords
-password_backup=$?
-if [[ $password_backup -ne 0 ]]; then
+if ! password_backup=$(backup_passwords_for_reset); then
 	echo $password_backup
         echo "WARNING:Password files could not be backed up! exiting..."
         exit 3
@@ -47,15 +44,13 @@ if [[ -z $user ]]; then
 	user=$(choose_username)
 fi
 
-test_for_user $user
-if (( $? != 0 )); then
+if ! test_for_user $user; then
         echo "$user not found! exiting..."
         exit 3
 fi
 
 
-password_reset=$(change_password $user)
-if [[ password_reset -ne 0 ]]; then
+if ! reset_password $user; then
 	echo "WARNING:Password could not be reset, exiting..."
 	exit 3
 else 
