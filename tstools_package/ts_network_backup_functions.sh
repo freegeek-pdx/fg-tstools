@@ -24,8 +24,8 @@ backup_users_test(){
 backup_users(){
         local path=$1
         cat /etc/passwd| while read line ; do
-                user=$(echo $line | awk -F : '{print $1}')
-                user_uid=$(echo $line | awk -F : '{print $3}')
+                local user=$(echo $line | awk -F : '{print $1}')
+                local user_uid=$(echo $line | awk -F : '{print $3}')
                 # if UID >999 then is normal (non-system) user
                 if [[ $user_uid -gt 999 ]] ; then
                         # unless user is a nobody :)
@@ -146,9 +146,6 @@ backup_sources(){
 	fi
 }
 ### TODO ###
-restore_sources(){
-}restore_partners(){
-}
 
 backup_apt(){
         dpkg --get-selections > $dpkg_file   2>&1
@@ -191,6 +188,8 @@ restore_backup(){
 	
 }
 ###TODO####
+restore_sources(){
+}
 restore_multiverse(){
 }
 restore_partners(){
