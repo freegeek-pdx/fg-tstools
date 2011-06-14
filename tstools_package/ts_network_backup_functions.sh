@@ -23,9 +23,14 @@ backup_users_test(){
 
 backup_users(){
         local path=$1
+	local user
+	local user_uid
+	local userlist
+	local fail
+	local fail_list
         cat /etc/passwd| while read line ; do
-                local user=$(echo $line | awk -F : '{print $1}')
-                local user_uid=$(echo $line | awk -F : '{print $3}')
+                user=$(echo $line | awk -F : '{print $1}')
+                user_uid=$(echo $line | awk -F : '{print $3}')
                 # if UID >999 then is normal (non-system) user
                 if [[ $user_uid -gt 999 ]] ; then
                         # unless user is a nobody :)
@@ -33,11 +38,11 @@ backup_users(){
                                 # gets lists of groups user belongs to
                                 echo "$user: $(id $user)" >>"${path}/group"
 				if (( $? != 0 )); then
-					local fail="${fail} ${groupfile} "
+					fail="${fail} ${groupfile} "
 				fi
                                 echo $line >>${path}/passwd
 				if (( $? != 0 )); then
-                                        local fail="${fail} ${path}/passwd "
+                                        fail="${fail} ${path}/passwd "
                                 fi
 
                                 # /etc/shadow contains the date of last password
@@ -45,14 +50,14 @@ backup_users(){
                                 # should not be a problem, but noting just in case
                                 grep -e ^$user: /etc/shadow >>"${path}/shadow"
 				if (( $? != 0 )); then
-                                        local fail="${fail} ${path}/shadow "
+                                        fail="${fail} ${path}/shadow "
                                 fi
 				if [[ $fail ]]; then 
 					for file in $fail; do
-						local fail_list="${failist}\n${user}:${file}"
+						fail_list="${failist}\n${user}:${file}"
 					done
 				else
-                                	local userlist="$userlist $user"
+                                	userlist="$userlist $user"
 				fi
                         fi
                 fi
