@@ -149,16 +149,29 @@ backup_sources(){
 		echo "problem copying over /etc/apt/sourceslist.d"
         	return 3
 	fi
+
+      if ! cp  /etc/apt/sources.list $sourcespath/apt/  ; then
+                echo "problem copying over /etc/apt/sources.list"
+                return 3
+        fi
+
 }
+
+
 ### TODO ###
+restore_sources(){
+}
+
 
 backup_apt(){
-        dpkg --get-selections > $dpkg_file   2>&1
+	local $dpkgfile=$1
+        dpkg --get-selections > $dpkgfile   2>&1
         return $?
 }
 
 restore_apt(){
-        dpkg --set-selections < $dpkg_file  2>&1
+	local $dpkgfile=$1
+        dpkg --set-selections < $dpkgfile  2>&1
         return $?
 }
 
@@ -193,8 +206,6 @@ restore_backup(){
 	
 }
 ###TODO####
-restore_sources(){
-}
 restore_multiverse(){
 }
 restore_partners(){
