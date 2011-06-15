@@ -1,6 +1,6 @@
 #!/bin/bash
 #functions for ts_network_backup
-#split our for convinience
+#split out for convinience
 backup_users_test(){
         local path=$1        
 	# check we can wrtite to the backup files
