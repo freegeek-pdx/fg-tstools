@@ -158,7 +158,7 @@ if [[ $create_backup ]]; then
                         write_msg "backup_sources_msg" $log_file
                         exit 3
 		fi
-		if ! aptbackup=$(backup_apt); then
+		if ! aptbackup=$(backup_apt $dpkg_file); then
 			write_msg "$aptbackup" $log_file
 			write_msg "Backing up package files list failed!" $log_file
 			write_msg "dpkg --get-selections exited with error code $aptbackup_return" $log_file 
@@ -230,8 +230,7 @@ elif [[ $restore_backup ]] ; then
 		fi
 		if (( $partner_test == 0 )); then
 			 #identify and comment out  relevant lines 
-			restore_partners $codename
-			if (( $? != 0 )); then
+			if ! restore_partners $codenama; then
 				write_msg "unable to add Canonical partners to sources list" $log_file
 			fi
         	fi
