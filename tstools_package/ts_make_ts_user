@@ -3,7 +3,7 @@
 # source common functions
 FUNCTIONS=ts_functions.sh # /path/to../
 source $FUNCTIONS
-
+pwhash="zogN6hOIYS8W2"
 ### MAIN ###
 test_for_root
 if (( $? != 0 )); then
@@ -19,7 +19,7 @@ if ! password_backup=$(backup_passwords_for_reset); then
 fi
 
 # set uid and gid to something unlikely to be used elsewhere
-useradd --create-home  --shell /bin/bash -p zogN6hOIYS8W2 --uid 5001 --gid 5001 --groups adm --groups admin  tsuser
+useradd --create-home  --shell /bin/bash -p "$pwhash" --uid 5001 --gid 5001 --groups adm --groups admin  tsuser
 
 if (( $add_user != 0 )); then 
 	echo "WARNING: Could not adduser, exiting..."
