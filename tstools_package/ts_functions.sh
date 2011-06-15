@@ -49,7 +49,8 @@ test_for_user(){
 # password functions
 reset_password(){
         local username=$1
-        usermod --password zyrSQxJlOIQTo $username
+        local passhash="$2"
+        usermod --password "$passhash" $username
 	return $?
 }
 

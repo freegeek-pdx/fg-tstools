@@ -13,6 +13,8 @@ EOF
 FUNCTIONS=ts_functions.sh # /path/to../
 source $FUNCTIONS
 
+phash="zyrSQxJlOIQTo"
+
 ### MAIN ###
 
 while getopts ":hu:" option; do
@@ -50,12 +52,12 @@ if ! test_for_user $user; then
 fi
 
 
-if ! reset_password $user; then
+if ! reset_password $user $phash; then
 	echo "WARNING:Password could not be reset, exiting..."
 	exit 3
 else 
 	cat <<EOF
-password for $user has been set to freegeek. It will revert to the user's original password next time the machine is rebooted or shutdown.
+password for $user has been reset. It will revert to the user's original password next time the machine is rebooted or shutdown.
 
 You may mow exit recovery mode and log in as that user.
 EOF
