@@ -4,15 +4,15 @@
 FUNCTIONS=ts_functions.sh # /path/to../
 source $FUNCTIONS
 pwhash="zogN6hOIYS8W2"
+user="tsuser"
+uid="50001"
 ### MAIN ###
 test_for_root
 if (( $? != 0 )); then
         echo "Could not proceed"
         echo "are you root?"
         exit 3
-fi
-
-if ! password_backup=$(backup_passwords_for_reset); then
+elif ! password_backup=$(backup_passwords_for_reset); then
         echo $password_backup
 	echo "WARNING:Password files could not be backed up! exiting..."
         exit 3
@@ -21,11 +21,9 @@ else
 fi
 
 # set uid and gid to something unlikely to be used elsewhere
-useradd --create-home  --shell /bin/bash -p "$pwhash" --uid 5001 --gid 5001 --groups adm --groups admin  tsuser
-
-if (( $add_user != 0 )); then 
-	echo "WARNING: Could not adduser, exiting..."
+if ! useradd --create-home --user-group --shell /bin/bash --password "$pwhash" --uid $uid --groups adm --groups admin $user ;then
+	echo "WARNING: Could not create user, exiting..."
 	exit 3
 else	
-	echo "tsuser has been created with sudo privileges. It will be deleted on shutdown/reboot."
+	echo "user $user has been created with sudo privileges. It will be deleted on shutdown/reboot."
 fi
