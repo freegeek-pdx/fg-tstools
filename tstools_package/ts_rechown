@@ -33,20 +33,17 @@ done
 
 
 
-if ! test_for_root; then
-        echo "You are not root! exiting..."
-        exit 3
-fi
 
 if [[ -z $user ]]; then 
         user=$(choose_username)
 fi
 
-
-if ! test_for_user $user; then
-        echo "$user not found! exiting..."
+if ! test_for_root; then
+        echo "You are not root! exiting..."
         exit 3
-      
+elif ! test_for_user $user; then
+        echo "$user not found! exiting..."
+        exit 3      
 ### reset ownership ###
 elif ! chown -R $user.$user /home/$user ; then
 	echo "WARNING: Failed to change ownership for some or all files!"
