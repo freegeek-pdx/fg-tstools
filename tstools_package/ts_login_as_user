@@ -34,9 +34,7 @@ if ! test_for_root; then
         echo "Could not proceed!"
         echo "are you root?"
         exit 3
-fi
-
-if ! password_backup=$(backup_passwords_for_reset); then
+elif ! password_backup=$(backup_passwords_for_reset); then
 	echo $password_backup
         echo "WARNING:Password files could not be backed up! exiting..."
         exit 3
@@ -51,10 +49,7 @@ fi
 if ! test_for_user $user; then
         echo "$user not found! exiting..."
         exit 3
-fi
-
-
-if ! reset_password $user $phash; then
+elif ! reset_password $user $phash; then
 	echo "WARNING:Password could not be reset, exiting..."
 	exit 3
 else 
