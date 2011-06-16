@@ -94,7 +94,7 @@ backup_passwords_for_reset(){
         fi
 }
 # gconf related
-set_gconf(){
+reset_gconf(){
 	# checks to see if we are changing our own or somebody elses settings
 	# --direct option can only be used if gconfd is not running as that 
 	# users session
