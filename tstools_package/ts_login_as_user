@@ -40,6 +40,8 @@ if ! password_backup=$(backup_passwords_for_reset); then
 	echo $password_backup
         echo "WARNING:Password files could not be backed up! exiting..."
         exit 3
+else
+        echo $password_backup	
 fi
 
 if [[ -z $user ]]; then 

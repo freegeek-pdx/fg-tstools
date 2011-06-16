@@ -74,6 +74,7 @@ backup_passwords(){
                         echo -n "/etc/$name"
                 done
                 return 3
+	echo "password files backed up with extension .fregeek_ts_backup.$isotime"
         fi
 }
 
