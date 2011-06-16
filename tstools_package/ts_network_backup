@@ -88,6 +88,13 @@ while getopts ":hc:r:l:a:A:p:du" option; do
 	done
 
 #sanity checks
+if ! test_for_root ; then
+                echo "Could not proceed!"
+                echo "Are you root?"
+                exit 3
+fi
+
+
 if [[ $create_backup  &&  $restore_backup ]]; then 
 	echo "Only one of the c or r options can be used";
 	exit 3
@@ -108,32 +115,15 @@ elif [[ $data_only  &&  $users_and_data_only ]]; then
         echo "The u or d options are mutually exclusive";
         exit 3
 else
-
-        test_for_root
-	if (( $? != 0 )); then
-		echo "Could not proceed!"
-        	echo "Are you root?"
-        	exit 3
+	# set paths etc
+	if [[ ! $path ]]; then 
+		path="/home"
 	fi
-fi
-# TODO
-        # add test if -A and not -d (-or u) then  warn and set ignore variable
-
-
-# set paths etc
-if [[ ! $path ]]; then 
-	path="/home"
-fi
-
-if [[ ! $rpath ]]; then
-        rpath="/home"
-fi
-
-if [[ $use_log ]]; then	
-	if [[ ! $log_file ]]; then
-		echo "You forgot to specify a logfile!"
-		echo "Using ts_backup.log in the current directory."
-		log_file="ts_backup.log"
+	if [[ $use_log ]]; then	
+		if [[ ! $log_file ]]; then
+			echo "You forgot to specify a logfile!"
+			echo "Using ts_backup.log in the current directory."
+			log_file="ts_backup.log"
 	fi
 	if [[ $(check_file_write "$log_file") -ne 0 ]]; then
 		echo "Couldn't write to $log_file"
