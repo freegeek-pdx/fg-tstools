@@ -48,17 +48,12 @@ else
 fi
 
 ### reset desktop ###
-
-# set appropriate command and options
-GCONF_RESET=$(set_gconf $user)
-
 # recursive uset of gnome schemas
 for setting in /apps/compiz /apps/metacity /desktop/gnome/session /schemas/desktop/gnome/session
 do	
-	$GCONF_RESET $setting 
-	if [[ $? -ne 0 ]]; then
+	if ! set_gconf $user $setting; then
         	echo "gconf failed to reset $setting" 
-        	EXIT=1
+        	EXIT=3
 	fi
 done
 
