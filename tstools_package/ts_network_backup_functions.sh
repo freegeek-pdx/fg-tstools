@@ -159,9 +159,48 @@ backup_sources(){
 
 
 ### TODO ###
-restore_sources(){
+restore_multiverse(){
+	local dist_version=$1
+	
+	if ! local tmpfile=$(mktemp); then
+		echo "Couldn't make temp file"
+		return 3
+	fi
+
+	cat /etc/apt/sources.list | while read line; do
+		if [[ $line =~ ^# ]]; then
+			echo $line >>$tmpfile
+		elif [[ $line =~ main ]] ; then
+			echo "# $line" >> $tmpfile
+			if [[ $line =~ $dist_version ]]; then
+				echo "$line multiverse" >>$tmpfile
+			else
+				old_version=$(echo $line | awk '{print $3}' | awk -F- '{print $1}')
+				newline=$(echo line | sed "s/$old_version/$dist_version/")
+				echo "$newline multiverse" >>$tmpfile	
+			fi
+		else
+			echo $line >>$tmpfile  
+		fi 
+	done
+	
+	if ! cp $tmpfile /etc/apt/sources.list; then
+		echo "could not overwrite /etc/apt/sources.list, new version stored at $tmpfile"
+		return 3
+	fi
+	rm $tmpfile
 }
 
+restore_partners(){
+	local dist_version=$1
+	if ! echo "deb http://archive.canonical.com/ubuntu $dist_version partner" >>/etc/apt/sources.list; then
+		echo "could not add partners to /etc/apt/sources.list"
+		return 3
+	fi
+	echo "deb-src http://archive.canonical.com/ubuntu $dist_version partner" >>/etc/apt/sources.list
+}
+
+####
 
 backup_apt(){
 	local $dpkgfile=$1
@@ -204,9 +243,4 @@ restore_backup(){
                 rsync -azh "${user}@${host}:${spath}/${backupdir}/" "$rpath/"
 	return $?
 	
-}
-###TODO####
-restore_multiverse(){
-}
-restore_partners(){
 }

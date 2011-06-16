@@ -131,7 +131,9 @@ fi
 
 if [[ $use_log ]]; then	
 	if [[ ! $log_file ]]; then
-		log_file="rsync.log"
+		echo "You forgot to specify a logfile!"
+		echo "Using ts_backup.log in the current directory."
+		log_file="ts_backup.log"
 	fi
 	if [[ $(check_file_write "$log_file") -ne 0 ]]; then
 		echo "Couldn't write to $log_file"
@@ -179,7 +181,7 @@ if [[ $create_backup ]]; then
 			write_msg $user_backup $log_file
 		fi
 	fi
-	if ! backup_config; then
+	if ! backup_config $path; then
 		write_msg "Could not backup /etc" $log_file
 		exit $config_check
 	fi
@@ -214,6 +216,8 @@ elif [[ $restore_backup ]] ; then
 	if [[ ! $no_apt ]]; then
 		# add test [if -A and not -d (-or u) then] do the user etc/apt files
 		# exist? no? warn / ignore
+		
+		sources_file="$sources_path/sources.list"
 		# if user had multiverse enabled
 		grep multiverse $sources_file
 		multiverse_test=$?
@@ -223,17 +227,23 @@ elif [[ $restore_backup ]] ; then
 		codename=$(lsb_release -c |  awk '{print $2}') # lucid etc
 		if (( $multiverse_test == 0 )); then
 		#identify and comment out  relevant lines 
-			restore_multiverse $codename
-			if (( $? != 0 )); then
-				write_msg "unable to add multiverse to sources list" $log_file
+			if ! multiverse_restore=$(restore_multiverse $codename); then	
+				write_msg "WARNING: unable to add multiverse to sources list" $log_file
+				write_msg "$multiverse_restore" $log_file
+				exit 3
 			fi
 		fi
 		if (( $partner_test == 0 )); then
 			 #identify and comment out  relevant lines 
-			if ! restore_partners $codenama; then
+			if ! restore_partners $codename; then
 				write_msg "unable to add Canonical partners to sources list" $log_file
+			
 			fi
         	fi
+		# check to see if any PPA files in sources.list.d
+		if [[ -v "$(ls -A $sources_path/sourceslist.d)" ]]; then
+			cp -R "$sources_path/sourceslist.d/*" /etc/apt/sources.list.d
+		fi
 	fi
 	
 	###TODO###
