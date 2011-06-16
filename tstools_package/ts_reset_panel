@@ -34,30 +34,23 @@ done
 #set/check user
 if [[ -z $user ]]; then
         user=$EUID
-else
-	test_for_user $user
-	if (( $? != 0 )); then
-        	echo "$user not found! exiting..."
-        	exit 3
-	fi
-	test_for_root
-	if [[ $? -ne 0 ]]; then
-		echo "You are not root! exiting..."
-		exit 3  
-      fi
+fi
+
+if ! test_for_user $user ; then
+        echo "$user not found! exiting..."
+        exit 3
+elif ! test_for_root; then
+	echo "You are not root! exiting..."
+	exit 3  
 fi
 
 
 # reset panel second stage maybe unnecessary need to test
 
 # set appropriate command and options
-GCONF_RESET=$(set_gconf $user)
-
-$GCONF_RESET /apps/panel
-if [[ $? -ne 0 ]]; then
+if ! set_gconf $user /apps/panel; then
 	echo "gconf failed to reset panel" 
-	EXIT=1
-fi
+	exit 3
 
 #rm -rf /home/$user/.gconf/apps/panel
 #if [[ $? -ne 0 ]]; then
@@ -65,14 +58,10 @@ fi
 #        EXIT=1
 #fi
 
-pkill gnome-panel 
-if [[ $? -ne 0 ]]; then
+elif ! pkill gnome-panel ; then
         echo "failed to restart gnome-panel" 
-        EXIT=1
-fi
- 
-if [[ -z  $EXIT ]] ; then
-	exit $EXIT
+        exit 3
 else
 	exit 0
-fi  
+fi
+ 
