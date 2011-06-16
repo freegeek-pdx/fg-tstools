@@ -51,7 +51,7 @@ fi
 # recursive uset of gnome schemas
 for setting in /apps/compiz /apps/metacity /desktop/gnome/session /schemas/desktop/gnome/session
 do	
-	if ! set_gconf $user $setting; then
+	if ! reset_gconf $user $setting; then
         	echo "gconf failed to reset $setting" 
         	EXIT=3
 	fi
