@@ -4,8 +4,10 @@ if [[ -e /var/lib/freegeek-extras/printme/system_id ]]
 then 
 	echo -n "System ID:"
 	cat /var/lib/freegeek-extras/printme/system_id 
+	exit 0
 else 
 	echo "system id not found" 
+	exit 1
 fi
 
 

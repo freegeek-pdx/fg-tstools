@@ -181,8 +181,7 @@ if [[ $create_backup ]]; then
 	else
 		write_msg "$make_backup" $log_file
 	fi
-
-
+	exit 0
 elif [[ $restore_backup ]] ; then
 
         # not the same as backup_password_files
@@ -259,4 +258,5 @@ else
 	# Should never get here as we should have caught it 
 	# at the top of the sanity check
 	echo "You should never see this message. If you are reading it now something is very, very wrong."
+	exit 1
 fi 
