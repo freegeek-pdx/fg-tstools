@@ -76,7 +76,7 @@ while getopts ":hc:r:l:a:A:p:du" option; do
                    data_only="true"
 		   path="$OPTARG"
 		;;
-		A) rpath="$OPTARG"
+		A) path="$OPTARG"
 		;;
 		p) cut_path=$(echo "$OPTARG" |sed -r -e 's:/home/?$::' -e 's/\/*$//') 
 		   path="${cut_path}/home"
@@ -157,36 +157,35 @@ if [[ $create_backup ]]; then
 	# unless no_apt is set back up record of packages installed
 	if [[ ! $no_apt ]]; then
                 if ! backup_sources_msg=$(backup_sources $sources_path) ; then
-                        write_msg "backup_sources_msg" $log_file
+	                write_msg "Encountered problem backing up software sources" $log_file        
+			write_msg "$backup_sources_msg" $log_file
                         exit 3
+		else
+			write_msg "$backup_sources_msg" $log_file
+
 		fi
 		if ! aptbackup=$(backup_apt $dpkg_file); then
-			write_msg "$aptbackup" $log_file
 			write_msg "Backing up package files list failed!" $log_file
+                        write_msg "$aptbackup" $log_file	
 			write_msg "dpkg --get-selections exited with error code $aptbackup_return" $log_file 
 			exit 3
+		else
+			write_msg "Backed up a list of installed packages" $log_fiile
 		fi
-	fi 
-	
-	if [[ ! $no_user_passwords ]]; then
-		if ! backup_user_check=$(backup_user_test "$path"); then
+	elif [[ ! $no_user_passwords ]]; then
+		if ! backup_users_check=$(backup_user_test "$path"); then
 			write_msg $backup_user_check
-			exit 3
-		else
-			  
-		if ! user_backup=$(backup_users "$path");then
+			exit 3		  
+		elif ! user_backup=$(backup_users "$path");then
 			write_msg $user_backup $log_file
 			exit 3
 		else
 			write_msg $user_backup $log_file
 		fi
-	fi
-	if ! backup_config $path; then
+	elif ! config_check=$(backup_config $path); then
 		write_msg "Could not backup /etc" $log_file
 		exit $config_check
-	fi
-
-	if ! make_backup=$(create_backup  $path $backup_user $backup_host $backup_path $ticket_number ); then
+	elif ! make_backup=$(create_backup  $path $backup_user $backup_host $backup_path $ticket_number ); then
 		write_msg "$make_backup" $log_file
 		exit $backup_check
 	else
@@ -198,59 +197,76 @@ elif [[ $restore_backup ]] ; then
 
         # not the same as backup_password_files
         if ! backup_passwords_check=$(backup_passwords); then
-		write_msg "$backup_passwords_check"$ log_file
-		write_msg "failed to backup password files ..exiting" $log_file
+		write_msg "$backup_passwords_check" $log_file
+		write_msg "Failed to backup password files ..exiting" $log_file
 		exit 3
+	else
+		write_msg "$backup_passwords_check" $log_file
 	fi
 
         
-	if ! restorebackup=$(restore_backup $backup_user $backup_host $backup_path $ticket_number $rpath); then
+	if ! restorebackup=$(restore_backup $backup_user $backup_host $backup_path $ticket_number $path); then
 		restore_check=$?
-		write_msg $restorebackup
-                write_msg "Could not restore backup!!!"
+		write_msg $restorebackup $log_file
+                write_msg "WARNING! Could not restore backup!!!" $log_file
                 exit $restore_check
-        fi
-
-
-	###TODO###
-	if [[ ! $no_apt ]]; then
+	else
+		if [[ ! $no_user_passwords ]]; 
+			if ! restore_users_test=$(restore_users $path); then
+				write_msg $restore_users_test $log_file
+				exit 3
+			else 
+				write_msg "Restored users" $log_file
+		fi
+		if [[ ! $no_apt ]]; then
 		# add test [if -A and not -d (-or u) then] do the user etc/apt files
 		# exist? no? warn / ignore
 		
-		sources_file="$sources_path/sources.list"
-		# if user had multiverse enabled
-		grep multiverse $sources_file
-		multiverse_test=$?
-		# if user had partner software enabled
-		grep partner $sources_file
-		partner_test=$?
-		codename=$(lsb_release -c |  awk '{print $2}') # lucid etc
-		if (( $multiverse_test == 0 )); then
-		#identify and comment out  relevant lines 
-			if ! multiverse_restore=$(restore_multiverse $codename); then	
-				write_msg "WARNING: unable to add multiverse to sources list" $log_file
-				write_msg "$multiverse_restore" $log_file
-				exit 3
+			sources_file="$sources_path/sources.list"
+			# if user had multiverse enabled
+			grep multiverse $sources_file
+			multiverse_test=$?
+			# if user had partner software enabled
+			grep partner $sources_file
+			partner_test=$?
+			codename=$(lsb_release -c |  awk '{print $2}') # lucid etc
+			if (( $multiverse_test == 0 )); then
+			#identify and comment out  relevant lines 
+				if ! multiverse_restore=$(restore_multiverse $codename); then	
+					write_msg "WARNING: unable to add multiverse to sources list" $log_file
+					write_msg "$multiverse_restore" $log_file
+					exit 3
+			else
+				write_msg "Added multiverse to software sources" $log_file
 			fi
-		fi
-		if (( $partner_test == 0 )); then
+			if (( $partner_test == 0 )); then
 			 #identify and comment out  relevant lines 
-			if ! restore_partners $codename; then
-				write_msg "unable to add Canonical partners to sources list" $log_file
-			
+				if ! restore_partners $codename; then
+					write_msg "unable to add Canonical partners to software sources" $log_file
+				else
+					write_msg "Added Canonical partners to software sources" $log_file
+				fi
+      			fi
+
+			# check to see if any PPA files in sources.list.d
+			if [[ -v "$(ls -A $sources_path/sourceslist.d)" ]]; then
+				cp -R "$sources_path/sourceslist.d/*" /etc/apt/sources.list.d
+			else
+                        	write_msg "Added PPA's to software sources" $log_file
 			fi
-        	fi
-		# check to see if any PPA files in sources.list.d
-		if [[ -v "$(ls -A $sources_path/sourceslist.d)" ]]; then
-			cp -R "$sources_path/sourceslist.d/*" /etc/apt/sources.list.d
-		fi
+		
+			if ! packagerestore=$(restore_packages $dpkg_file); then
+				write_msg "$packagerestore" $log_file
+				exit 3
+			else
+				write_msg "$packagerestore" $log_file
+			fi
+		fi # End no-apt
+	write_msg "Backup successfully restored" $log_file
+	exit 0
 	fi
-	
-	###TODO###
-	#        #if [[ ! $no_user_passwords ]]; then
- 
 else	
 	# Should never get here as we should have caught it 
 	# at the top of the sanity check
-	echo "You should never see this message. If you are reading it now this script is broken."
+	echo "You should never see this message. If you are reading it now something is very, very wrong."
 fi 

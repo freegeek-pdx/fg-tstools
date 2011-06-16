@@ -17,8 +17,9 @@ backup_users_test(){
                         echo -n "$name"
                 done
                 return 3
-        fi
-        return 0
+        else
+		return 0
+	fi
 }
 
 backup_users(){
@@ -38,7 +39,7 @@ backup_users(){
                                 # gets lists of groups user belongs to
                                 echo "$user: $(id $user)" >>"${path}/group"
 				if (( $? != 0 )); then
-					fail="${fail} ${groupfile} "
+					fail="${fail} ${path}/group "
 				fi
                                 echo $line >>${path}/passwd
 				if (( $? != 0 )); then
@@ -111,6 +112,7 @@ restore_user(){
 	if [[ ${#usergroups} -ne 0 ]] ; then
 		if ! usermod -a -G "$usergroups" $user; then
 			echo "problem adding ${user}'s groups"
+			return 3
                 fi
 	fi
 }
@@ -139,22 +141,19 @@ backup_sources(){
 	if ! mkdir $sourcespath/; then
 		echo "Couldn't make $sourcespath"
 		return 3
-	fi
-	if ! check_file_write $sourcespath/apt ; then
+	elif ! check_file_write $sourcespath/apt ; then
 		echo "Couldn't write to $sourcespath/apt Check permissions?" 
 		return 3
-	fi	
-
-        if ! cp -R /etc/apt/sources.list.d/ $sourcespath/apt/  ; then
-		echo "problem copying over /etc/apt/sourceslist.d"
+	elif ! cp -R /etc/apt/sources.list.d/ $sourcespath/apt/  ; then
+		echo "Problem copying over /etc/apt/sourceslist.d"
         	return 3
-	fi
-
-      if ! cp  /etc/apt/sources.list $sourcespath/apt/  ; then
-                echo "problem copying over /etc/apt/sources.list"
+	elif ! cp  /etc/apt/sources.list $sourcespath/apt/  ; then
+                echo "Problem copying over /etc/apt/sources.list"
                 return 3
+	else
+		echo "Backed up software sources"
+		return 0
         fi
-
 }
 
 
@@ -208,18 +207,28 @@ backup_apt(){
         return $?
 }
 
-restore_apt(){
-	local $dpkgfile=$1
-        dpkg --set-selections < $dpkgfile  2>&1
-        return $?
-}
 
 restore_packages(){
-        apt-get -u dselect-upgrade   2>&1
-        return $?
+        local $dpkgfile=$1
+	if ! local update_msg=$(apt-get update); then
+		echo "apt-get update failed while attempting to restore packages"
+		echo "$update_msg"
+		return 3
+        elif ! local dpkg_msg=$(dpkg --set-selections < $dpkgfile  2>&1);then
+                echo "Could not set package selection when attempting to restore packages"	
+		echo "$dpkg_msg"
+		return 3
+        elif ! local upgrade_mdg=$(apt-get -u dselect-upgrade   2>&1); then
+		echo "apt-get -u dselect-upgrade  while attempting to restore packages"
+		echo "$upgrade_msg"
+	else
+		echo "Restored software packages successfully"
+		return 0
+	fi
 }
 
 backup_config(){
+	local bpath=$1
         tar -czf ${path}/etc_backup.tar.gz /etc/  2>&1
         return $?
 }
