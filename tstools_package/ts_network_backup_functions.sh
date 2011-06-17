@@ -65,7 +65,6 @@ backup_users(){
         done
 	if [[ $userlist ]]; then
 		echo "backed up passwords for $userlist"
-		return $?
 	fi
 	if [[ $fail_list ]]; then
 		echo "$fail_list"
@@ -93,27 +92,28 @@ restore_user(){
 	if ! addgroup --gid $gid $user; then
        		echo "problem creating ${user}'s group"
 		return 3
-	fi
- 	if ! useradd -N --gid $gid --uid $uid -d /home/$user --password $password $user; then
+ 	elif ! useradd -N --gid $gid --uid $uid -d /home/$user --password $password $user; then
 		echo "problem creating user: $user"
 		return 3
-	fi
+	else
         # read /home/group usermod to addusers to groups        
-	local groups=$(grep -e "\<$user\>" $path/group | cut -f1 -d: -)
-                for entry in $groups; do
-                        if [[ $entry != $user ]]; then
-                                if [[ ! $usergroups ]]; then
-                                        usergroups=$entry
-                                else
-                                        usergroups="$entry,$usergroups"
-                                fi
-                        fi
-                done
-	if [[ ${#usergroups} -ne 0 ]] ; then
-		if ! usermod -a -G "$usergroups" $user; then
-			echo "problem adding ${user}'s groups"
-			return 3
-                fi
+		local groups=$(grep -e "\<$user\>" $path/group | cut -f1 -d: -)
+                	for entry in $groups; do
+                        	if [[ $entry != $user ]]; then
+                                	if [[ ! $usergroups ]]; then
+                                        	usergroups=$entry
+	                                else
+        	                                usergroups="$entry,$usergroups"
+                	                fi
+	                        fi
+	                done
+			if [[ ${#usergroups} -ne 0 ]] ; then
+				if ! usermod -a -G "$usergroups" $user; then
+				echo "problem adding ${user}'s groups"
+				return 3
+ 				fi
+			fi
+		return 0
 	fi
 }
 
@@ -130,9 +130,10 @@ restore_users(){
 		password=$(grep $user /$password/shadow | awk -F: '{print $2}')
 		if ! user_restore=$(restore_user $path $user $uid $gid $password); then
 			echo "$user_restore"
-			return $3
+			return 3
 		fi
 	done
+	return 0
 }
 
 
@@ -157,7 +158,6 @@ backup_sources(){
 }
 
 
-### TODO ###
 restore_multiverse(){
 	local dist_version=$1
 	
@@ -186,8 +186,10 @@ restore_multiverse(){
 	if ! cp $tmpfile /etc/apt/sources.list; then
 		echo "could not overwrite /etc/apt/sources.list, new version stored at $tmpfile"
 		return 3
+	else 
+		rm $tmpfile
+		return 0
 	fi
-	rm $tmpfile
 }
 
 restore_partners(){
@@ -195,8 +197,10 @@ restore_partners(){
 	if ! echo "deb http://archive.canonical.com/ubuntu $dist_version partner" >>/etc/apt/sources.list; then
 		echo "could not add partners to /etc/apt/sources.list"
 		return 3
-	fi
-	echo "deb-src http://archive.canonical.com/ubuntu $dist_version partner" >>/etc/apt/sources.list
+	else 
+		echo "deb-src http://archive.canonical.com/ubuntu $dist_version partner" >>/etc/apt/sources.list
+		return 0
+	fi 
 }
 
 ####
