@@ -1,4 +1,30 @@
 #!/bin/bash
+help(){
+        cat <<EOF 
+        usage: ts_getid
+	returns the system id if present. 
+EOF
+        exit 0
+}
+
+# source common functions
+FUNCTIONS=ts_functions.sh # /path/to../
+source $FUNCTIONS
+
+### MAIN ###
+
+### Process options ###
+
+while getopts ":h" option; do
+        case $option in
+                h) help
+                   exit
+                ;;
+                /?) help
+                    exit
+                ;;
+        esac
+done
 
 if [[ -e /var/lib/freegeek-extras/printme/system_id ]] 
 then 
