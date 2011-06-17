@@ -74,8 +74,10 @@ backup_passwords(){
                         echo -n "/etc/$name"
                 done
                 return 3
+	else
 	echo "password files backed up with extension .fregeek_ts_backup.$isotime"
-        fi
+        exit 0
+	fi
 }
 
 backup_passwords_for_reset(){
@@ -91,6 +93,9 @@ backup_passwords_for_reset(){
                         echo -n "/etc/$name"
                 done
                 return 3
+	else
+		echo "backed up password files to [file].ts_bak"
+		return 0
         fi
 }
 # gconf related
@@ -121,8 +126,9 @@ echo "$msg"
 if [[ $logfile ]]; then
         if ! echo "$msg" >>$logfile; then
         echo "Could not write to Log File: $logfile"
-        exit 1
+        exit 3
         fi
 fi
+return 0
 }
 
