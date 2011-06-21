@@ -12,8 +12,19 @@ test_for_root(){
 
 check_file_write(){
         file=$1
-        touch $file 2>/dev/null
-        return $?
+	touch $file &>/dev/null
+	return $?
+}
+
+check_file_read(){
+        file=$1
+        if [[ ! -e $file ]]; then
+                return 5
+        elif [[ ! -r $file ]]; then
+                return 4
+        else
+                return 0
+        fi
 }
 
 choose_username(){

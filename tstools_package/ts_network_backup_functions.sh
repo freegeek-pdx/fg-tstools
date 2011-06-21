@@ -120,8 +120,18 @@ restore_user(){
 restore_users(){
 	local $path=$1
         # note that copying files back across is not sufficient 
-        # need to extract values form files and added to new copies
-
+        # need to extract values from files and added to new copies
+	for file in passwd group shadow; do
+		if ! check_file_read "$path/$file"; then
+			local retval=$?
+			if (( $retval == 5 )); then
+				echo "$path/$file does not exist!" 
+			elif (( $retval == 4 )); then
+				echo "Can not read $path/$file!"
+			fi
+			return $retval
+		fi
+	done
         # read /home/password file or equivalent)
         cat "${path/passwd}" | while read line ; do
                 user=$(echo $line | awk -F : '{print $1}')
@@ -214,6 +224,16 @@ backup_apt(){
 
 restore_packages(){
         local $dpkgfile=$1
+	                if ! check_file_read "$dpkgfile"; then
+                        local retval=$?
+                        if (( $retval == 5 )); then
+                                echo "$dpkgfile does not exist!" 
+                        elif (( $retval == 4 )); then
+                                echo "Can not read $dpkgfile!"
+                        fi
+                        return $retval
+                fi
+
 	if ! local update_msg=$(apt-get update); then
 		echo "apt-get update failed while attempting to restore packages"
 		echo "$update_msg"

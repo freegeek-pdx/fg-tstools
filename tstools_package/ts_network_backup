@@ -124,13 +124,13 @@ else
 			echo "You forgot to specify a logfile!"
 			echo "Using ts_backup.log in the current directory."
 			log_file="ts_backup.log"
-	fi
-	if [[ $(check_file_write "$log_file") -ne 0 ]]; then
-		echo "Couldn't write to $log_file"
-		exit 3
+		fi
+		if [[ $(check_file_write "$log_file") -ne 0 ]]; then
+			echo "Couldn't write to $log_file"
+			exit 3
+		fi
 	fi
 fi
-
 
 #CONFIG
 group_file="/${path}/groups"
@@ -203,6 +203,9 @@ elif [[ $restore_backup ]] ; then
 		if [[ ! $no_user_passwords ]]; 
 			if ! restore_users_test=$(restore_users $path); then
 				write_msg $restore_users_test $log_file
+				write_msg "WARNING! users may have been deleted from the system" $log_file
+				write_msg "Before proceeding restore $backup_passwords_check" $log_file
+				write_msg "to /etc/passwd /etc/shadow /etc/group" $log_file
 				exit 3
 			else 
 				write_msg "Restored users" $log_file
