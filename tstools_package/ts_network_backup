@@ -26,7 +26,7 @@ Create or restore network backup.
 
 	-p /path/to/home	Use this if the home folder you want to
 				backup is not in its usual place i.e. if you
-				to backup an external drive rather than /home.
+				to backup an external/mounted drive rather than /home.
 				You do not need to add home on the end but the
 				script does not mind either way. 
 				Can be used with or without -u or -d. 	
