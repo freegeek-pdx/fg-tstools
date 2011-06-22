@@ -94,8 +94,9 @@ backup_passwords(){
 }
 
 backup_passwords_for_reset(){
+	local path=$1
         for file in passwd group shadow ; do
-                if ! cp /etc/$file /etc/$file.fregeek_ts_bak;then
+                if ! cp $path/etc/$file $path/etc/$file.fregeek_ts_bak;then
                         local failarray=( ${failarray[@]-} $(echo "$file") )
                 fi
         done
