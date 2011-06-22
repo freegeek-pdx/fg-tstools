@@ -4,6 +4,7 @@ help(){
         usage: ts_rechown[OPTION]
         -h              prints this message
         -u [USERNAME]   specify the user.
+        -p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
 	
 	Restores correct ownership  of a users files.
 EOF
@@ -18,13 +19,15 @@ source $FUNCTIONS
 
 ### Process options ###
 
-while getopts ":hu:" option; do
+while getopts ":hu:p:" option; do
         case $option in
                 h) help
                    exit
                 ;;
                 u) user=$OPTARG
 		;;
+                p) path="$OPTARG"
+                ;;
                 \?) help
                     exit
                 ;;
@@ -41,11 +44,11 @@ fi
 if ! test_for_root; then
         echo "You are not root! exiting..."
         exit 3
-elif ! test_for_user $user; then
+elif ! test_for_user $usera $path; then
         echo "$user not found! exiting..."
         exit 3      
 ### reset ownership ###
-elif ! chown -R $user.$user /home/$user ; then
+elif ! chown -R $user.$user $path/home/$user ; then
 	echo "WARNING: Failed to change ownership for some or all files!"
 	exit 3
 else
