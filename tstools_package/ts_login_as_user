@@ -6,6 +6,8 @@ help(){
 	-h		prints this message
 	-u [USERNAME]	specify the user whose password will be changed. 
         -p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
+
+	Resets a users password to the standard (oem) password. to enable you to login as that  user.
 EOF
 	exit 0
 }
@@ -63,6 +65,8 @@ else
 
 You may now exit recovery mode and log in as that user.
 EOF
+	else
+		echo "You will need to run ts_revert_passwords when you are finished"	
 	fi
 	exit 0
 fi
