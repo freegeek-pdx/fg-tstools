@@ -28,6 +28,7 @@ check_file_read(){
 }
 
 choose_username(){
+	local path=$1
 	while read line  ; do
 		local user=$(echo $line | awk -F : '{print $1}')
 		local user_uid=$(id -u $user)
@@ -39,7 +40,7 @@ choose_username(){
 			fi
 		fi
 
-	done < /etc/passwd	
+	done < $path/etc/passwd
 	PS3="Select a user "
         select user_name in $user_list; do
                 break
@@ -55,7 +56,12 @@ test_for_uid(){
 
 test_for_user(){
 	local my_user=$1
-	id $my_user &>/dev/null
+	local path=$2
+	if [[ $path ]]; then
+        	local chroot_path="chroot $path"
+	fi
+
+	$chroot_path id $my_user &>/dev/null
 	return $?
 }
 
@@ -63,13 +69,21 @@ test_for_user(){
 reset_password(){
         local username=$1
         local passhash="$2"
-        usermod --password "$passhash" $username
+        local path=$3
+        if [[ $path ]]; then
+                local chroot_path="chroot $path"
+        fi
+        $chroot_path usermod --password "$passhash" $username
 	return $?
 }
 
 expire_password(){
 	local username=$1
-        passwd -e $username
+	local path=$2
+	if [[ $path ]]; then
+        	chroot_path="chroot $path"
+	fi
+	$chroot_path passwd -e $username
         return $?
 }
 
@@ -118,13 +132,17 @@ reset_gconf(){
 	# --direct option can only be used if gconfd is not running as that 
 	# users session
 	local my_user=$1
-        local my_uid=$(id -u $my_user)
 	local setting=$2
+	local path=$3
+	if [[ $path ]]; then
+        	local chroot_path="chroot $path"
+	fi
+        local my_uid=$($chroot_path id -u $my_user)
 	# test to see if self change and if gconfd-2 is running
 	if [[ $my_uid -eq $EUID ]] && [[  $(pidof gconfd-2) ]]; then
         	gconftool-2 --recursive-unset $setting
 	else
-        	gconftool-2 --direct --config-source=xml::/home/$my_user/.gconf --recursive-unset $setting
+        	$chroot_path gconftool-2 --direct --config-source=xml::/home/$my_user/.gconf --recursive-unset $setting
 	fi
 	return $?
 }
