@@ -5,6 +5,7 @@ help(){
 	usage ts_login_as_user [OPTION]
 	-h		prints this message
 	-u [USERNAME]	specify the user whose password will be changed. 
+        -p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
 EOF
 	exit 0
 }
@@ -17,24 +18,25 @@ phash="zyrSQxJlOIQTo"
 
 ### MAIN ###
 
-while getopts ":hu:" option; do
+while getopts ":hu:p:" option; do
 	case $option in 
 		h) help
 		   exit
 		;;
 		u) user=$OPTARG
 		;;
+                p) path="$OPTARG"
+                ;;
 		\?) help
 		    exit
 		;;
 	esac
 done
-echo user:$user length:${#user}
 if ! test_for_root; then
         echo "Could not proceed!"
         echo "are you root?"
         exit 3
-elif ! password_backup=$(backup_passwords_for_reset); then
+elif ! password_backup=$(backup_passwords_for_reset $path); then
 	echo $password_backup
         echo "WARNING:Password files could not be backed up! exiting..."
         exit 3
@@ -44,20 +46,23 @@ fi
 
 if [[ -z $user ]]; then
 	echo "no user"
-	user=$(choose_username)
+	user=$(choose_username $path)
 fi
 
-if ! test_for_user $user; then
+if ! test_for_user $user $path; then
         echo "$user not found! exiting..."
         exit 3
-elif ! reset_password $user $phash; then
+elif ! reset_password $user $phash $path; then
 	echo "WARNING:Password could not be reset, exiting..."
 	exit 3
 else 
-	cat <<EOF
-password for $user has been reset. It will revert to the user's original password next time the machine is rebooted or shutdown.
+	echo "password for $user has been reset."
+	if [[ ! $path ]]; then
+		cat <<EOF
+ It will revert to the user's original password next time the machine is rebooted or shutdown.
 
-You may mow exit recovery mode and log in as that user.
+You may now exit recovery mode and log in as that user.
 EOF
+	fi
 	exit 0
 fi
