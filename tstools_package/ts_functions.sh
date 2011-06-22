@@ -88,9 +88,10 @@ expire_password(){
 }
 
 backup_passwords(){
+	local path=$1
 	local isotime=$(date +%Y%m%d%H%M)
 	for file in passwd group shadow ; do
-		if ! cp /etc/$file /etc/$file.fregeek_ts_backup.$isotime;then
+		if ! cp $path/etc/$file $path/etc/$file.fregeek_ts_backup.$isotime;then
 			local failarray=( ${failarray[@]-} $(echo "$file") )
 		fi
 	done
