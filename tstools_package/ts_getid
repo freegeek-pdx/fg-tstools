@@ -17,7 +17,7 @@ source $FUNCTIONS
 
 ### Process options ###
 
-while getopts ":h" option; do
+while getopts ":hp:" option; do
         case $option in
                 h) help
                    exit
