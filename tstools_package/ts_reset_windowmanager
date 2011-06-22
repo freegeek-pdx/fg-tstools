@@ -18,14 +18,14 @@ source $FUNCTIONS
 ### MAIN ###
 
 ### process options ###
-while getopts ":hu:" option; do
+while getopts ":hu" option; do
         case $option in
                 h) help
                    exit
                 ;;
                 u) user=$OPTARG
 		;;
-                /?) help
+                \?) help
                     exit
                 ;;
         esac

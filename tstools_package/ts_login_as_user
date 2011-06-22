@@ -24,12 +24,12 @@ while getopts ":hu:" option; do
 		;;
 		u) user=$OPTARG
 		;;
-		/?) help
+		\?) help
 		    exit
 		;;
 	esac
 done
-
+echo user:$user length:${#user}
 if ! test_for_root; then
         echo "Could not proceed!"
         echo "are you root?"
@@ -42,7 +42,8 @@ else
         echo $password_backup	
 fi
 
-if [[ -z $user ]]; then 
+if [[ -z $user ]]; then
+	echo "no user"
 	user=$(choose_username)
 fi
 

@@ -81,7 +81,7 @@ while getopts ":hc:r:l:a:A:p:du" option; do
 		p) cut_path=$(echo "$OPTARG" |sed -r -e 's:/home/?$::' -e 's/\/*$//') 
 		   path="${cut_path}/home"
 		;;
-		/?) help
+		\?) help
                     exit 1
                 ;;
         esac

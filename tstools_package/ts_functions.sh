@@ -28,16 +28,18 @@ check_file_read(){
 }
 
 choose_username(){
-	cat /etc/passwd| while read line ; do
+	while read line  ; do
 		local user=$(echo $line | awk -F : '{print $1}')
-		local user_list
+		local user_uid=$(id -u $user)
 		if [[ $user_uid -gt 999 ]] ; then
                         # unless user is a nobody :)
                         if [[ ! $user == "nobody" ]]; then
-        			user_list="$user_list $user"
+        			 user_list="$user_list $user"
+
 			fi
 		fi
-	done	
+
+	done < /etc/passwd	
 	PS3="Select a user "
         select user_name in $user_list; do
                 break

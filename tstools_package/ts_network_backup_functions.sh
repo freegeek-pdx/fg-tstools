@@ -29,7 +29,7 @@ backup_users(){
 	local userlist
 	local fail
 	local fail_list
-        cat /etc/passwd| while read line ; do
+        while read line ; do
                 user=$(echo $line | awk -F : '{print $1}')
                 user_uid=$(echo $line | awk -F : '{print $3}')
                 # if UID >999 then is normal (non-system) user
@@ -62,7 +62,7 @@ backup_users(){
 				fi
                         fi
                 fi
-        done
+        done < /etc/passwd
 	if [[ $userlist ]]; then
 		echo "backed up passwords for $userlist"
 	fi
@@ -133,7 +133,7 @@ restore_users(){
 		fi
 	done
         # read /home/password file or equivalent)
-        cat "${path/passwd}" | while read line ; do
+        while read line ; do
                 user=$(echo $line | awk -F : '{print $1}')
                 uid=$(echo $line | awk -F : '{print $3}')
                 gid=$(echo $line | awk -F : '{print $4}')
@@ -142,7 +142,7 @@ restore_users(){
 			echo "$user_restore"
 			return 3
 		fi
-	done
+	done < ${path/passwd}
 	return 0
 }
 
@@ -176,7 +176,7 @@ restore_multiverse(){
 		return 3
 	fi
 
-	cat /etc/apt/sources.list | while read line; do
+	while read line; do
 		if [[ $line =~ ^# ]]; then
 			echo $line >>$tmpfile
 		elif [[ $line =~ main ]] ; then
@@ -191,7 +191,7 @@ restore_multiverse(){
 		else
 			echo $line >>$tmpfile  
 		fi 
-	done
+	done < /etc/apt/sources.list
 	
 	if ! cp $tmpfile /etc/apt/sources.list; then
 		echo "could not overwrite /etc/apt/sources.list, new version stored at $tmpfile"
