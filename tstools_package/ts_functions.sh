@@ -110,7 +110,7 @@ backup_passwords(){
 backup_passwords_for_reset(){
 	local path=$1
         for file in passwd group shadow ; do
-                if ! cp $path/etc/$file $path/etc/$file.fregeek_ts_bak;then
+                if ! cp $path/etc/$file $path/etc/$file.freegeek_ts_bak;then
                         local failarray=( ${failarray[@]-} $(echo "$file") )
                 fi
         done
@@ -126,6 +126,28 @@ backup_passwords_for_reset(){
 		return 0
         fi
 }
+
+revert_passwords(){
+        local path=$1
+        for file in passwd group shadow ; do
+                if ! cp $path/etc/$file.freegeek_ts_bak $path/etc/$file ;then
+                        local failarray=( ${failarray[@]-} $(echo "$file") )
+                fi
+        done
+        # check length of failarray if >0 then something failed
+         if [[ ${#fail_array[@]} -ne 0 ]]; then
+                echo -n "could not revert"
+                for name in ${failarray[@]}; do
+                        echo -n "/etc/$name"
+                done
+                return 3
+        else
+                echo "Restored original password files"
+                return 0
+        fi
+}
+
+
 # gconf related
 reset_gconf(){
 	# checks to see if we are changing our own or somebody elses settings
