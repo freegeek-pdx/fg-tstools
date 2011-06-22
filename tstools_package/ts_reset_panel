@@ -33,7 +33,7 @@ done
 
 #set/check user
 if [[ -z $user ]]; then
-        user=$EUID
+        user=$USER
 else
         test_for_user $user
         if (( $? != 0 )); then
