@@ -4,6 +4,7 @@ help(){
         usage ts_reset_ windowmanger [OPTION]
         -h              prints this message
         -u [USERNAME]   specify the user whose desktop will be reset.
+        -p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
 	
 	Resets a users desktop/windowmanager to the default settings.
 	This will reset ALL of a users desktop settings. Don't use it to reset the panel, use ts_reset_panel. This should only be used if things are really mesesed up.
@@ -18,13 +19,15 @@ source $FUNCTIONS
 ### MAIN ###
 
 ### process options ###
-while getopts ":hu" option; do
+while getopts ":hu:p:" option; do
         case $option in
                 h) help
                    exit
                 ;;
                 u) user=$OPTARG
 		;;
+                p) path="$OPTARG"
+                ;;
                 \?) help
                     exit
                 ;;
@@ -34,7 +37,7 @@ done
 if [[ -z $user ]]; then
         user=$USER
 else
-	test_for_user $user
+	test_for_user $user $path
 	if (( $? != 0 )); then
         	echo "$user not found! exiting..."
         	exit 3
@@ -51,7 +54,7 @@ fi
 # recursive uset of gnome schemas
 for setting in /apps/compiz /apps/metacity /desktop/gnome/session /schemas/desktop/gnome/session
 do	
-	if ! reset_gconf $user $setting; then
+	if ! reset_gconf $user $setting $path; then
         	echo "gconf failed to reset $setting" 
         	EXIT=3
 	fi
