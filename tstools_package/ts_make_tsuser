@@ -1,8 +1,11 @@
 #!/bin/bash
 help(){
         cat <<EOF 
-        usage: ts_make_tsuser
+        usage: ts_make_tsuser [-p]
         Adds tsuser to a system with root privileges. The user is removed on reboot or shutdown.
+
+        -p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
+
 EOF
         exit 0
 }
@@ -15,10 +18,12 @@ source $FUNCTIONS
 
 ### Process options ###
 
-while getopts ":h" option; do
+while getopts ":hp:" option; do
         case $option in
                 h) help
                    exit
+                ;;
+                p) path="$OPTARG"
                 ;;
                 \?) help
                     exit
@@ -27,7 +32,9 @@ while getopts ":h" option; do
 done
 
 
-
+if [[ $path ]]; then 
+	chroot_path="chroot $path"
+fi
 
 
 
@@ -43,7 +50,7 @@ if !test_for_root; then
         echo "Could not proceed"
         echo "are you root?"
         exit 3
-elif ! password_backup=$(backup_passwords_for_reset); then
+elif ! password_backup=$(backup_passwords_for_reset $path); then
         echo $password_backup
 	echo "WARNING:Password files could not be backed up! exiting..."
         exit 3
@@ -52,7 +59,7 @@ else
 fi
 
 # set uid and gid to something unlikely to be used elsewhere
-if ! useradd --create-home --user-group --shell /bin/bash --password "$pwhash" --uid $uid --groups adm --groups admin $user ;then
+if ! $chroot_path useradd --create-home --user-group --shell /bin/bash --password "$pwhash" --uid $uid --groups adm --groups admin $user ;then
 	echo "WARNING: Could not create user, exiting..."
 	exit 3
 else	
