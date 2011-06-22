@@ -2,9 +2,10 @@
 help(){
         cat <<EOF 
         usage: ts_make_tsuser [-p]
-        Adds tsuser to a system with root privileges. The user is removed on reboot or shutdown.
 
         -p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
+
+        Adds tsuser to a system with root privileges. The user is removed on reboot or shutdown unless this command was run on an external/mounted disk e.g. from a system rescue cd. If this is the case you will need to run ts_revert_passwords when you are finished"
 
 EOF
         exit 0
