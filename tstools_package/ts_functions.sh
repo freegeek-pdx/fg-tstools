@@ -130,8 +130,11 @@ backup_passwords_for_reset(){
 
 revert_passwords(){
         local path=$1
+	local extension=$2
+	if [[ ! $extension ]] ; then
+		extension='freegeek_ts_bak' 
         for file in passwd group shadow ; do
-                if ! cp $path/etc/$file.freegeek_ts_bak $path/etc/$file ;then
+                if ! cp $path/etc/$file.${extension} $path/etc/$file ;then
                         local failarray=( ${failarray[@]-} $(echo "$file") )
                 fi
         done
