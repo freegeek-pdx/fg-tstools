@@ -24,6 +24,7 @@ backup_users_test(){
 
 backup_users(){
         local path=$1
+	local extpath=$2
 	local user
 	local user_uid
 	local userlist
@@ -49,7 +50,7 @@ backup_users(){
                                 # /etc/shadow contains the date of last password
                                 # change. Having this be older than the install
                                 # should not be a problem, but noting just in case
-                                grep -e ^$user: /etc/shadow >>"${path}/shadow"
+                                grep -e ^$user: $ext_path/etc/shadow >>"${path}/shadow"
 				if (( $? != 0 )); then
                                         fail="${fail} ${path}/shadow "
                                 fi
@@ -62,7 +63,7 @@ backup_users(){
 				fi
                         fi
                 fi
-        done < /etc/passwd
+        done < $extpath/etc/passwd
 	if [[ $userlist ]]; then
 		echo "backed up passwords for $userlist"
 	fi
@@ -149,16 +150,17 @@ restore_users(){
 
 backup_sources(){
 	local $sourcespath=$1
+	local path=$2
 	if ! mkdir $sourcespath/; then
 		echo "Couldn't make $sourcespath"
 		return 3
 	elif ! check_file_write $sourcespath/apt ; then
 		echo "Couldn't write to $sourcespath/apt Check permissions?" 
 		return 3
-	elif ! cp -R /etc/apt/sources.list.d/ $sourcespath/apt/  ; then
+	elif ! cp -R $ext_path/etc/apt/sources.list.d/ $sourcespath/apt/  ; then
 		echo "Problem copying over /etc/apt/sourceslist.d"
         	return 3
-	elif ! cp  /etc/apt/sources.list $sourcespath/apt/  ; then
+	elif ! cp  $ext_path/etc/apt/sources.list $sourcespath/apt/  ; then
                 echo "Problem copying over /etc/apt/sources.list"
                 return 3
 	else
@@ -217,7 +219,11 @@ restore_partners(){
 
 backup_apt(){
 	local $dpkgfile=$1
-        dpkg --get-selections > $dpkgfile   2>&1
+	local path=$2
+        if [[ $path ]]; then
+        	chroot_path="chroot $path"
+	fi
+	$chroot_path dpkg --get-selections > $dpkgfile   2>&1
         return $?
 }
 
@@ -252,8 +258,9 @@ restore_packages(){
 }
 
 backup_config(){
-	local bpath=$1
-        tar -czf ${path}/etc_backup.tar.gz /etc/  2>&1
+	local path=$1
+	local extpath=$2
+        tar -czf ${path}/etc_backup.tar.gz $extpath/etc/  2>&1
         return $?
 }
 
