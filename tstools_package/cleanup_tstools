@@ -21,13 +21,13 @@ fi
 
 # check to see if /etc/passed etc backed and restore if necessary
 
-if [[ -e /etc/passwd.ts_bak ]]; then
+if [[ -e /etc/passwd.freegeek_ts_bak ]]; then
 	mv /etc/passwd.ts_bak /etc/passwd
 fi
-if [[ -e /etc/shadow.ts_bak ]]; then
+if [[ -e /etc/shadow.freegeek_ts_bak ]]; then
 	mv /etc/shadow.ts_bak /etc/shadow
 fi
-if [[ -e /etc/group.ts_bak ]]; then
+if [[ -e /etc/group.freegeek_ts_bak ]]; then
         mv /etc/group.ts_bak /etc/group
 fi
 }
