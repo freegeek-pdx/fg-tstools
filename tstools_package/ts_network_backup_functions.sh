@@ -81,19 +81,25 @@ restore_user(){
 	local uid=$3
 	local gid=$4
 	local password=$5
+	local extpath=$6
+
+	if [[ $extpath ]]; then
+        	local chroot_path="chroot $extpath"
+	fi
+
 
 	#N.B. users may not be in file
 	# delete matching lines in /etc/passwd 
-        sed -i '/^$user:/ d' /etc/passwd
+        sed -i '/^$user:/ d' $extpath/etc/passwd
 	# delete existing encypted password 
-	sed -i '/^$user:/ d' /etc/shadow
+	sed -i '/^$user:/ d' $extpath/etc/shadow
 	# delete matching lines/existing groups
-	sed -i '/:$gid:/ d' /etc/group
+	sed -i '/:$gid:/ d' $extpath/etc/group
 
-	if ! addgroup --gid $gid $user; then
+	if ! $chroot_path addgroup --gid $gid $user; then
        		echo "problem creating ${user}'s group"
 		return 3
- 	elif ! useradd -N --gid $gid --uid $uid -d /home/$user --password $password $user; then
+ 	elif ! $chroot_path useradd -N --gid $gid --uid $uid -d /home/$user --password $password $user; then
 		echo "problem creating user: $user"
 		return 3
 	else
@@ -109,7 +115,7 @@ restore_user(){
 	                        fi
 	                done
 			if [[ ${#usergroups} -ne 0 ]] ; then
-				if ! usermod -a -G "$usergroups" $user; then
+				if ! $chroot_path usermod -a -G "$usergroups" $user; then
 				echo "problem adding ${user}'s groups"
 				return 3
  				fi
@@ -119,7 +125,8 @@ restore_user(){
 }
 
 restore_users(){
-	local $path=$1
+	local path=$1
+	local extpath=$2
         # note that copying files back across is not sufficient 
         # need to extract values from files and added to new copies
 	for file in passwd group shadow; do
@@ -138,8 +145,8 @@ restore_users(){
                 user=$(echo $line | awk -F : '{print $1}')
                 uid=$(echo $line | awk -F : '{print $3}')
                 gid=$(echo $line | awk -F : '{print $4}')
-		password=$(grep $user /$password/shadow | awk -F: '{print $2}')
-		if ! user_restore=$(restore_user $path $user $uid $gid $password); then
+		password=$(grep $user $path/shadow | awk -F: '{print $2}')
+		if ! user_restore=$(restore_user $path $user $uid $gid $password $extpath); then
 			echo "$user_restore"
 			return 3
 		fi
@@ -149,7 +156,7 @@ restore_users(){
 
 
 backup_sources(){
-	local $sourcespath=$1
+	local sourcespath=$1
 	local path=$2
 	if ! mkdir $sourcespath/; then
 		echo "Couldn't make $sourcespath"
@@ -172,7 +179,7 @@ backup_sources(){
 
 restore_multiverse(){
 	local dist_version=$1
-	
+	local extpath=$2
 	if ! local tmpfile=$(mktemp); then
 		echo "Couldn't make temp file"
 		return 3
@@ -193,9 +200,9 @@ restore_multiverse(){
 		else
 			echo $line >>$tmpfile  
 		fi 
-	done < /etc/apt/sources.list
+	done < $extpath/etc/apt/sources.list
 	
-	if ! cp $tmpfile /etc/apt/sources.list; then
+	if ! cp $tmpfile $extpath/etc/apt/sources.list; then
 		echo "could not overwrite /etc/apt/sources.list, new version stored at $tmpfile"
 		return 3
 	else 
@@ -206,11 +213,12 @@ restore_multiverse(){
 
 restore_partners(){
 	local dist_version=$1
-	if ! echo "deb http://archive.canonical.com/ubuntu $dist_version partner" >>/etc/apt/sources.list; then
+	local extpath=$2
+	if ! echo "deb http://archive.canonical.com/ubuntu $dist_version partner" >>$extpath/etc/apt/sources.list; then
 		echo "could not add partners to /etc/apt/sources.list"
 		return 3
 	else 
-		echo "deb-src http://archive.canonical.com/ubuntu $dist_version partner" >>/etc/apt/sources.list
+		echo "deb-src http://archive.canonical.com/ubuntu $dist_version partner" >>$extpath/etc/apt/sources.list
 		return 0
 	fi 
 }
@@ -218,10 +226,10 @@ restore_partners(){
 ####
 
 backup_apt(){
-	local $dpkgfile=$1
-	local path=$2
+	local dpkgfile=$1
+	local extpath=$2
         if [[ $path ]]; then
-        	chroot_path="chroot $path"
+        	local chroot_path="chroot $extpath"
 	fi
 	$chroot_path dpkg --get-selections > $dpkgfile   2>&1
         return $?
@@ -229,7 +237,8 @@ backup_apt(){
 
 
 restore_packages(){
-        local $dpkgfile=$1
+        local dpkgfile=$1
+	local extpath=$2
 	                if ! check_file_read "$dpkgfile"; then
                         local retval=$?
                         if (( $retval == 5 )); then
@@ -239,16 +248,18 @@ restore_packages(){
                         fi
                         return $retval
                 fi
+	if [[ $extpath ]] ; then
+		local chroot_path="chroot $extpath"
 
-	if ! local update_msg=$(apt-get update); then
+	if ! local update_msg=$($chroot_path apt-get update); then
 		echo "apt-get update failed while attempting to restore packages"
 		echo "$update_msg"
 		return 3
-        elif ! local dpkg_msg=$(dpkg --set-selections < $dpkgfile  2>&1);then
+        elif ! local dpkg_msg=$($chroot_path dpkg --set-selections < $dpkgfile  2>&1);then
                 echo "Could not set package selection when attempting to restore packages"	
 		echo "$dpkg_msg"
 		return 3
-        elif ! local upgrade_mdg=$(apt-get -u dselect-upgrade   2>&1); then
+        elif ! local upgrade_mdg=$($chroot_path apt-get -u dselect-upgrade   2>&1); then
 		echo "apt-get -u dselect-upgrade  while attempting to restore packages"
 		echo "$upgrade_msg"
 	else

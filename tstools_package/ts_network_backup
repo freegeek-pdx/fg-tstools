@@ -79,9 +79,10 @@ while getopts ":hc:r:l:a:A:p:du" option; do
 		A) path="$OPTARG"
 		;;
 		p) 
-		   ext_path="$OPTARG"
 		   cut_path=$(echo "$OPTARG" |sed -r -e 's:/home/?$::' -e 's/\/*$//') 
+		   ext_path=$cut_path
 		   path="${cut_path}/home"
+		   chroot_path="chroot $ext_path"
 		;;
 		\?) help
                     exit 1
@@ -178,7 +179,7 @@ if [[ $create_backup ]]; then
 	elif ! config_check=$(backup_config $path $ext_path); then
 		write_msg "Could not backup /etc" $log_file
 		exit $config_check
-	elif ! make_backup=$(create_backup  $path $backup_user $backup_host $backup_path $ticket_number ); then
+	elif ! make_backup=$(create_backup $path $backup_user $backup_host $backup_path $ticket_number ); then
 		write_msg "$make_backup" $log_file
 		exit $backup_check
 	else
@@ -188,7 +189,7 @@ if [[ $create_backup ]]; then
 elif [[ $restore_backup ]] ; then
 
         # not the same as backup_password_files
-        if ! backup_passwords_check=$(backup_passwords); then
+        if ! backup_passwords_check=$(backup_passwords $ext_path); then
 		write_msg "$backup_passwords_check" $log_file
 		write_msg "Failed to backup password files ..exiting" $log_file
 		exit 3
@@ -204,7 +205,7 @@ elif [[ $restore_backup ]] ; then
                 exit $restore_check
 	else
 		if [[ ! $no_user_passwords ]]; 
-			if ! restore_users_test=$(restore_users $path); then
+			if ! restore_users_test=$(restore_users $path $ext_path); then
 				write_msg $restore_users_test $log_file
 				write_msg "WARNING! users may have been deleted from the system" $log_file
 				write_msg "Before proceeding restore $backup_passwords_check" $log_file
@@ -224,10 +225,10 @@ elif [[ $restore_backup ]] ; then
 			# if user had partner software enabled
 			grep partner $sources_file
 			partner_test=$?
-			codename=$(lsb_release -c |  awk '{print $2}') # lucid etc
+			codename=$($chroot_path lsb_release -c |  awk '{print $2}') # lucid etc
 			if (( $multiverse_test == 0 )); then
 			#identify and comment out  relevant lines 
-				if ! multiverse_restore=$(restore_multiverse $codename); then	
+				if ! multiverse_restore=$(restore_multiverse $codename $ext_path); then	
 					write_msg "WARNING: unable to add multiverse to sources list" $log_file
 					write_msg "$multiverse_restore" $log_file
 					exit 3
@@ -236,7 +237,7 @@ elif [[ $restore_backup ]] ; then
 			fi
 			if (( $partner_test == 0 )); then
 			 #identify and comment out  relevant lines 
-				if ! restore_partners $codename; then
+				if ! restore_partners $codename $ext_path; then
 					write_msg "unable to add Canonical partners to software sources" $log_file
 				else
 					write_msg "Added Canonical partners to software sources" $log_file
@@ -245,12 +246,12 @@ elif [[ $restore_backup ]] ; then
 
 			# check to see if any PPA files in sources.list.d
 			if [[ -v "$(ls -A $sources_path/sourceslist.d)" ]]; then
-				cp -R "$sources_path/sourceslist.d/*" /etc/apt/sources.list.d
+				cp -R "$sources_path/sourceslist.d/*" $ext_path/etc/apt/sources.list.d
 			else
                         	write_msg "Added PPA's to software sources" $log_file
 			fi
 		
-			if ! packagerestore=$(restore_packages $dpkg_file); then
+			if ! packagerestore=$(restore_packages $dpkg_file $ext_path); then
 				write_msg "$packagerestore" $log_file
 				exit 3
 			else
