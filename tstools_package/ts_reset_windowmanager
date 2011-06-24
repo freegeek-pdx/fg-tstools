@@ -61,6 +61,13 @@ do
 	else
 		echo "success: $setting"
 	fi
+        if ! rm -rf /home/$user/.gconf/$setting; then
+                echo "gconf failed to remove $setting" 
+                EXIT=3
+        else
+                echo "success: $setting"
+        fi
+
 done
 
 if [[ -z  $EXIT ]] ; then
