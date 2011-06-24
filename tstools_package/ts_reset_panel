@@ -59,7 +59,7 @@ fi
 if ! reset_gconf $user /apps/panel $path; then
 	echo "gconf failed to reset panel" 
 	exit 3
-
+fi
 #rm -rf /home/$user/.gconf/apps/panel
 #if [[ $? -ne 0 ]]; then
 #        echo "gconf failed to reset" 
