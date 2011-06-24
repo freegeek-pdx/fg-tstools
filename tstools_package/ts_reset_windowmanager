@@ -49,6 +49,7 @@ else
 		exit 3	
 		fi
 fi
+        echo "user=$USER"
 
 ### reset desktop ###
 # recursive uset of gnome schemas
@@ -57,6 +58,8 @@ do
 	if ! reset_gconf $user $setting $path; then
         	echo "gconf failed to reset $setting" 
         	EXIT=3
+	else
+		echo "success: $setting"
 	fi
 done
 
