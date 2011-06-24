@@ -53,22 +53,20 @@ fi
 
 ### reset desktop ###
 # recursive uset of gnome schemas
-for setting in /apps/compiz /apps/metacity /desktop/gnome/session /schemas/desktop/gnome/session
+for setting in /apps/compiz /apps/metacity /desktop/gnome/session /schemas/desktop/gnome/session /apps/panel /apps/gdm /apps/gnome-session /apps/nautilus
 do	
 	if ! reset_gconf $user $setting $path; then
         	echo "gconf failed to reset $setting" 
         	EXIT=3
-	else
-		echo "success: $setting"
 	fi
         if ! rm -rf /home/$user/.gconf/$setting; then
                 echo "gconf failed to remove $setting" 
                 EXIT=3
-        else
-                echo "success: $setting"
         fi
 
 done
+
+rm /home/$user/.local/share/applications/mimeapps.list 
 
 if [[ -z  $EXIT ]] ; then
         exit $EXIT
