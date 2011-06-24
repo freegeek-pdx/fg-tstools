@@ -60,11 +60,10 @@ if ! reset_gconf $user /apps/panel $path; then
 	echo "gconf failed to reset panel" 
 	exit 3
 fi
-#rm -rf /home/$user/.gconf/apps/panel
-#if [[ $? -ne 0 ]]; then
-#        echo "gconf failed to reset" 
-#        EXIT=1
-#fi
+if ! rm -rf /home/$user/.gconf/apps/panel; then
+        echo "gconf failed to reset" 
+        exit 3
+fi
 
 if [[ ! $path ]] ; then
 	if ! pkill gnome-panel ; then
