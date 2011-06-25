@@ -8,7 +8,6 @@ help(){
         Adds tsuser to a system with root privileges. The user is removed on reboot or shutdown unless this command was run on an external/mounted disk e.g. from a system rescue cd. If this is the case you will need to run ts_revert_passwords when you are finished"
 
 EOF
-        exit 0
 }
 
 # source common functions
@@ -22,12 +21,12 @@ source $FUNCTIONS
 while getopts ":hp:" option; do
         case $option in
                 h) help
-                   exit
+                   exit 0
                 ;;
                 p) path="$OPTARG"
                 ;;
                 \?) help
-                    exit
+                    exit 1
                 ;;
         esac
 done
