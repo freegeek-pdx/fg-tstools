@@ -8,7 +8,6 @@ help(){
 	
 	Restores correct ownership  of a users files.
 EOF
-        exit 0
 }
 
 # source common functions
@@ -22,14 +21,14 @@ source $FUNCTIONS
 while getopts ":hu:p:" option; do
         case $option in
                 h) help
-                   exit
+                   exit 0
                 ;;
                 u) user=$OPTARG
 		;;
                 p) path="$OPTARG"
                 ;;
                 \?) help
-                    exit
+                    exit 1
                 ;;
         esac
 done
