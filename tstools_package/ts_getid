@@ -7,7 +7,6 @@ help(){
 
         returns the system id if present.
 EOF
-        return 0
 }
 
 # source common functions
