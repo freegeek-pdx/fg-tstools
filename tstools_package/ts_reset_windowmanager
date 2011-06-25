@@ -9,7 +9,6 @@ help(){
 	Resets a users desktop/windowmanager to the default settings.
 	This will reset ALL of a users desktop settings. Don't use it to reset the panel, use ts_reset_panel. This should only be used if things are really mesesed up.
 EOF
-        exit 0
 }
 
 # source common functions
@@ -22,14 +21,14 @@ source $FUNCTIONS
 while getopts ":hu:p:" option; do
         case $option in
                 h) help
-                   exit
+                   exit 0
                 ;;
                 u) user=$OPTARG
 		;;
                 p) path="$OPTARG"
                 ;;
                 \?) help
-                    exit
+                    exit 1
                 ;;
         esac
 done
