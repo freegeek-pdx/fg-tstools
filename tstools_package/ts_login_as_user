@@ -9,7 +9,6 @@ help(){
 
 	Resets a users password to the standard (oem) password. to enable you to login as that user.
 EOF
-	exit 0
 }
 
 # source common functions
