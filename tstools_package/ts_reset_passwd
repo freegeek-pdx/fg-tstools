@@ -33,7 +33,7 @@ while getopts ":hu:" option; do
 done
 
 if [[ -z $user ]]; then
-        user=$(choose_usernamea $path)
+        user=$(choose_username $path)
 fi
 
 
