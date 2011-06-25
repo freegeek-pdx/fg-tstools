@@ -7,7 +7,6 @@ help(){
 	
 	Resets a users password to the standard oem password and sets it to expire on the next login, causing the system to prompt the users for a new passowrd. 
 EOF
-	exit 0
 }
 
 # source common functions
@@ -21,14 +20,14 @@ phash="zyrSQxJlOIQTo"
 while getopts ":hu:" option; do
 	case $option in 
 		h) help
-		   exit
+		   exit 0
 		;;
 		u) user=$OPTARG
 		;;
                 p) path="$OPTARG"
                 ;;
 		\?) help
-		    exit
+		    exit 1
 		;;
 	esac
 done
