@@ -3,8 +3,9 @@ help(){
 	cat <<EOF 
 	usage ts_reset_passwd [OPTION]
 	-h		prints this message
-	-u [USERNAME]	specify the user whose password will be reset. 
+	-u [USERNAME]	specify the user whose password will be reset.         		-p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
 	
+	Resets a users password to the standard oem password and sets it to expire on the next login, causing the system to prompt the users for a new passowrd. 
 EOF
 	exit 0
 }
@@ -24,6 +25,8 @@ while getopts ":hu:" option; do
 		;;
 		u) user=$OPTARG
 		;;
+                p) path="$OPTARG"
+                ;;
 		\?) help
 		    exit
 		;;
@@ -31,7 +34,7 @@ while getopts ":hu:" option; do
 done
 
 if [[ -z $user ]]; then
-        user=$(choose_username)
+        user=$(choose_usernamea $path)
 fi
 
 
@@ -39,19 +42,19 @@ if ! test_for_root; then
 	echo "Could not proceed"
         echo "are you root?"
         exit 3
-elif test_for_user $user; then        
+elif test_for_user $user $path; then        
 	echo "$user not found! exiting..."
         exit 3
 fi
 
 
-if ! reset_password $user "$phash"; then
+if ! reset_password $user "$phash" $path; then
 	echo "password for $user could not be reset"
 	exit 3
-elif ! expire_password $user; then
-	echo "WARNING:Password for $user has been reset to freegeek. It will not expire"
+elif ! expire_password $user $path; then
+	echo "WARNING:Password for $user has been reset to the standard (oem) password. It will not expire"
 	exit 3
 else
-	echo "password for $user has been set to freegeek. It will expire on the next login and the user will be prompted to reset it."
+	echo "password for $user has been set to the standard (oem) password. It will expire on the next login and the user will be prompted to reset it."
 	exit 0
 fi
