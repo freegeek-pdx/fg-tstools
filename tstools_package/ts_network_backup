@@ -35,7 +35,6 @@ Create or restore network backup.
 
 
 EOF
-        exit 0
 }
 
 
