@@ -20,12 +20,12 @@ source $FUNCTIONS
 while getopts ":hp:" option; do
         case $option in
                 h) help
-                   exit
+                   exit 0
                 ;;
 		p) path="$OPTARG"
                 ;;
                 \?) help
-                    exit
+                    exit 1
                 ;;
         esac
 done
