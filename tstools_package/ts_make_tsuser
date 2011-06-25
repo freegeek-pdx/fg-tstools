@@ -46,7 +46,7 @@ pwhash="zogN6hOIYS8W2"
 user="tsuser"
 uid="50001"
 ### MAIN ###
-if !test_for_root; then
+if ! test_for_root; then
         echo "Could not proceed"
         echo "are you root?"
         exit 3
