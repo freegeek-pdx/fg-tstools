@@ -132,7 +132,8 @@ revert_passwords(){
         local path=$1
 	local extension=$2
 	if [[ ! $extension ]] ; then
-		extension='freegeek_ts_bak' 
+		extension='freegeek_ts_bak'
+	fi 
         for file in passwd group shadow ; do
                 if ! cp $path/etc/$file.${extension} $path/etc/$file ;then
                         local failarray=( ${failarray[@]-} $(echo "$file") )
