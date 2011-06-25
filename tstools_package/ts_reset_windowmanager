@@ -48,7 +48,6 @@ else
 		exit 3	
 		fi
 fi
-        echo "user=$USER"
 
 ### reset desktop ###
 # recursive uset of gnome schemas
@@ -65,8 +64,9 @@ do
 
 done
 
-rm /home/$user/.local/share/applications/mimeapps.list 
-
+if [[ -e /home/$user/.local/share/applications/mimeapps.list ]]; then 
+	rm /home/$user/.local/share/applications/mimeapps.list
+fi
 if [[ -z  $EXIT ]] ; then
         exit $EXIT
 else
