@@ -1,7 +1,7 @@
 #!/bin/bash
 help(){
         cat <<EOF 
-        usage ts_reset_ windowmanger [OPTION]
+        usage ts_reset_windowmanger [OPTION]
         -h              prints this message
         -u [USERNAME]   specify the user whose desktop will be reset.
         -p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
