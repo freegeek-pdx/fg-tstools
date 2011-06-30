@@ -74,8 +74,6 @@ else
 		fi
 fi
 
-wm_list="/apps/compiz /apps/metacity /desktop/gnome/session /schemas/desktop/gnome/session /apps/gdm /apps/gnome-session /apps/nautilus"
-
 if [[ $nuke_from_orbit ]]; then
 	echo "WARNING! This is an undocumented Nuclear option! It might have unpredictable results!"
 	while  [ true ]; do
@@ -131,14 +129,14 @@ unset IFS
 
 #fileassoc="true"
 
-for type in apps desktop system; do
+for type in /apps /desktop /system; do
 	echo "nuking .gconf/$type"
 	#g_reset($user $type $path)
 done
 echo
 
 echo "Ha!Ha! not really..."
-echo "...at least yet"
+echo "...at least not yet"
 fi
 
 if [[ $fileassoc ]]; then
@@ -148,6 +146,21 @@ if [[ $fileassoc ]]; then
 	fi
 fi
 
+if [[ $windowmanager ]]; then
+	wm_list=(/apps/compiz /apps/metacity /desktop/gnome/session /schemas/desktop/gnome/session /apps/gdm /apps/gnome-session /apps/nautilusi /apps/panel)
+	for setting in ${wmlist[@]}; do
+		if ! reset_g_setting_msg=$(g_reset $user $setting $path); then
+			EXIT=$?
+			echo "$reset_g_setting_msg"
+		fi
+	done
+fi
+if [[ $path ]]; then
+	if ! reset_panel_msg=$(g_reset $user /apps/panel $path); then
+		EXIT=$?
+		echo "$reset_panel_msg"
+	fi
+fi
 
 if [[ -z  $EXIT ]] ; then
         exit $EXIT
