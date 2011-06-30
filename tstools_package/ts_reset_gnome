@@ -126,6 +126,7 @@ for line in "${ascii[@]}"; do
         echo $line
         sleep 0.1s
 done
+echo
 unset IFS
 
 #fileassoc="true"
@@ -134,6 +135,9 @@ for type in apps desktop system; do
 	echo "nuking .gconf/$type"
 	#g_reset($user $type $path)
 done
+echo
+
+echo "ha!ha! not really...yet"
 fi
 
 if [[ $fileassoc ]]; then
