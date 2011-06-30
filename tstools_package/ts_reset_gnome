@@ -1,0 +1,152 @@
+#!/bin/bash
+help(){
+        cat <<EOF 
+        usage ts_reset_gnome [OPTION]
+        -h              prints this message
+        -u [USERNAME]   specify the user whose desktop will be reset.
+        -p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
+	
+	Resets various gnome configurations to their default settings, e.g. panel.
+EOF
+}
+
+# source common functions
+FUNCTIONS=ts_functions.sh # /path/to../
+source $FUNCTIONS
+
+function g_reset(){
+	local user=$1
+	local setting=$2
+	local path=$3	
+	if ! reset_gconf $user $setting $path; then
+        	echo "gconf failed to reset $setting" 
+        	return 3
+	fi
+        if ! rm -rf /home/$user/.gconf/$setting; then
+                echo "gconf failed to remove $setting" 
+                return 3
+        fi
+}
+
+
+### MAIN ###
+
+### process options ###
+while getopts ":hu:p:fNPwo:" option; do
+        case $option in
+                h) help
+                   exit 0
+                ;;
+                u) user="$OPTARG"
+		;;
+                p) path="$OPTARG"
+                ;;
+		f) fileassoc="true"
+		;;
+		N) nuke_from_orbit="true"
+		;;
+		P) panel="true"
+		;;
+		w) windowmananger="true"
+		   panel="true"
+		;;
+		o) option="$OPTARG"
+		;;
+                \?) help
+                    exit 1
+                ;;
+        esac
+done
+
+if [[ -z $user ]]; then
+        user=$USER
+else
+	test_for_user $user $path
+	if (( $? != 0 )); then
+        	echo "$user not found! exiting..."
+        	exit 3
+	fi
+
+	test_for_root
+	if [[ $? -ne 0 ]]; then
+		echo "You are not root! exiting..."
+		exit 3	
+		fi
+fi
+
+wm_list="/apps/compiz /apps/metacity /desktop/gnome/session /schemas/desktop/gnome/session /apps/gdm /apps/gnome-session /apps/nautilus"
+
+if [[ $nuke_from_orbit ]]; then
+	echo "WARNING: This is an undocumented Nuclear option. It might have unpredictable results"
+	while  [ true ]; do
+		echo "Do you want to press the big red button? [Yes/no]"
+		read answer
+		if [[ ${answer,,} == "yes" ]]; then
+			break 
+		elif [[ ${answer,,} == "no" ]]; then
+			echo "Chicken!"
+			exit 1
+		fi
+	done
+	
+#easter egg!
+ascii=( 
+'                           ____                                 '
+'               ____  , -- -        ---   -.                     '
+'            (((   ((  ///   //     \\-\ \  )) ))                '
+'        ///    ///  (( _        _   -- \\--     \\\ \)          '
+'     ((( ==  ((  -- ((             ))  )- ) __   ))  )))        '
+'      ((  (( -=   ((  ---  (          _ ) ---  ))   ))          '
+'         (( __ ((    ()(((  \\  / ///     )) __ )))             '
+'                \\_ (( __  |     | __  ) _ ))                   '
+'                          ,|  |  |                              '
+'                         `-._____,-                             '
+'                         `--.___,--                             '
+'                           |     |                              '
+'                           |    ||                              ' 
+'                           | ||  |                              '
+'                 ,    _,   |   | |                              '
+'        (  ((  ((((  /,| __|     |  ))))  )))  )  ))            '
+'      (()))       __/ ||(    ,,     ((//\     )     ))))        ' 
+'---((( ///_.___ _/    ||,,_____,_,,, (|\ \___.....__..  ))--ool '
+'           ____/      |/______________| \/_/\__                 '
+'          /                                \/_/|                '
+'         /  |___|___|__                        ||     ___       '
+'         \    |___|___|_                       |/\   /__/|      '
+'         /      |   |                           \/   |__|/      '
+'                                                                '
+'                 _                             _                '
+'                | |__   ___   ___  _ __ ___   | |		 '
+'                |  _ \ / _ \ / _ \|  _ ` _ \  | |		 '
+'                | |_) | (_) | (_) | | | | | | |_|		 '
+'                |_.__/ \___/ \___/|_| |_| |_| (_)		 '
+)
+IFS='%'
+for line in "${ascii[@]}"; do
+        echo $line
+        sleep 0.1s
+done
+unset IFS
+
+#fileassoc="true"
+
+for type in apps desktop system; do
+	echo "nuking .gconf/$type"
+	#g_reset($user $type $path)
+done
+fi
+
+if [[ $fileassoc ]]; then
+
+	if [[ -e /home/$user/.local/share/applications/mimeapps.list ]]; then 
+		rm /home/$user/.local/share/applications/mimeapps.list
+	fi
+fi
+
+
+if [[ -z  $EXIT ]] ; then
+        exit $EXIT
+else
+        exit 0
+fi
+
