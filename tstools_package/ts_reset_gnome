@@ -77,7 +77,7 @@ fi
 wm_list="/apps/compiz /apps/metacity /desktop/gnome/session /schemas/desktop/gnome/session /apps/gdm /apps/gnome-session /apps/nautilus"
 
 if [[ $nuke_from_orbit ]]; then
-	echo "WARNING: This is an undocumented Nuclear option. It might have unpredictable results"
+	echo "WARNING! This is an undocumented Nuclear option! It might have unpredictable results!"
 	while  [ true ]; do
 		echo "Do you want to press the big red button? [Yes/no]"
 		read answer
@@ -137,7 +137,8 @@ for type in apps desktop system; do
 done
 echo
 
-echo "ha!ha! not really...yet"
+echo "Ha!Ha! not really..."
+echo "...at least yet"
 fi
 
 if [[ $fileassoc ]]; then
