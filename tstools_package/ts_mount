@@ -1,0 +1,15 @@
+#! /bin/bash
+
+fdisk -l | while read line ;do 
+	disk=$(echo $line | awk '{print $1}' | egrep ^/dev.*[1-9]$ )
+	if [[ -n $disk ]]; then 
+		if mount_point=$(mount | grep $disk 2>/dev/null); then
+			echo "$mount_point"
+		else
+			#test for swap  / extended non -linux
+			# or better echo type (awk $7)
+			echo "partition $disk not mounted"
+		fi
+	fi
+done 
+
