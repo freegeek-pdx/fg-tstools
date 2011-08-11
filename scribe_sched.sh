@@ -15,7 +15,7 @@ email (){
 	name=$1
 	email=$2
 	role=$3
-	env MAILRC=/dev/null from="A Robot on behalf of <paulm@freegeek.org>" smtp=mail.freegeek.org  mailx -n -s "$role reminder" paulm@freegeek.org <<EOM
+	env MAILRC=/dev/null from="A Robot on behalf of <paulm@freegeek.org>" smtp=mail.freegeek.org  mailx -n -s "$role reminder" $email <<EOM
 Hello $name,
 	You are due to be a $role at the next staff meeting. Well I think you are but I'm just a dumb shell script so what do I know. 
 
@@ -92,4 +92,3 @@ fi
 
 echo $magic_number >$magic_number_file
 
-# echo test2 | mail -s test2 paulm@freegeek.org
