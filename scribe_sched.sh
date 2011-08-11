@@ -32,8 +32,8 @@ magic_number_file="/home/paulm/magic-number"
 #staff_members=(Amelia Darryl Jen Jessica Laurel Liane  Meredith Paul Richard Sean Tony) 
 
 staff_members=(Amelia Darryl Jen Jessica Liane  Meredith Paul Richard Sean Tony)
-
-
+staff_mem_len=$(( ${#staff_members[*]} - 1 ))
+echo $staff_mem_len
 # associative array
 declare -A email_list
 email_list[Amelia]="alamb"
@@ -68,7 +68,7 @@ read magic_number < $magic_number_file
 facilitator=${staff_members[$magic_number]}
 facilitator_email="${email_list[$facilitator]}@freegeek.org"
 
-if (( $magic_number != 0   &&   $magic_number % 10 == 0 )); then
+if (( $magic_number != 0   &&   $magic_number % $staff_mem_len == 0 )); then
 	magic_number=0
 else
 	let magic_number++	
