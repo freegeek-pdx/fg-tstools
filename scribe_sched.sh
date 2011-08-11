@@ -33,7 +33,6 @@ magic_number_file="/home/paulm/magic-number"
 
 staff_members=(Amelia Darryl Jen Jessica Liane  Meredith Paul Richard Sean Tony)
 staff_mem_len=$(( ${#staff_members[*]} - 1 ))
-echo $staff_mem_len
 # associative array
 declare -A email_list
 email_list[Amelia]="alamb"
