@@ -17,7 +17,7 @@ phash="zyrSQxJlOIQTo"
 
 ### MAIN ###
 
-while getopts ":hu:" option; do
+while getopts ":hu:p:" option; do
 	case $option in 
 		h) help
 		   exit 0
