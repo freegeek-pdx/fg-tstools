@@ -168,10 +168,17 @@ reset_gconf(){
 	# test to see if self change and if gconfd-2 is running
 	if [[ $my_uid -eq $EUID ]] && [[  $(pidof gconfd-2) ]]; then
         	gconftool-2 --recursive-unset $setting
+		returnval=$?
+	elif [[ $(ps aux |  grep $(pidof gconfd-2) | awk '{print $1}') = $my_user ]]
+		echo "WARNING:gconfd-2 is running as $my_user"
+		echo "You can not change gconfd settings for that user"
+		echo "run ts_reset_panel as that user without the -u option"
+		returnval=3
 	else
         	$chroot_path gconftool-2 --direct --config-source=xml::/home/$my_user/.gconf --recursive-unset $setting
 	fi
-	return $?
+		returnval=$?
+	return $returnval
 }
 
 
