@@ -46,7 +46,7 @@ else
 fi
 
 if [[ -z $user ]]; then
-	echo "no user"
+	echo "no user was selected"
 	user=$(choose_username $path)
 fi
 
