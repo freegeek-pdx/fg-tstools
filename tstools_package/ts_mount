@@ -1,4 +1,28 @@
 #! /bin/bash
+help(){
+        cat <<EOF 
+        usage ts_mount
+        -h              prints this message
+	
+	Reports mounted and unmounted disks
+EOF
+}
+
+# source common functions
+FUNCTIONS=ts_functions.sh # /path/to../
+source $FUNCTIONS
+while getopts ":hu:p:" option; do
+        case $option in
+                h) help
+                   exit 0
+                ;;
+                \?) help
+                    exit 1
+                ;;
+        esac
+done
+
+
 if ! test_for_root; then
         echo "Could not proceed"
         echo "are you root?"
