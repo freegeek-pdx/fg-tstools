@@ -35,15 +35,13 @@ done
 
 if [[ -z $user ]]; then
         user=$USER
-else
-	if ! test_for_root; then
-  	      echo "Could not proceed"
-        	echo "are you root?"
-       		exit 3
-	elif ! test_for_user $user $path; then
-        	echo "$user not found! exiting..."
-        	exit 3
-	fi
+elif ! test_for_root; then
+       echo "Could not proceed"
+	echo "are you root?"
+       	exit 3
+elif ! test_for_user $user $path; then
+       	echo "$user not found! exiting..."
+       	exit 3
 fi
 
 ### reset desktop ###
