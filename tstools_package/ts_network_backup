@@ -95,8 +95,15 @@ if ! test_for_root ; then
                 echo "Are you root?"
                 exit 3
 fi
-
-
+# if this machine is tsdata a path must be supplied
+# otherwise some dumbass will back up the wrong thing
+if [[ ! $ext_path && $HOSTNAME = tsdata ]]; then
+	echo 'YOU MUST USE THE -p OPTION TO SPECIFY THE PATH OF THE 
+DIRECTORY YU WISH TO BACKUP WHEN YOU ARE ON TSDATA!!!'
+	exit 3
+fi
+ 
+# process options
 if [[ $create_backup  &&  $restore_backup ]]; then 
 	echo "Only one of the c or r options can be used";
 	exit 3
