@@ -4,7 +4,7 @@ help(){
         usage ts_mount
         -h              prints this message
 	
-	Reports mounted and unmounted disks
+	Reports mounted and unmounted partitions/disks
 EOF
 }
 
@@ -30,13 +30,14 @@ if ! test_for_root; then
 fi
 fdisk -l | while read line ;do 
 	disk=$(echo $line | awk '{print $1}' | egrep ^/dev.*[1-9]$ )
+	type=$(echo $line | egrep ^/dev.*[1-9] | awk '{for(i=6;i<=NF;i++){printf("%s ",$i)}}' )
 	if [[ -n $disk ]]; then 
 		if mount_point=$(mount | grep $disk 2>/dev/null); then
 			echo "$mount_point"
 		else
 			#test for swap  / extended non -linux
 			# or better echo type (awk $7)
-			echo "partition $disk not mounted"
+			echo "partition $disk not mounted type: $type"
 		fi
 	fi
 done 
