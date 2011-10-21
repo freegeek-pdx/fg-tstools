@@ -35,6 +35,11 @@ done
 
 if [[ -z $user ]]; then
         user=$USER
+	self_check=true
+	if test_for_root; then
+		echo "If resetting for the current user do not run this as root"
+		exit 3
+	fi
 elif ! test_for_root; then
        echo "Could not proceed"
 	echo "are you root?"
@@ -52,16 +57,22 @@ do
         	echo "gconf failed to reset $setting" 
         	EXIT=3
 	fi
-        if ! rm -rf /home/$user/.gconf/$setting; then
-                echo "gconf failed to remove $setting" 
-                EXIT=3
-        fi
-
+#        if ! rm -rf /home/$user/.gconf/$setting; then
+#                echo "gconf failed to remove $setting" 
+#                EXIT=3
+#        fi
 done
 
 if [[ -e /home/$user/.local/share/applications/mimeapps.list ]]; then 
 	rm /home/$user/.local/share/applications/mimeapps.list
 fi
+
+if [[ -z self_check ]]; then
+	if ! pkill gnome-panel; then
+		echo "You might need to log out and log in again"
+		EXIT=2
+	fi
+
 if [[ -z  $EXIT ]] ; then
         exit $EXIT
 else
