@@ -176,8 +176,8 @@ reset_gconf(){
 		returnval=3
 	else
         	$chroot_path gconftool-2 --direct --config-source=xml::/home/$my_user/.gconf --recursive-unset $setting
-	fi
 		returnval=$?
+	fi
 	return $returnval
 }
 
