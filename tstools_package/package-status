@@ -9,5 +9,5 @@ ts_network_backup	n
 ts_rechown		y					DEPRECTED?
 ts_reset_gnome		?
 ts_reset_panel		y		y				See comments in file
-ts_reset_passwd		y
-ts_reset_windowmanager 	y
+ts_reset_passwd		y		y
+ts_reset_windowmanager 	y		sort of
