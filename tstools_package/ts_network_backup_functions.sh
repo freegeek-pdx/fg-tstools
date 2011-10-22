@@ -6,9 +6,10 @@ backup_users_test(){
 	# check we can wrtite to the backup files
         declare -a failarray
         for file in "${path}/group" "${path}/passwd" "${path}/shadow"; do
-                if [[ $(check_file_write "${file}") -ne 0 ]]; then
+                 if [[ $(check_file_write "${file}") -ne 0 ]]; then
                         # if we cant write to file add to array         
-                        failarray=( ${failarray[@]-} $(echo "$file") )                          fi
+                        failarray=( ${failarray[@]-} $(echo "$file") ) 
+	fi
         done
         # check length of failarray if >0 then something failed
         if [[ ${#failarray[@]} -ne 0 ]]; then
@@ -239,18 +240,18 @@ backup_apt(){
 restore_packages(){
         local dpkgfile=$1
 	local extpath=$2
-	                if ! check_file_read "$dpkgfile"; then
-                        local retval=$?
-                        if (( $retval == 5 )); then
-                                echo "$dpkgfile does not exist!" 
-                        elif (( $retval == 4 )); then
-                                echo "Can not read $dpkgfile!"
-                        fi
-                        return $retval
+	if ! check_file_read "$dpkgfile"; then
+       		local retval=$?
+                      	if (( $retval == 5 )); then
+                               	echo "$dpkgfile does not exist!" 
+                       	elif (( $retval == 4 )); then
+                               	echo "Can not read $dpkgfile!"
+                       	fi
+               		return $retval
                 fi
 	if [[ $extpath ]] ; then
 		local chroot_path="chroot $extpath"
-
+	fi
 	if ! local update_msg=$($chroot_path apt-get update); then
 		echo "apt-get update failed while attempting to restore packages"
 		echo "$update_msg"
