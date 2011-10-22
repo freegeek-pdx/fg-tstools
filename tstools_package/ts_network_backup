@@ -210,7 +210,7 @@ elif [[ $restore_backup ]] ; then
                 write_msg "WARNING! Could not restore backup!!!" $log_file
                 exit $restore_check
 	else
-		if [[ ! $no_user_passwords ]]; 
+		if [[ ! $no_user_passwords ]];  then
 			if ! restore_users_test=$(restore_users $path $ext_path); then
 				write_msg $restore_users_test $log_file
 				write_msg "WARNING! users may have been deleted from the system" $log_file
