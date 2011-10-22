@@ -87,7 +87,7 @@ while getopts ":hc:r:l:a:A:p:du" option; do
                     exit 1
                 ;;
         esac
-	done
+done
 
 #sanity checks
 if ! test_for_root ; then
@@ -251,7 +251,7 @@ elif [[ $restore_backup ]] ; then
       			fi
 
 			# check to see if any PPA files in sources.list.d
-			if [[ -v "$(ls -A $sources_path/sourceslist.d)" ]]; then
+			if [[ -n "$(ls -A $sources_path/sourceslist.d)" ]]; then
 				cp -R "$sources_path/sourceslist.d/*" $ext_path/etc/apt/sources.list.d
 			else
                         	write_msg "Added PPA's to software sources" $log_file
