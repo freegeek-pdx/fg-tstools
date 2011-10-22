@@ -219,6 +219,7 @@ elif [[ $restore_backup ]] ; then
 				exit 3
 			else 
 				write_msg "Restored users" $log_file
+			fi
 		fi
 		if [[ ! $no_apt ]]; then
 		# add test [if -A and not -d (-or u) then] do the user etc/apt files
