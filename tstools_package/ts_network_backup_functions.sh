@@ -159,16 +159,16 @@ restore_users(){
 backup_sources(){
 	local sourcespath=$1
 	local path=$2
-	if ! mkdir $sourcespath/; then
+	if ! mkdir $sourcespath; then
 		echo "Couldn't make $sourcespath"
 		return 3
-	elif ! check_file_write $sourcespath/apt ; then
-		echo "Couldn't write to $sourcespath/apt Check permissions?" 
+	elif ! check_file_write $sourcespath ; then
+		echo "Couldn't write to $sourcespath Check permissions?" 
 		return 3
-	elif ! cp -R $ext_path/etc/apt/sources.list.d/ $sourcespath/apt/  ; then
+	elif ! cp -R $ext_path/etc/apt/sources.list.d/ $sourcespath  ; then
 		echo "Problem copying over /etc/apt/sourceslist.d"
         	return 3
-	elif ! cp  $ext_path/etc/apt/sources.list $sourcespath/apt/  ; then
+	elif ! cp  $ext_path/etc/apt/sources.list $sourcespath  ; then
                 echo "Problem copying over /etc/apt/sources.list"
                 return 3
 	else
