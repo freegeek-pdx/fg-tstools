@@ -238,6 +238,7 @@ elif [[ $restore_backup ]] ; then
 					write_msg "WARNING: unable to add multiverse to sources list" $log_file
 					write_msg "$multiverse_restore" $log_file
 					exit 3
+				fi
 			else
 				write_msg "Added multiverse to software sources" $log_file
 			fi
