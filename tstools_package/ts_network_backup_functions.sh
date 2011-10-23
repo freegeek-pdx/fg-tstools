@@ -232,7 +232,7 @@ backup_apt(){
         if [[ $path ]]; then
         	local chroot_path="chroot $extpath"
 	fi
-	$chroot_path dpkg --get-selections > $dpkgfile  
+	$chroot_path dpkg --get-selections > $dpkgfile 2>&1 
         return $?
 }
 
