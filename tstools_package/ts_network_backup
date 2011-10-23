@@ -172,7 +172,8 @@ if [[ $create_backup ]]; then
 		else
 			write_msg "Backed up a list of installed packages" $log_fiile
 		fi
-	elif [[ ! $no_user_passwords ]]; then
+	fi
+	if [[ ! $no_user_passwords ]]; then
 		if ! backup_users_check=$(backup_users_test "$path"); then
 			write_msg $backup_users_check
 			exit 3		  
@@ -182,7 +183,8 @@ if [[ $create_backup ]]; then
 		else
 			write_msg $user_backup $log_file
 		fi
-	elif ! config_check=$(backup_config $path $ext_path); then
+	fi
+	if ! config_check=$(backup_config $path $ext_path); then
 		write_msg "Could not backup /etc" $log_file
 		exit $config_check
 	elif ! make_backup=$(create_backup $path $backup_user $backup_host $backup_path $ticket_number ); then
