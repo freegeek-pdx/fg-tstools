@@ -229,7 +229,7 @@ restore_partners(){
 backup_apt(){
 	local dpkgfile=$1
 	local extpath=$2
-        if [[ $path ]]; then
+        if [[ $extpath ]]; then
         	local chroot_path="chroot $extpath"
 	fi
 	$chroot_path dpkg --get-selections > $dpkgfile 2>&1 
