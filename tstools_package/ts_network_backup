@@ -146,7 +146,7 @@ fi
 group_file="/${path}/groups"
 password_file="/${path}/passwords"
 shadow_file="/${path}/shadows"
-dkpg_file="/${path}/dpkg.out"
+dpkg_file="/${path}/dpkg.out"
 sources_path="${path}/apt/"
 backup_user="tsbackup"
 backup_host="tsbackup"
