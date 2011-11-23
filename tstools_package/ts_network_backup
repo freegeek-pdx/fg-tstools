@@ -53,6 +53,7 @@ while getopts ":hc:r:l:a:A:p:du" option; do
                 ;;
                 c) create_backup="true"
                    ticket_number="$OPTARG"
+i		   backup_dir="$(date +%Y%m%d)-${ticket_number}"
 		;;
 		r) restore_backup="true"
                    backup_dir="$OPTARG"
@@ -99,7 +100,7 @@ fi
 # otherwise some dumbass will back up the wrong thing
 if [[ ! $ext_path && $HOSTNAME = tsdata ]]; then
 	echo 'YOU MUST USE THE -p OPTION TO SPECIFY THE PATH OF THE 
-DIRECTORY YU WISH TO BACKUP WHEN YOU ARE ON TSDATA!!!'
+DIRECTORY YOU WISH TO BACKUP WHEN YOU ARE ON TSDATA!!!'
 	exit 3
 fi
  
@@ -198,11 +199,11 @@ if [[ $create_backup ]]; then
 
 	echo "Preparing to rsync network backup..."
 
-	if ! make_backup=$(create_backup $path $backup_user $backup_host $backup_path $ticket_number ); then
+	if ! make_backup="$(create_backup $path $backup_user $backup_host $backup_path $backup_dir )"; then
 		write_msg "$make_backup" $log_file
 		exit $backup_check
 	else
-		write_msg "$make_backup" $log_file
+		write_msg "Successfully created network backup on tsbackup at /var/tsbackup/${backup_dir}" $log_file
 	fi
 	exit 0
 
