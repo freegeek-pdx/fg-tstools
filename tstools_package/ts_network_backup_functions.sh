@@ -20,7 +20,7 @@ backup_users_test(){
                 return 3
         else
 		echo "proceeding to backup users..."
-i		return 0
+		return 0
 	fi
 }
 
