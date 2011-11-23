@@ -19,7 +19,8 @@ backup_users_test(){
                 done
                 return 3
         else
-		return 0
+		echo "proceeding to backup users..."
+i		return 0
 	fi
 }
 
@@ -66,10 +67,10 @@ backup_users(){
                 fi
         done < $extpath/etc/passwd
 	if [[ $userlist ]]; then
-		echo "backed up passwords for $userlist"
+		echo "Backed up passwords for $userlist"
 	fi
 	if [[ $fail_list ]]; then
-		echo "$fail_list"
+		echo "Failed to backup passwords for $fail_list"
 		return 3
 	else
 		return 0
