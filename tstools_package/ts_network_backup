@@ -152,6 +152,11 @@ backup_user="tsbackup"
 backup_host="tsbackup"
 backup_path="/var/tsbackup"
 
+
+#################
+# Create Backup #
+#################
+
 if [[ $create_backup ]]; then
 
 	# unless no_apt is set back up record of packages installed
@@ -162,8 +167,8 @@ if [[ $create_backup ]]; then
                         exit 3
 		else
 			write_msg "$backup_sources_msg" $log_file
-
 		fi
+
 		if ! aptbackup="$(backup_apt $dpkg_file $ext_path)"; then
 			write_msg "Backing up package files list failed!" $log_file
                         write_msg "$aptbackup" $log_file	
@@ -173,6 +178,7 @@ if [[ $create_backup ]]; then
 			write_msg "Backed up a list of installed packages" $log_fiile
 		fi
 	fi
+
 	if [[ ! $no_user_passwords ]]; then
 		if ! backup_users_check="$(backup_users_test "$path")"; then
 			write_msg "$backup_users_check" $log_file
@@ -184,10 +190,14 @@ if [[ $create_backup ]]; then
 			write_msg "$user_backup" $log_file
 		fi
 	fi
+
 	if ! config_check=$(backup_config $path $ext_path); then
 		write_msg "Could not backup /etc" $log_file
 		exit $config_check
 	fi
+
+	echo "Preparing to rsync network backup..."
+
 	if ! make_backup=$(create_backup $path $backup_user $backup_host $backup_path $ticket_number ); then
 		write_msg "$make_backup" $log_file
 		exit $backup_check
@@ -195,6 +205,10 @@ if [[ $create_backup ]]; then
 		write_msg "$make_backup" $log_file
 	fi
 	exit 0
+
+##################
+# Restore Backup #
+##################
 elif [[ $restore_backup ]] ; then
 
         # not the same as backup_password_files
@@ -224,6 +238,7 @@ elif [[ $restore_backup ]] ; then
 				write_msg "Restored users" $log_file
 			fi
 		fi
+
 		if [[ ! $no_apt ]]; then
 		# add test [if -A and not -d (-or u) then] do the user etc/apt files
 		# exist? no? warn / ignore
@@ -246,6 +261,7 @@ elif [[ $restore_backup ]] ; then
 			else
 				write_msg "Added multiverse to software sources" $log_file
 			fi
+
 			if (( $partner_test == 0 )); then
 			 #identify and comment out  relevant lines 
 				if ! restore_partners $codename $ext_path; then
@@ -269,9 +285,15 @@ elif [[ $restore_backup ]] ; then
 				write_msg "$packagerestore" $log_file
 			fi
 		fi # End no-apt
+
 	write_msg "Backup successfully restored" $log_file
 	exit 0
 	fi
+
+#######################
+# restore backup ends #
+#######################
+
 else	
 	# Should never get here as we should have caught it 
 	# at the top of the sanity check
