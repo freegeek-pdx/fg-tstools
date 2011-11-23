@@ -105,23 +105,23 @@ fi
  
 # process options
 if [[ $create_backup  &&  $restore_backup ]]; then 
-	echo "Only one of the c or r options can be used";
+	echo "Only one of the -c or -r options can be used";
 	exit 3
 
 elif [[ ! $create_backup && ! $restore_backup ]]; then 
-        echo "One of the c or r options must  be used";
+        echo "One of the -c or -r (or -h help) options must  be used";
         exit 3
 
 elif [[ $create_backup  &&  ! $ticket_number ]]; then 
-        echo "You must supply a ticket number with the c option";
+        echo "You must supply a ticket number with the -c option";
         exit 3
 
 elif [[ $restore_backup && ! $backup_dir ]]; then
-        echo "You must supply a backup directory with the r option";
+        echo "You must supply a backup directory with the -r option";
         exit 3
 
 elif [[ $data_only  &&  $users_and_data_only ]]; then
-        echo "The u or d options are mutually exclusive";
+        echo "The -u or -d options are mutually exclusive";
         exit 3
 else
 	# set paths etc
