@@ -283,7 +283,7 @@ create_backup(){
 	local host=$3
 	local bpath=$4
 	local ticket="$5-$(date +%Y%m%d)"
-        rsync -azh $cpath "${user}@${host}:${bpath}/${ticket}" 2>&1
+        rsync -azh --exclude=".gvfs" $cpath "${user}@${host}:${bpath}/${ticket}" 2>&1
 	return $?	
 }
 
