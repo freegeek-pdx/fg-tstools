@@ -292,6 +292,6 @@ else
 	exit 1
 fi
 
-# Clean up after ourselves
+# Clean up after ourselves -- leaves backup of /etc in place 
 
 rm -r /home/apt /home/passwd /home/shadow / home/group /home/dpkg.out 
