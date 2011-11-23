@@ -197,7 +197,6 @@ if [[ $create_backup ]]; then
 	else
 		write_msg "Successfully created network backup on tsbackup at /var/tsbackup/${backup_dir}" $log_file
 	fi
-	exit 0
 
 ##################
 # Restore Backup #
@@ -280,7 +279,6 @@ elif [[ $restore_backup ]] ; then
 		fi # End no-apt
 
 	write_msg "Backup successfully restored" $log_file
-	exit 0
 	fi
 
 #######################
@@ -292,4 +290,8 @@ else
 	# at the top of the sanity check
 	echo "You should never see this message. If you are reading it now something is very, very wrong."
 	exit 1
-fi 
+fi
+
+# Clean up after ourselves
+
+rm -r /home/apt /home/passwd /home/shadow / home/group /home/dpkg.out 
