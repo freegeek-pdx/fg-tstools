@@ -283,7 +283,7 @@ create_backup(){
 	local host=$3
 	local bpath=$4
 	local bdir="$5"
-        rsync -azh --exclude=".gvfs" $cpath "${user}@${host}:${bpath}/${bdir}" 2>&1
+        rsync -azh --exclude=".gvfs" "${cpath}/" "${user}@${host}:${bpath}/${bdir}" 2>&1
 	return $?	
 }
 
@@ -293,7 +293,7 @@ restore_backup(){
         local spath=$3
         local backupdir=$4
         local rpath=$5
-                rsync -azh --exclude=".gvfs" "${user}@${host}:${spath}/${backupdir}/" "$rpath/"
+                rsync -azh --exclude=".gvfs" "${user}@${host}:${spath}/${backupdir}/" "${rpath}/"
 	return $?
 	
 }
