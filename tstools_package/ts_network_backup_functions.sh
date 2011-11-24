@@ -167,7 +167,7 @@ backup_sources(){
 		echo "Couldn't write to $sourcespath Check permissions?" 
 		return 3
 	elif ! cp -R $ext_path/etc/apt/sources.list.d/ $sourcespath  ; then
-		echo "Problem copying over /etc/apt/sourceslist.d"
+		echo "Problem copying over /etc/apt/sources.list.d"
         	return 3
 	elif ! cp  $ext_path/etc/apt/sources.list $sourcespath  ; then
                 echo "Problem copying over /etc/apt/sources.list"
