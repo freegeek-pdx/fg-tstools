@@ -294,4 +294,4 @@ fi
 
 # Clean up after ourselves -- leaves backup of /etc in place 
 
-rm -r /home/apt /home/passwd /home/shadow / home/group /home/dpkg.out 
+rm -r /home/apt /home/passwd /home/shadow /home/group /home/dpkg.out 
