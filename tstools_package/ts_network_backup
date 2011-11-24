@@ -264,8 +264,8 @@ elif [[ $restore_backup ]] ; then
       			fi
 
 			# check to see if any PPA files in sources.list.d
-			if [[ -n "$(ls -A $sources_path/sourceslist.d)" ]]; then
-				cp -R "$sources_path/sourceslist.d/*" $ext_path/etc/apt/sources.list.d
+			if [[ -n "$(ls -A $sources_path/sources.list.d)" ]]; then
+				cp -R "$sources_path/sources.list.d/*" $ext_path/etc/apt/sources.list.d
 			else
                         	write_msg "Added PPA's to software sources" $log_file
 			fi
