@@ -2,23 +2,27 @@
 help(){
         cat <<EOF 
 Usage: ts_network_backup  [OPTION(S)]
-Create or restore network backup.
+Create or restore network backup. 
 
-        -h              	prints this message
-        -c ticket number 	create network backup
-	-r backup directory 	restore network backup. The backup directory 
+        -h              	Prints this message
+        -c ticket number 	Create network backup
+	-r backup directory 	Restore network backup. The backup directory 
 				should be in the format date-ticket_number.
-	-d 			Data only. 
+	-d 			Data only. Does not backup/restore users or 
+				packages.
 				Use of this option is strongly discouraged.
-	-u 			Users and data only. 
+	-u 			Users and data only. Does not backup/restore 
+				packages. 
 				Use of this option is discouraged.
-	-l log file		be careful not to use the same path for backing
+	-l log file		Log messages to file rather than stdout.
+				Be careful not to use the same path for backing
 				up and restoring, or the  log file may get 
 				overwritten.
-	-a /path/to/directory   Alternative directory to backup. implies -d
+	-a /path/to/directory   Alternative directory to backup. implies -d but
+				does not set it automatically.
 				Use this if you want to backup something
 				other than the home directory.
-				suggests the use of -A for restoring backups.
+				Suggests the use of -A for restoring backups.
 	-A /path/to/directory	Use this to restore the backup to somewhere
 				other than the default (/home)
                                 Can be used with or without -u or -d 
@@ -26,7 +30,8 @@ Create or restore network backup.
 
 	-p /path/to/home	Use this if the home folder you want to
 				backup is not in its usual place i.e. if you
-				to backup an external/mounted drive rather than /home.
+				to backup an external/mounted drive 
+				rather than /home.
 				You do not need to add home on the end but the
 				script does not mind either way. 
 				Can be used with or without -u or -d. 	
