@@ -237,8 +237,11 @@ elif [[ $restore_backup ]] ; then
 		fi
 
 		if [[ ! $no_apt ]]; then
-		# add test [if -A and not -d (-or u) then] do the user etc/apt files
-		# exist? no? warn / ignore
+		# add test [if -A and not -d (-or u) then] i
+		# do the user etc/apt files exist? no? warn / ignore
+		# Actually restore_packages will check and exit if not found
+		# we can let the user figure it out from there.
+		
 		
 			sources_file="$sources_path/sources.list"
 			# if user had multiverse enabled
