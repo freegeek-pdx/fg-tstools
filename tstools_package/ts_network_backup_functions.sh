@@ -132,16 +132,21 @@ restore_users(){
         # note that copying files back across is not sufficient 
         # need to extract values from files and added to new copies
 	for file in passwd group shadow; do
-		if ! check_file_read "$path/$file"; then
-			local retval=$?
+	check_file_read "$path/$file"
+	local retval=$?	
+	if [[ $retval -ne 0 ]] ; then
 			if (( $retval == 5 )); then
 				echo "$path/$file does not exist!" 
 			elif (( $retval == 4 )); then
 				echo "Can not read $path/$file!"
 			fi
-			return $retval
+			local break_value=1
 		fi
 	done
+	# checks if value is set
+	if declare -p break_value then
+		exit 3
+	fi
         # read /home/password file or equivalent)
         while read line ; do
                 user=$(echo $line | awk -F : '{print $1}')
@@ -241,15 +246,18 @@ backup_apt(){
 restore_packages(){
         local dpkgfile=$1
 	local extpath=$2
-	if ! check_file_read "$dpkgfile"; then
-       		local retval=$?
-                      	if (( $retval == 5 )); then
-                               	echo "$dpkgfile does not exist!" 
-                       	elif (( $retval == 4 )); then
-                               	echo "Can not read $dpkgfile!"
-                       	fi
-               		return $retval
-                fi
+        
+	check_file_read "$dpkgfile"
+        local retval=$?
+        if [[ $retval -ne 0 ]] ; then
+		if (( $retval == 5 )); then
+			echo "$dpkgfile does not exist!" 
+		elif (( $retval == 4 )); then
+			echo "Can not read $dpkgfile!"
+		fi
+        	exit 3       
+	fi
+
 	if [[ $extpath ]] ; then
 		local chroot_path="chroot $extpath"
 	fi
