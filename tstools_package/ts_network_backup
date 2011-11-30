@@ -4,6 +4,9 @@ help(){
 Usage: ts_network_backup  [OPTION(S)]
 Create or restore network backup. 
 
+By default it backs up the contents of /home, the users on the system and the 
+packages that have been installed (via apt-get, Ubuntu Software Center etc). 
+
         -h              	Prints this message
         -c ticket number 	Create network backup
 	-r backup directory 	Restore network backup. The backup directory 
