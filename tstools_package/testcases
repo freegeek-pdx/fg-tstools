@@ -1,0 +1,26 @@
+no options
+invalid option
+valid option with no argument
+
+create backup 
+create backup with no ticket number
+create backup with ../../foo for ticket number
+create backup with - u
+create backup with -d
+create backup with -ud
+create backup with -a 
+create backup with -p
+
+restore backup
+restore backup with no ticket number
+restore backup with ../../foo for ticket number
+restore backup with - u
+restore backup with -d
+restore backup with -ud
+restore backup created iwth u/d without u/d  
+restore backup with -A created with -a
+restore backup with -A created without -a
+restore backup with -A without -u/d
+restore backup from -p
+
+-l logfile option
