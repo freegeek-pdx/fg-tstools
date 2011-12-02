@@ -96,12 +96,12 @@ while getopts ":hc:r:l:a:A:p:du" option; do
 		   path="${cut_path}/home"
 		   chroot_path="chroot $ext_path"
 		;;
-		?)
+		\?)
 		   help exit 1
 		;;
-		*) help
-                    exit 1
-                ;;
+	#	*) help
+         #           exit 1
+         #       ;;
         esac
 done
 
