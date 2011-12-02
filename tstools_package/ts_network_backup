@@ -54,9 +54,9 @@ source $NB_FUNCTIONS
 
 ### MAIN ###
 
-if declare -p break_value; then
-                exit 3
-        fi
+#if declare -p break_value; then
+#                exit 3
+#        fi
 
 while getopts ":hc:r:l:a:A:p:du" option; do
        case $option in
