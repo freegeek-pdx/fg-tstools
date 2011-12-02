@@ -141,10 +141,10 @@ restore_users(){
 				echo "Can not read $path/$file!"
 			fi
 			local break_value=1
-		fi
+	fi
 	done
 	# checks if value is set
-	if declare -p break_value then
+	if declare -p break_value; then
 		exit 3
 	fi
         # read /home/password file or equivalent)
