@@ -4,13 +4,18 @@ valid option with no argument - Pass
 
 1:create backup - Pass
 create backup with no ticket number - Pass
-2: create backup with ../../foo for ticket number - Fail
-3: create backup with - u - Pass
+2: create backup with ../../foo for ticket number - Fail --- now fixed RETEST
+3: create backup with - u - Pass actually FAIL as errors outputted
+Should only back up users and data:
+	test for files
+	test for passwd, shadow, group  
    errors:
    rm: cannot remove `/home/apt': No such file or directory
    rm: cannot remove `/home/dpkg.out': No such file or directory
 
-4: create backup with -d - Pass
+							        now fixed RETEST
+
+4: create backup with -d - Pass  actually FAIL as errors outputted
    errors:
    rm: cannot remove `/home/apt': No such file or directory
    rm: cannot remove `/home/passwd': No such file or directory
@@ -18,16 +23,19 @@ create backup with no ticket number - Pass
    rm: cannot remove `/home/group': No such file or directory
    rm: cannot remove `/home/dpkg.out': No such file or directory
 
+								now fixed RETEST
 
-5: create backup with -ud - FAILED
+5: create backup with -ud - FAILED Actually PASS -- correctly detects mutally exclusive options
    The -u or -d options are mutually exclusive
 
 6: create backup with -a  - FAILED
    Could not backup /etc
    ./ts_network_backup: line 207: exit: tar:: numeric argument required
+								now fixed RETEST
 
-7: create backup with -p - FAILED
-   dpkg --get-selections exited with error code
+
+7: create backup with -p 
+   	This needs to be tested with a disk on TSDATA
 
 restore backup
 restore backup with no ticket number
