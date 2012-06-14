@@ -1,15 +1,33 @@
-no options
-invalid option
-valid option with no argument
+no options - Pass
+invalid option - Pass
+valid option with no argument - Pass
 
-create backup 
-create backup with no ticket number
-create backup with ../../foo for ticket number
-create backup with - u
-create backup with -d
-create backup with -ud
-create backup with -a 
-create backup with -p
+1:create backup - Pass
+create backup with no ticket number - Pass
+2: create backup with ../../foo for ticket number - Fail
+3: create backup with - u - Pass
+   errors:
+   rm: cannot remove `/home/apt': No such file or directory
+   rm: cannot remove `/home/dpkg.out': No such file or directory
+
+4: create backup with -d - Pass
+   errors:
+   rm: cannot remove `/home/apt': No such file or directory
+   rm: cannot remove `/home/passwd': No such file or directory
+   rm: cannot remove `/home/shadow': No such file or directory
+   rm: cannot remove `/home/group': No such file or directory
+   rm: cannot remove `/home/dpkg.out': No such file or directory
+
+
+5: create backup with -ud - FAILED
+   The -u or -d options are mutually exclusive
+
+6: create backup with -a  - FAILED
+   Could not backup /etc
+   ./ts_network_backup: line 207: exit: tar:: numeric argument required
+
+7: create backup with -p - FAILED
+   dpkg --get-selections exited with error code
 
 restore backup
 restore backup with no ticket number
