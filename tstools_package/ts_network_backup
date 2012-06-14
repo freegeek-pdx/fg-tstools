@@ -21,8 +21,7 @@ packages that have been installed (via apt-get, Ubuntu Software Center etc).
 				Be careful not to use the same path for backing
 				up and restoring, or the  log file may get 
 				overwritten.
-	-a /path/to/directory   Alternative directory to backup. implies -d but
-				does not set it automatically.
+	-a /path/to/directory   Alternative directory to backup. Implies  -d i.e. does not backup/restore users or packages.
 				Use this if you want to backup something
 				other than the home directory.
 				Suggests the use of -A for restoring backups.
@@ -75,7 +74,6 @@ while getopts ":hc:r:l:a:A:p:du" option; do
 		   data_only="true"
                    no_apt="true"
                    no_user_passwords="true"
-                   data_only="true"
                 ;;
                 u) no_apt="true"
                    users_and_data_only="true"
@@ -118,7 +116,7 @@ elif [[ ! $create_backup && ! $restore_backup ]]; then
         exit 3
 
 elif [[ $data_only  &&  $users_and_data_only ]]; then
-        echo "The -u or -d options are mutually exclusive";
+        echo "The -d or -a and -u options are mutually exclusive";
         exit 3
 else
 	# set paths etc
@@ -324,4 +322,16 @@ fi
 
 # Clean up after ourselves -- leaves backup of /etc in place 
 
-rm -r /home/apt /home/passwd /home/shadow /home/group /home/dpkg.out 
+if [[ ! $data_only ]]; then
+ 	if [[ ! $no_apt]]; then
+		to_remove="/home/apt /home/dpkg.out /home/passwd /home/shadow /home/group"
+	else
+		to_remove="${toremove} /home/passwd /home/shadow /home/group"
+	fi
+	# runs rm -r on files/dirs
+	if ! cleanup $to_remove
+		echo "Could not remove $to_remove, you may need to remove these manually. Alternatively they may not have been there in the first place and you should investigate why."
+		exit 3
+	fi
+fi
+exit 0
