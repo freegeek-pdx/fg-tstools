@@ -8,8 +8,8 @@ By default it backs up the contents of /home, the users on the system and the
 packages that have been installed (via apt-get, Ubuntu Software Center etc). 
 
         -h              	Prints this message
-        -c ticket number 	Create network backup
-	-r backup directory 	Restore network backup. The backup directory 
+        -c [ticket number] 	Create network backup
+	-r [backup directory] 	Restore network backup. The backup directory 
 				should be in the format date-ticket_number.
 	-d 			Data only. Does not backup/restore users or 
 				packages.
@@ -17,7 +17,7 @@ packages that have been installed (via apt-get, Ubuntu Software Center etc).
 	-u 			Users and data only. Does not backup/restore 
 				packages. 
 				Use of this option is discouraged.
-	-l log file		Log messages to file rather than stdout.
+	-l [log file]		Log messages to file rather than stdout.
 				Be careful not to use the same path for backing
 				up and restoring, or the  log file may get 
 				overwritten.
@@ -114,6 +114,15 @@ if ! test_for_root ; then
                 echo "Are you root?"
                 exit 3
 fi
+
+# test for valid ticket number
+#N.B. actually tests for 5 digits
+regex="^[0-9]{5}$"
+if [[ ! $ticket_number =~ $regex ]] ; then
+		echo "Not a valid ticket number" 
+		exit 3
+fi
+
 # if this machine is tsdata a path must be supplied
 # otherwise some dumbass will back up the wrong thing
 if [[ ! $ext_path && $HOSTNAME = "tsdata" ]]; then
