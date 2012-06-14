@@ -21,6 +21,15 @@ packages that have been installed (via apt-get, Ubuntu Software Center etc).
 				Be careful not to use the same path for backing
 				up and restoring, or the  log file may get 
 				overwritten.
+	-t [addendum]		Normally this script checks to see if a ticket
+				number looks like a "real" ticket number. 
+				(i.e. it has the correct number of numbers). 
+				This option lets you add an additional number. 
+				It's useful if you are backing up more than one
+				computer and want to store them in different 
+				folders referring to the same ticket.
+				e.g. 00001-A and 00001-B
+				Takes letters, numbers and _only. - is added automatically.  
 	-a /path/to/directory   Alternative directory to backup. Implies  -d i.e. does not backup/restore users or packages.
 				Use this if you want to backup something
 				other than the home directory.
@@ -29,7 +38,6 @@ packages that have been installed (via apt-get, Ubuntu Software Center etc).
 				other than the default (/home)
                                 Can be used with or without -u or -d 
 				suggests the later (required if needed). 
-
 	-p /path/to/home	Use this if the home folder you want to
 				backup is not in its usual place i.e. if you
 				to backup an external/mounted drive 
@@ -58,7 +66,7 @@ if [[ -z $1 ]]; then
                 exit 1
         fi
 
-while getopts ":hc:r:l:a:A:p:du" option; do
+while getopts ":hc:r:l:t:a:A:p:du" option; do
        case $option in
                 h) help
                    exit 0
@@ -77,10 +85,12 @@ while getopts ":hc:r:l:a:A:p:du" option; do
                 ;;
                 u) no_apt="true"
                    users_and_data_only="true"
-                ;;
-                
+                ;;        
 		l) use_log="true"
 		   log_file="$OPTARG"
+		;;
+		t)
+		   addendum=$OPTARG
 		;;
 		a) no_apt="true"
                    no_user_passwords="true"
@@ -151,6 +161,18 @@ if [[ ! $ticket_number =~ $regex ]] ; then
 		echo "Not a valid ticket number" 
 		exit 3
 fi
+# add addendum to ticket number if present
+if [[ $addendum ]]; then
+	regex="[^A-Za-z0-9_]"
+	if [[ $addendum =~ ]]; then
+		ticket_number="${ticket_number}-$addendum"
+	else
+		echo "Only nubers, letters and _ can be added to a ticket number"
+		echo "You do not need to use - it will will be added automatically"
+		exit 3
+	fi
+fi
+
 
 # if this machine is tsdata a path must be supplied
 # otherwise some dumbass will back up the wrong thing
@@ -208,10 +230,13 @@ if [[ $create_backup ]]; then
 			write_msg "$user_backup" $log_file
 		fi
 	fi
-
-	if ! config_check=$(backup_config $path $ext_path); then
-		write_msg "Could not backup /etc" $log_file
-		exit $config_check
+	
+	# backs up /etc, don't run if backing up alternate path or data only
+	if [[ ! data_only ]]; then
+		if ! config_check=$(backup_config $path $ext_path); then
+			write_msg "Could not backup /etc" $log_file
+			exit $config_check
+		fi
 	fi
 
 	echo "Preparing to rsync network backup..."
