@@ -52,7 +52,7 @@ backup_users(){
                                 # /etc/shadow contains the date of last password
                                 # change. Having this be older than the install
                                 # should not be a problem, but noting just in case
-                                grep -e ^$user: $ext_path/etc/shadow >>"${path}/shadow"
+                                grep -e ^$user: $extpath/etc/shadow >>"${path}/shadow"
 				if (( $? != 0 )); then
                                         fail="${fail} ${path}/shadow "
                                 fi
@@ -165,16 +165,17 @@ restore_users(){
 backup_sources(){
 	local sourcespath=$1
 	local path=$2
+	local extpath=$3
 	if ! mkdir $sourcespath; then
 		echo "Couldn't make $sourcespath"
 		return 3
 	elif ! check_file_write $sourcespath ; then
 		echo "Couldn't write to $sourcespath Check permissions?" 
 		return 3
-	elif ! cp -R $ext_path/etc/apt/sources.list.d/ $sourcespath  ; then
+	elif ! cp -R $extpath/etc/apt/sources.list.d/ $sourcespath  ; then
 		echo "Problem copying over /etc/apt/sources.list.d"
         	return 3
-	elif ! cp  $ext_path/etc/apt/sources.list $sourcespath  ; then
+	elif ! cp  $extpath/etc/apt/sources.list $sourcespath  ; then
                 echo "Problem copying over /etc/apt/sources.list"
                 return 3
 	else
