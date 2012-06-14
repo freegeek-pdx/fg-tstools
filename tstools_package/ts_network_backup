@@ -132,6 +132,8 @@ else
 	# set paths etc
 	if [[ ! $path ]]; then 
 		path="/home"
+		# ext_path is only need if we are working relative to something other than /
+		# i.e. is null
 	fi
 	if [[ $use_log ]]; then	
 		if [[ ! $log_file ]]; then
