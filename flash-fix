@@ -15,7 +15,7 @@ fi
 
 
 mkdir c-tmp
-wget tsbackup://google-chrome-stable_current_i386.deb
+wget http://tsbackup/google-chrome-stable_current_i386.deb
 dpkg-deb -x google-chrome-stable_current_i386.deb c-tmp
 today=$(date +%Y%m%d%H%M)
 cp /usr/lib/adobe-flashplugin/libflashplayer.so /usr/lib/adobe-flashplugin/libflashplayer.so.bak.$today
