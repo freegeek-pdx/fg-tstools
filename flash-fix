@@ -1,0 +1,24 @@
+#!/bin/bash
+test_for_root(){
+        if [[ $EUID -ne 0 ]]; then
+                return 1
+        else
+                return 0
+        fi
+}
+if ! test_for_root; then
+        echo "Could not proceed"
+        echo "are you root?"
+        exit 3
+fi
+
+
+
+mkdir c-tmp
+wget http://tsbackup/google-chrome-stable_current_i386.deb
+dpkg-deb -x google-chrome-stable_current_i386.deb c-tmp
+today=$(date +%Y%m%d%H%M)
+cp /usr/lib/adobe-flashplugin/libflashplayer.so /usr/lib/adobe-flashplugin/libflashplayer.so.bak.$today
+cp c-tmp/opt/google/chrome/libgcflashplayer.so /usr/lib/adobe-flashplugin/libflashplayer.so
+rm -r c-tmp
+rm google-chrome-stable_current_i386.deb

@@ -1,0 +1,134 @@
+#!/bin/bash
+help(){
+        cat <<EOF 
+        usage $0 [OPTION]
+	-m 		remind staff that they are facilitator/scribe by email
+	-t		test. See what would have been done if it was runnig for real. 
+	-c		config file for meeting (compulsory)
+        -h              prints this message
+        This is a bash script.
+EOF
+        exit 0
+}
+
+
+email (){
+	name=$1
+	email=$2
+	role=$3
+	env MAILRC=/dev/null from="A Robot on behalf of <paulm@freegeek.org>" smtp=mail.freegeek.org  mailx -n -s "$role reminder" $email <<EOM
+Hello $name,
+	You are due to be a $role at the next $meeting meeting. Well I think you are but I'm just a dumb shell script so what do I know. 
+
+$message Please poke paulm@freegeek.org if I'm wrong.
+
+	Bye!
+		your friendly reminder robot.
+EOM
+
+}
+
+
+
+while getopts ":htmc:" option; do
+        case $option in
+                h) help
+                   exit 0
+                ;;
+                t) test_on="true"
+                ;;
+		m) mail_on="true"
+		;;
+		c) config_file="$OPTARG"
+		;;
+		e) email_list_file="$OPTARG"
+		;;
+                \?) help
+                    exit 1
+                ;;
+        esac
+done
+
+if [[ -z $email_list_file ]] ; then
+	email_list_file=email_list
+fi
+
+if [[ ! -e $email_list_file]]; then
+        echo "This script needs an email list  to operate and it  does not exist...exiting"
+        exit 2
+else
+        source $email_list_file
+fi
+
+
+if [[ -z  $config_file ]]; then
+	echo "This script needs a config file to operate...exiting"
+	exit 2
+elif [[ ! -e $config_file ]]; then
+	echo "This script needs a config file to operate and the file you gave does not exist...exiting"
+	exit 2
+else
+	source $config_file	
+fi
+
+if [[ -z  $magic_number_file ]]; then
+        echo "This script needs a magic number file to operate and it is not specified in the config file...exiting"
+        exit 2
+elif [[ ! -e $config_file ]]; then
+        echo "This script needs a magic number file to operate and the file you gave does not exist...exiting"
+        exit 2
+else
+ 
+read magic_number < $magic_number_file
+	if [[ -z $magic_number ]] ; then
+		echo "no magic number...exiting"
+		exit 2
+	fi
+fi
+
+
+# attendees in config file
+attendees_len=$(( ${#attendees[*]} - 1 ))
+
+# technically this also includes the case where there is only one person
+# but that doesn't make anymore sense.
+if [[ $attendees_len <= 0 ]] ; then
+                echo "nobody in the list of attendees...exiting"
+                exit 2
+        fi
+
+facilitator=${attendees[$magic_number]}
+facilitator_email="${email_list[$facilitator]}"
+
+if [[ -z $facilitator_email]] ; then
+                echo "Warning: no email found for facilitator ($facilitator)"
+        fi
+
+if (( $magic_number != 0   &&   $magic_number % $attendees_len == 0 )); then
+	magic_number=0
+else
+	let magic_number++	
+fi
+
+scribe=${attendees[$magic_number]}
+scribe_email="${email_list[$scribe]}"
+
+if [[ -z $scribe_email]] ; then
+                echo "Warning: no email found for scribe ($scribe)"
+        fi
+
+
+if [[ $test_on ]]; then
+	echo "remind $facilitator ($facilitator_email) that they are the next facilitator"
+	echo "remind $scribe ($scribe_email) that they are the next scribe"
+
+elif [[ $mail_on ]]; then
+	email $facilitator $facilitator_email facilitator
+	email $scribe $scribe_email scribe
+else
+	help
+	exit
+fi 
+
+echo $magic_number >$magic_number_file
+
