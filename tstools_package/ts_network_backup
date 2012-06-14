@@ -108,29 +108,6 @@ while getopts ":hc:r:l:a:A:p:du" option; do
 		esac
 done
 
-#sanity checks
-if ! test_for_root ; then
-                echo "Could not proceed!"
-                echo "Are you root?"
-                exit 3
-fi
-
-# test for valid ticket number
-#N.B. actually tests for 5 digits
-regex="^[0-9]{5}$"
-if [[ ! $ticket_number =~ $regex ]] ; then
-		echo "Not a valid ticket number" 
-		exit 3
-fi
-
-# if this machine is tsdata a path must be supplied
-# otherwise some dumbass will back up the wrong thing
-if [[ ! $ext_path && $HOSTNAME = "tsdata" ]]; then
-	echo 'YOU MUST USE THE -p OPTION TO SPECIFY THE PATH OF THE 
-DIRECTORY YOU WISH TO BACKUP WHEN YOU ARE ON TSDATA!!!'
-	exit 3
-fi
- 
 # process options
 if [[ $create_backup  &&  $restore_backup ]]; then 
 	echo "Only one of the -c or -r options can be used";
@@ -162,6 +139,29 @@ else
 	fi
 fi
 
+#sanity checks
+if ! test_for_root ; then
+                echo "Could not proceed!"
+                echo "Are you root?"
+                exit 3
+fi
+
+# test for valid ticket number
+#N.B. actually tests for 5 digits
+regex="^[0-9]{5}$"
+if [[ ! $ticket_number =~ $regex ]] ; then
+		echo "Not a valid ticket number" 
+		exit 3
+fi
+
+# if this machine is tsdata a path must be supplied
+# otherwise some dumbass will back up the wrong thing
+if [[ ! $ext_path && $HOSTNAME = "tsdata" ]]; then
+	echo 'YOU MUST USE THE -p OPTION TO SPECIFY THE PATH OF THE 
+DIRECTORY YOU WISH TO BACKUP WHEN YOU ARE ON TSDATA!!!'
+	exit 3
+fi
+ 
 #CONFIG
 group_file="/${path}/groups"
 password_file="/${path}/passwords"
