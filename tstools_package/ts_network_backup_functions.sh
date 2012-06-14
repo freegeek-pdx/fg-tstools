@@ -305,3 +305,9 @@ restore_backup(){
 	return $?
 	
 }
+
+
+cleanup(){
+	rm -r $@
+	return $?
+}
