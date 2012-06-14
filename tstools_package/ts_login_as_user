@@ -1,0 +1,71 @@
+#!/bin/bash
+
+help(){
+	cat <<EOF 
+	usage ts_login_as_user [OPTION]
+	-h		prints this message
+	-u [USERNAME]	specify the user whose password will be changed. 
+        -p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
+
+	Resets a users password to the standard (oem) password. to enable you to login as that user.
+EOF
+}
+
+# source common functions
+FUNCTIONS=ts_functions.sh # /path/to../
+source $FUNCTIONS
+
+phash="zyrSQxJlOIQTo"
+
+### MAIN ###
+
+while getopts ":hu:p:" option; do
+	case $option in 
+		h) help
+		   exit 0
+		;;
+		u) user=$OPTARG
+		;;
+                p) path="$OPTARG"
+                ;;
+		\?) help
+		    exit 1
+		;;
+	esac
+done
+if ! test_for_root; then
+        echo "Could not proceed!"
+        echo "are you root?"
+        exit 3
+elif ! password_backup=$(backup_passwords_for_reset $path); then
+	echo $password_backup
+        echo "WARNING:Password files could not be backed up! exiting..."
+        exit 3
+else
+        echo $password_backup	
+fi
+
+if [[ -z $user ]]; then
+	echo "no user was selected"
+	user=$(choose_username $path)
+fi
+
+if ! test_for_user $user $path; then
+        echo "$user not found! exiting..."
+        exit 3
+elif ! reset_password $user $phash $path; then
+	echo "WARNING:Password could not be reset, exiting..."
+	exit 3
+else 
+	echo "password for $user has been reset."
+	if [[ ! $path ]]; then
+		cat <<EOF
+ It will revert to the user's original password next time the machine is rebooted or shutdown.
+
+You may now exit recovery mode and log in as that user.
+EOF
+	else
+		echo "You will need to run ts_revert_passwords when you are finished"	
+	fi
+	exit 0
+fi

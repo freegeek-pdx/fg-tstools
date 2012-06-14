@@ -1,0 +1,137 @@
+#!/bin/bash
+
+help(){
+cat <<EOF 
+ usage data-sort [OPTION]
+-h	prints this message
+-b [base-dir]	specify the directory containing the recovered files (from PhotoRec)
+-d [dest-dir]   specify the directory you want the sorted output files to go in
+If neither are specified  the default is the current directory, however you will 
+always be prompted to ensure this is what you intend.
+EOF
+}
+
+while getopts ":hb:d:" option; do
+	case $option in 
+		h) help
+		   exit
+		;;
+		b) basedir=$OPTARG
+		;;
+		d) destdir=$OPTARG
+		;;
+		/?) help
+		    exit
+		;;
+	esac
+done
+
+# set base & destination directory  to current directory if not set on command line
+
+if [[ -z $basedir ]]
+	 then
+		help
+		echo "The current directory $PWD will be searched for recovered files."
+		echo "Do you wish to proceed [y/n]"
+		read -sn 1  proceed
+		echo ":$proceed:"
+		if  [[ $proceed != y  &&  $proceed != Y  ]]; then
+			exit
+		else
+			$basedir=$PWD
+		fi
+fi
+
+if [[ -z $destdir ]]
+	 then
+		help
+		echo "The current directory $PWD will be used as the destination directory to store the sorted files."
+		echo "This is probably not a good idea"
+		echo "You can set it on the command line using the -d option"
+		echo "Do you wish to proceed [y/n]"
+		read -sn 1  proceed
+		echo ":$proceed:"
+		if  [[ $proceed != y  &&  $proceed != Y  ]]; then
+			exit
+		else
+			$destdir=$PWD
+		fi
+fi
+
+# test to see if base dir is a directory
+
+if [[ ! -d $basedir ]]; then
+		echo "Base directory: $basedir is not a directory or could not be found"
+		exit
+fi
+	
+# test to see if destination is a directory and give option to create if it doesn't exist
+
+if [[ ! -d $destdir ]] ; then
+	if [[ -e $destdir ]]; then
+		echo "Destination: $destdir is not a directory"
+		exit
+	else 
+		echo "$destdir does not exist do you wish to create it [y/n]"
+		read -n 1  proceed
+		echo 
+		if  [[ $proceed != y && $proceed != Y  ]]; then
+			exit
+		else
+			if ! mkdir $destdir ; then
+				echo "couldn't create $destdir"
+				exit
+			fi	
+		fi
+	fi
+fi
+
+
+echo "base:$basedir dest:$destdir"
+
+echo "Building file list..."
+
+
+# create list of source directories and the filetypes they contain
+
+dir_list=$(find $basedir -type  d  -print)
+file_list=$(for dir in $dir_list; do ls $dir | awk -F \. '{print $2}' ; done | sort | uniq)
+
+# Create destination directories to sort files into
+
+echo -n "Making destination directories"
+for file in $file_list;do
+	filetest=$file
+	if  !(( filetest++ )) 2> /dev/null; then
+		echo -n '.'
+		mkdir -p $destdir/$file
+	fi
+done
+
+echo 
+# Copy files to destination directories
+
+echo -n "Copying files"
+i=0
+for dir in $dir_list; do
+	for file in $(ls $dir); do
+		if ! (( $i % 100 )) ; then echo -n '.'; fi
+		filetype=$(echo $file | awk -F \. '{print $2}')
+		filetest=$filetype	
+		if (( filetest++ )) 2> /dev/null ; then 
+			false
+		else	
+			cp $dir/$file $destdir/$filetype 2> /dev/null
+			(( i++ ))
+		fi
+	done
+done
+
+
+
+
+
+echo
+
+
+

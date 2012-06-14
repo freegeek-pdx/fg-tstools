@@ -1,0 +1,81 @@
+#!/bin/bash
+help(){
+        cat <<EOF 
+        usage ts_reset_ windowmanger [OPTION]
+        -h              prints this message
+        -u [USERNAME]   specify the user whose desktop will be reset.
+        -p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
+	
+	Resets a users desktop/windowmanager to the default settings.
+	This will reset ALL of a users desktop settings. Don't use it to reset the panel, use ts_reset_panel. This should only be used if things are really mesesed up.
+EOF
+}
+
+# source common functions
+FUNCTIONS=ts_functions.sh # /path/to../
+source $FUNCTIONS
+
+### MAIN ###
+
+### process options ###
+while getopts ":hu:p:" option; do
+        case $option in
+                h) help
+                   exit 0
+                ;;
+                u) user=$OPTARG
+		;;
+                p) path="$OPTARG"
+                ;;
+                \?) help
+                    exit 1
+                ;;
+        esac
+done
+
+if [[ -z $user ]]; then
+        user=$USER
+	self_check=true
+	if test_for_root; then
+		echo "If resetting for the current user do not run this as root"
+		exit 3
+	fi
+elif ! test_for_root; then
+       echo "Could not proceed"
+	echo "are you root?"
+       	exit 3
+elif ! test_for_user $user $path; then
+       	echo "$user not found! exiting..."
+       	exit 3
+fi
+
+### reset desktop ###
+# recursive uset of gnome schemas
+for setting in /apps/compiz /apps/metacity /desktop/gnome/session /schemas/desktop/gnome/session /apps/panel /apps/gdm /apps/gnome-session /apps/nautilus
+do	
+	if ! reset_gconf $user $setting $path; then
+        	echo "gconf failed to reset $setting" 
+        	EXIT=3
+	fi
+#        if ! rm -rf /home/$user/.gconf/$setting; then
+#                echo "gconf failed to remove $setting" 
+#                EXIT=3
+#        fi
+done
+
+if [[ -e /home/$user/.local/share/applications/mimeapps.list ]]; then 
+	rm /home/$user/.local/share/applications/mimeapps.list
+fi
+
+if [[ self_check ]]; then
+	if ! pkill gnome-panel; then
+		echo "You might need to log out and log in again"
+		EXIT=2
+	fi
+fi
+if [[ -z  $EXIT ]] ; then
+        exit $EXIT
+else
+        exit 0
+fi
+

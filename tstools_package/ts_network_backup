@@ -1,0 +1,318 @@
+#!/bin/bash
+help(){
+        cat <<EOF 
+Usage: ts_network_backup  [OPTION(S)]
+Create or restore network backup. 
+
+By default it backs up the contents of /home, the users on the system and the 
+packages that have been installed (via apt-get, Ubuntu Software Center etc). 
+
+        -h              	Prints this message
+        -c ticket number 	Create network backup
+	-r backup directory 	Restore network backup. The backup directory 
+				should be in the format date-ticket_number.
+	-d 			Data only. Does not backup/restore users or 
+				packages.
+				Use of this option is strongly discouraged.
+	-u 			Users and data only. Does not backup/restore 
+				packages. 
+				Use of this option is discouraged.
+	-l log file		Log messages to file rather than stdout.
+				Be careful not to use the same path for backing
+				up and restoring, or the  log file may get 
+				overwritten.
+	-a /path/to/directory   Alternative directory to backup. implies -d but
+				does not set it automatically.
+				Use this if you want to backup something
+				other than the home directory.
+				Suggests the use of -A for restoring backups.
+	-A /path/to/directory	Use this to restore the backup to somewhere
+				other than the default (/home)
+                                Can be used with or without -u or -d 
+				suggests the later (required if needed). 
+
+	-p /path/to/home	Use this if the home folder you want to
+				backup is not in its usual place i.e. if you
+				to backup an external/mounted drive 
+				rather than /home.
+				You do not need to add home on the end but the
+				script does not mind either way. 
+				Can be used with or without -u or -d. 	
+	
+	Use this to create or restore network backups. By default it will attempt to restore users, their data and settings, and the progams installed on the machine. 
+
+
+EOF
+}
+
+
+# source common functions
+MAIN_FUNCTIONS=ts_functions.sh # /path/to../
+NB_FUNCTIONS=ts_network_backup_functions.sh
+source $MAIN_FUNCTIONS
+source $NB_FUNCTIONS
+
+### MAIN ###
+
+if [[ -z $1 ]]; then
+		help
+                exit 1
+        fi
+
+while getopts ":hc:r:l:a:A:p:du" option; do
+       case $option in
+                h) help
+                   exit 0
+                ;;
+                c) create_backup="true"
+                   ticket_number="$OPTARG"
+		   backup_dir="$(date +%Y%m%d)-${ticket_number}"
+		;;
+		r) restore_backup="true"
+                   backup_dir="$OPTARG"
+		;;
+		d)
+		   data_only="true"
+                   no_apt="true"
+                   no_user_passwords="true"
+                   data_only="true"
+                ;;
+                u) no_apt="true"
+                   users_and_data_only="true"
+                ;;
+                
+		l) use_log="true"
+		   log_file="$OPTARG"
+		;;
+		a) no_apt="true"
+                   no_user_passwords="true"
+                   data_only="true"
+		   path="$OPTARG"
+		;;
+		A) path="$OPTARG"
+		;;
+		p) 
+		   cut_path=$(echo "$OPTARG" |sed -r -e 's:/home/?$::' -e 's/\/*$//') 
+		   ext_path=$cut_path
+		   path="${cut_path}/home"
+		   chroot_path="chroot $ext_path"
+		;;
+        	\?)
+      		   echo "Invalid option: -$OPTARG" >&2
+      		   exit 1
+      		;;
+    		:)
+      		   echo "Option -$OPTARG requires an argument." >&2
+      		   exit 1
+      		;;
+		esac
+done
+
+#sanity checks
+if ! test_for_root ; then
+                echo "Could not proceed!"
+                echo "Are you root?"
+                exit 3
+fi
+# if this machine is tsdata a path must be supplied
+# otherwise some dumbass will back up the wrong thing
+if [[ ! $ext_path && $HOSTNAME = "tsdata" ]]; then
+	echo 'YOU MUST USE THE -p OPTION TO SPECIFY THE PATH OF THE 
+DIRECTORY YOU WISH TO BACKUP WHEN YOU ARE ON TSDATA!!!'
+	exit 3
+fi
+ 
+# process options
+if [[ $create_backup  &&  $restore_backup ]]; then 
+	echo "Only one of the -c or -r options can be used";
+	exit 3
+
+elif [[ ! $create_backup && ! $restore_backup ]]; then 
+        echo "One of the -c or -r (or -h help) options must  be used. Arguments must be supplied with -c & -r.";
+        exit 3
+
+elif [[ $data_only  &&  $users_and_data_only ]]; then
+        echo "The -u or -d options are mutually exclusive";
+        exit 3
+else
+	# set paths etc
+	if [[ ! $path ]]; then 
+		path="/home"
+	fi
+	if [[ $use_log ]]; then	
+		if [[ ! $log_file ]]; then
+			echo "You forgot to specify a logfile!"
+			echo "Using ts_backup.log in the current directory."
+			log_file="ts_backup.log"
+		fi
+		if [[ $(check_file_write "$log_file") -ne 0 ]]; then
+			echo "Couldn't write to $log_file"
+			echo "Is it on a writable file system?"
+			exit 3
+		fi
+	fi
+fi
+
+#CONFIG
+group_file="/${path}/groups"
+password_file="/${path}/passwords"
+shadow_file="/${path}/shadows"
+dpkg_file="/${path}/dpkg.out"
+sources_path="${path}/apt/"
+backup_user="tsbackup"
+backup_host="tsbackup"
+backup_path="/var/tsbackup"
+
+
+#################
+# Create Backup #
+#################
+
+if [[ $create_backup ]]; then
+
+	# unless no_apt is set back up record of packages installed
+	if [[ ! $no_apt ]]; then
+                if ! backup_sources_msg="$(backup_sources $sources_path $ext_path)" ; then
+	                write_msg "Encountered problem backing up software sources" $log_file        
+			write_msg "$backup_sources_msg" $log_file
+                        exit 3
+		else
+			write_msg "$backup_sources_msg" $log_file
+		fi
+
+		if ! aptbackup="$(backup_apt $dpkg_file $ext_path)"; then
+			write_msg "Backing up package files list failed!" $log_file
+                        write_msg "$aptbackup" $log_file	
+			write_msg "dpkg --get-selections exited with error code $aptbackup_return" $log_file 
+			exit 3
+		else
+			write_msg "Backed up a list of installed packages" $log_fiile
+		fi
+	fi
+
+	if [[ ! $no_user_passwords ]]; then
+		if ! backup_users_check="$(backup_users_test "$path")"; then
+			write_msg "$backup_users_check" $log_file
+			exit 3		  
+		elif ! user_backup=$(backup_users "$path" "$ext_path");then
+			write_msg "$user_backup" $log_file
+			exit 3
+		else
+			write_msg "$user_backup" $log_file
+		fi
+	fi
+
+	if ! config_check=$(backup_config $path $ext_path); then
+		write_msg "Could not backup /etc" $log_file
+		exit $config_check
+	fi
+
+	echo "Preparing to rsync network backup..."
+
+	if ! make_backup="$(create_backup $path $backup_user $backup_host $backup_path $backup_dir )"; then
+		write_msg "$make_backup" $log_file
+		exit $backup_check
+	else
+		write_msg "Successfully created network backup on tsbackup at /var/tsbackup/${backup_dir}" $log_file
+	fi
+
+##################
+# Restore Backup #
+##################
+elif [[ $restore_backup ]] ; then
+
+        # not the same as backup_password_files
+        if ! backup_passwords_check=$(backup_passwords $ext_path); then
+		write_msg "$backup_passwords_check" $log_file
+		write_msg "Failed to backup password files ..exiting" $log_file
+		exit 3
+	else
+		write_msg "$backup_passwords_check" $log_file
+	fi
+
+        
+	if ! restorebackup=$(restore_backup $backup_user $backup_host $backup_path $backup_dir $path); then
+		restore_check=$?
+		write_msg $restorebackup $log_file
+                write_msg "WARNING! Could not restore backup!!!" $log_file
+                exit $restore_check
+	else
+		if [[ ! $no_user_passwords ]];  then
+			if ! restore_users_test=$(restore_users $path $ext_path); then
+				write_msg $restore_users_test $log_file
+				write_msg "WARNING! users may have been deleted from the system" $log_file
+				write_msg "Before proceeding restore $backup_passwords_check" $log_file
+				write_msg "to /etc/passwd /etc/shadow /etc/group" $log_file
+				exit 3
+			else 
+				write_msg "Restored users" $log_file
+			fi
+		fi
+
+		if [[ ! $no_apt ]]; then
+		# add test [if -A and not -d (-or u) then] i
+		# do the user etc/apt files exist? no? warn / ignore
+		# Actually restore_packages will check and exit if not found
+		# we can let the user figure it out from there.
+		
+		
+			sources_file="$sources_path/sources.list"
+			# if user had multiverse enabled
+			grep multiverse $sources_file
+			multiverse_test=$?
+			# if user had partner software enabled
+			grep partner $sources_file
+			partner_test=$?
+			codename=$($chroot_path lsb_release -c |  awk '{print $2}') # lucid etc
+			if (( $multiverse_test == 0 )); then
+			#identify and comment out  relevant lines 
+				if ! multiverse_restore=$(restore_multiverse $codename $ext_path); then	
+					write_msg "WARNING: unable to add multiverse to sources list" $log_file
+					write_msg "$multiverse_restore" $log_file
+					exit 3
+				fi
+			else
+				write_msg "Added multiverse to software sources" $log_file
+			fi
+
+			if (( $partner_test == 0 )); then
+			 #identify and comment out  relevant lines 
+				if ! restore_partners $codename $ext_path; then
+					write_msg "unable to add Canonical partners to software sources" $log_file
+				else
+					write_msg "Added Canonical partners to software sources" $log_file
+				fi
+      			fi
+
+			# check to see if any PPA files in sources.list.d
+			if [[ -n "$(ls -A $sources_path/sources.list.d)" ]]; then
+				cp -R "$sources_path/sources.list.d/*" $ext_path/etc/apt/sources.list.d
+			else
+                        	write_msg "Added PPA's to software sources" $log_file
+			fi
+		
+			if ! packagerestore=$(restore_packages $dpkg_file $ext_path); then
+				write_msg "$packagerestore" $log_file
+				exit 3
+			else
+				write_msg "$packagerestore" $log_file
+			fi
+		fi # End no-apt
+
+	write_msg "Backup successfully restored" $log_file
+	fi
+
+#######################
+# restore backup ends #
+#######################
+
+else	
+	# Should never get here as we should have caught it 
+	# at the top of the sanity check
+	echo "You should never see this message. If you are reading it now something is very, very wrong."
+	exit 1
+fi
+
+# Clean up after ourselves -- leaves backup of /etc in place 
+
+rm -r /home/apt /home/passwd /home/shadow /home/group /home/dpkg.out 

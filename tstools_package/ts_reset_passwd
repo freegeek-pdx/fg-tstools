@@ -1,0 +1,59 @@
+#!/bin/bash
+help(){
+	cat <<EOF 
+	usage ts_reset_passwd [OPTION]
+	-h		prints this message
+	-u [USERNAME]	specify the user whose password will be reset.         		-p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
+	
+	Resets a users password to the standard oem password and sets it to expire on the next login, causing the system to prompt the users for a new passowrd. 
+EOF
+}
+
+# source common functions
+FUNCTIONS=ts_functions.sh # /path/to../
+source $FUNCTIONS
+
+phash="zyrSQxJlOIQTo"
+
+### MAIN ###
+
+while getopts ":hu:p:" option; do
+	case $option in 
+		h) help
+		   exit 0
+		;;
+		u) user=$OPTARG
+		;;
+                p) path="$OPTARG"
+                ;;
+		\?) help
+		    exit 1
+		;;
+	esac
+done
+
+if [[ -z $user ]]; then
+        user=$(choose_username $path)
+fi
+
+
+if ! test_for_root; then       
+	echo "Could not proceed"
+        echo "are you root?"
+        exit 3
+elif ! test_for_user $user $path; then        
+	echo "$user not found! exiting..."
+        exit 3
+fi
+
+
+if ! reset_password $user "$phash" $path; then
+	echo "password for $user could not be reset"
+	exit 3
+elif ! expire_password $user $path; then
+	echo "WARNING:Password for $user has been reset to the standard (oem) password. It will not expire"
+	exit 3
+else
+	echo "password for $user has been set to the standard (oem) password. It will expire on the next login and the user will be prompted to reset it."
+	exit 0
+fi

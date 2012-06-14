@@ -1,0 +1,68 @@
+#!/bin/bash
+help(){
+        cat <<EOF 
+        usage: ts_make_tsuser [-p]
+
+        -p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
+
+        Adds tsuser to a system with root privileges. The user is removed on reboot or shutdown unless this command was run on an external/mounted disk e.g. from a system rescue cd. If this is the case you will need to run ts_revert_passwords when you are finished"
+
+EOF
+}
+
+# source common functions
+FUNCTIONS=ts_functions.sh # /path/to../
+source $FUNCTIONS
+
+### MAIN ###
+
+### Process options ###
+
+while getopts ":hp:" option; do
+        case $option in
+                h) help
+                   exit 0
+                ;;
+                p) path="$OPTARG"
+                ;;
+                \?) help
+                    exit 1
+                ;;
+        esac
+done
+
+
+if [[ $path ]]; then 
+	chroot_path="chroot $path"
+fi
+
+
+
+
+# source common functions
+FUNCTIONS=ts_functions.sh # /path/to../
+source $FUNCTIONS
+pwhash="zogN6hOIYS8W2"
+user="tsuser"
+uid="50001"
+### MAIN ###
+if ! test_for_root; then
+        echo "Could not proceed"
+        echo "are you root?"
+        exit 3
+elif ! password_backup=$(backup_passwords_for_reset $path); then
+        echo $password_backup
+	echo "WARNING:Password files could not be backed up! exiting..."
+        exit 3
+else
+        echo $password_backup
+fi
+
+# set uid and gid to something unlikely to be used elsewhere
+if ! $chroot_path useradd --create-home --user-group --shell /bin/bash --password "$pwhash" --uid $uid --groups adm --groups admin $user ;then
+	echo "WARNING: Could not create user, exiting..."
+	exit 3
+else	
+	echo "user $user has been created with sudo privileges. It will be deleted on shutdown/reboot."
+	exit 0
+fi

@@ -1,0 +1,76 @@
+#!/bin/bash
+
+DISCSPAN=/usr/local/bin/discspan.py
+
+### Functions ###
+help_install(){
+		echo "This is just a wrapper around the discspan.py script. For it to work you need to make sure discspan.py has been copied to /usr/local/bin/ and  discspan.ini to /usr/local/etc/ or /etc/. You will need to edit this file to specify the drive speed.
+
+You can download it from Source Forge: 
+	http://sourceforge.net/projects/discspan/"
+		exit 2
+}
+
+check_ini(){
+	if [[ -e //usr/local/etc/discpan.ini ]]; then 
+		true
+	elif [[ /etc/discpan.ini ]]; then
+		true 
+	else
+		help_install
+	fi
+}
+
+
+### functions end ###
+
+### MAIN ###
+
+# check to see if files are installed in place.
+
+if [[ ! -e /usr/local/bin/discspan.py ]]; then 
+	help_install
+	fi
+
+check_ini
+
+# echo warning
+
+cat <<EOF 
+This is (a wrapper for) the discspan.py script. It will take the contents of a  directory specified by --dir and burn it to one or more DVD's 
+It is fussy about a couple of things. It doesn't always like it when a blank
+disc is inserted before it is started and it really doesn't like it if you install a second (or third etc) disc before it is ready. It is not very clear (or at least disarmingly literal)  about the last part.
+
+So when it says "press enter to continue" or some such, just press Enter! It it will prompt you for the disc when it is ready.
+
+It is designed for lots of small files and can't cope with files bigger than the disc capacity.
+
+You also need to watch out for the limits of the ISO file system e.g. filenames more than 32 characters long, containing odd characters etc. 
+
+EOF
+
+# do write a stupid line to fix colourization done 
+ 
+#  check for help call 
+if [[ $1 == -h || $1 == --help ]]; then
+	$DISCSPAN -h
+	exit
+fi
+
+for option in $@
+ do
+	if [[ $option =~ --dir ]]; then
+		dir_check=0
+	fi
+done
+
+if [[ ! $dir_check ]]; then
+	echo "please specify a directory to backup with $dir"
+	exit
+else 
+
+	$DISCSPAN "$@"
+fi
+
+
+

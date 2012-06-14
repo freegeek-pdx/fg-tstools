@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# identifying disks
+#sudo blkid  -o list
+#sudo blkid
+# ls -l /dev/disk/by-uuid
+# cat /proc/mounts
+
+
+## check what output you get with unmounted disks

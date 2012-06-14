@@ -1,0 +1,52 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          cleanup_tstools
+# Required-Start:
+# Required-Stop:
+# Default-Start:
+# Default-Stop:      1
+# Short-Description: Removes ts user and/or restores users passwords 
+# Description:
+### END INIT INFO
+
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+do_cleanup(){
+# check for tuser and delete if necessary
+user_check=`grep tsuser /etc/passwd | awk -F: '{print $3}'`
+if [[ -n $user_check ]]; then  
+	deluser --remove-home tsuser
+fi
+
+# check to see if /etc/passed etc backed and restore if necessary
+
+if [[ -e /etc/passwd.freegeek_ts_bak ]]; then
+	mv /etc/passwd.ts_bak /etc/passwd
+fi
+if [[ -e /etc/shadow.freegeek_ts_bak ]]; then
+	mv /etc/shadow.ts_bak /etc/shadow
+fi
+if [[ -e /etc/group.freegeek_ts_bak ]]; then
+        mv /etc/group.ts_bak /etc/group
+fi
+}
+
+case "$1" in
+  start)
+        # No-op
+        ;;
+  restart|reload|force-reload)
+        echo "Error: argument '$1' not supported" >&2
+        exit 3
+        ;;
+  stop)
+        do_cleanup
+        ;;
+  *)
+        echo "Usage: $0 start|stop" >&2
+        exit 3
+        ;;
+esac
+
+
