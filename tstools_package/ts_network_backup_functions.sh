@@ -319,8 +319,18 @@ check_ticket_number(){
 	#N.B. actually tests for 5 digits, will stop working at some distant point in the future
 	regex="^[0-9]{5}$"
 	if [[ ! $ticketnumber =~ $regex ]] ; then
-                echo "Not a valid ticket number" 
-                return 3
+                return 1
+	else
+		return 0
+	fi
+}
+
+check_valid_chars(){
+	local input=$1
+	#checks to see if any characters other than numbers letters and underscores are present
+	regex="[^A-Za-z0-9_]"
+	if [[ ! $input =~ $regex ]]; then
+		return 1
 	else
 		return 0
 	fi
