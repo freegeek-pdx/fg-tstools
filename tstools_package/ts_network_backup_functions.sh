@@ -312,3 +312,16 @@ cleanup(){
 	rm -r $@
 	return $?
 }
+
+check_ticket_number(){
+	local ticketnumber=$1
+	# test for valid ticket number
+	#N.B. actually tests for 5 digits, will stop working at some distant point in the future
+	regex="^[0-9]{5}$"
+	if [[ ! $ticketnumber =~ $regex ]] ; then
+                echo "Not a valid ticket number" 
+                return 3
+	else
+		return 0
+	fi
+}
