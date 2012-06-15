@@ -1,4 +1,10 @@
 #!/bin/bash
+#User definable Configuration
+backup_user="tsbackup"
+backup_host="tsbackup"
+backup_path="/var/tsbackup"
+#ends
+
 help(){
         cat <<EOF 
 Usage: ts_network_backup  [OPTION(S)]
@@ -53,9 +59,11 @@ EOF
 }
 
 
-# source common functions
+# These should point to the library functions and should have been set by the install process
 MAIN_FUNCTIONS=ts_functions.sh # /path/to../
 NB_FUNCTIONS=ts_network_backup_functions.sh
+ 
+# source common functions
 source $MAIN_FUNCTIONS
 source $NB_FUNCTIONS
 
@@ -158,17 +166,15 @@ fi
 
 # test for valid ticket number
 #N.B. actually tests for 5 digits
-regex="^[0-9]{5}$"
-if [[ ! $ticket_number =~ $regex ]] ; then
-		echo "Not a valid ticket number" 
+if ! check_ticket_number $ticket_number  ; then
+		echo "$ticket_number is not a valid ticket number" 
 		exit 3
 fi
+
 # add addendum to ticket number if present
 if [[ $addendum ]]; then
-	regex="[^A-Za-z0-9_]"
-	if [[ $addendum =~ ]]; then
-		ticket_number="${ticket_number}-$addendum"
-	else
+	
+	if ! check_valid_chars $addendum; then 
 		echo "Only nubers, letters and _ can be added to a ticket number"
 		echo "You do not need to use - it will will be added automatically"
 		exit 3
@@ -184,15 +190,12 @@ DIRECTORY YOU WISH TO BACKUP WHEN YOU ARE ON TSDATA!!!'
 	exit 3
 fi
  
-#CONFIG
+# Set Common paths
 group_file="/${path}/groups"
 password_file="/${path}/passwords"
 shadow_file="/${path}/shadows"
 dpkg_file="/${path}/dpkg.out"
 sources_path="${path}/apt/"
-backup_user="tsbackup"
-backup_host="tsbackup"
-backup_path="/var/tsbackup"
 
 
 #################
@@ -247,7 +250,7 @@ if [[ $create_backup ]]; then
 		write_msg "$make_backup" $log_file
 		exit $backup_check
 	else
-		write_msg "Successfully created network backup on tsbackup at /var/tsbackup/${backup_dir}" $log_file
+		write_msg "Successfully created network backup on $backup_host at ${backup_path}/${backup_dir}" $log_file
 	fi
 
 ##################
