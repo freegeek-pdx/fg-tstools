@@ -1,9 +1,12 @@
 #!/bin/bash
-#User definable Configuration
-backup_user="tsbackup"
-backup_host="tsbackup"
-backup_path="/var/tsbackup"
-#ends
+# CONFIGURATION
+# The following files should be set on/by install and are not intended to be user editable
+#User definable Configuration is in the following file. Note it is intended to be a shared file.
+CONFIG_FILE="ts_network_backup.cfg"
+MAIN_FUNCTIONS="ts_functions.sh" # /path/to../
+NB_FUNCTIONS="ts_network_backup_functions.sh"
+# Config ends
+source $CONFIG_FILE
 
 help(){
         cat <<EOF 
@@ -57,11 +60,6 @@ packages that have been installed (via apt-get, Ubuntu Software Center etc).
 
 EOF
 }
-
-
-# These should point to the library functions and should have been set by the install process
-MAIN_FUNCTIONS=ts_functions.sh # /path/to../
-NB_FUNCTIONS=ts_network_backup_functions.sh
  
 # source common functions
 source $MAIN_FUNCTIONS
