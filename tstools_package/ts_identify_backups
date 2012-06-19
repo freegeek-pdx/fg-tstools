@@ -41,21 +41,12 @@ get_candidates(){
 	local backupuser=$2
 	local backuphost=$3
 	local backuppath=$4
+	list_command="ls $backuppath | grep $ticketnumber"
 	# ssh into backup server and list contents of backup directory
-	if ! candidatelist=$(/usr/bin/ssh ${backupuser}@${backuphost} ls ${backuppath}); then 
-		#ssh failed
-		return 1
-	else	
-		# loop over listing and identify folders whose name contains ticket no
-		list_of_folders=$(for file in  $candidatelist; do echo $file | grep $ticketnumber;done)
-		if [[ -z $list_of_folders ]]; then
-			# no candidates found
-			return 3
-		else
-		 	echo "$list_of_folders"
-			return 0
-		fi
-	fi
+	candidatelist=$(/usr/bin/ssh ${backupuser}@${backuphost} "$list_command")
+	clreturn=$?
+	echo "$candidatelist"
+	return $clreturn
 }
 
 #FUNCTIONS END
@@ -90,9 +81,9 @@ if [[ $get_can_return -eq 0 ]]; then
 	for folder in $candidate_list; do
 		write_msg "$folder" $output_file 
 	done
-elif [[ $get_can_return -eq 3  ]]; then
+elif [[ $get_can_return -eq 1  ]]; then
 	echo "No matching folders found"
-elif [[ $get_can_return -eq  1 ]]; then
-	echo "Could not connect to $backup_host"
+else
+	echo "Error $get_can_return connecting  to $backup_host"
 fi
 exit $get_can_return	
