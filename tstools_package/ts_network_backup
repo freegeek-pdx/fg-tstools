@@ -357,7 +357,7 @@ if [[ ! $data_only ]]; then
 		to_remove="${toremove} /home/passwd /home/shadow /home/group"
 	fi
 	# runs rm -r on files/dirs
-	if ! cleanup $to_remove
+	if ! cleanup $to_remove; then
 		echo "Could not remove $to_remove, you may need to remove these manually. Alternatively they may not have been there in the first place and you should investigate why."
 		exit 3
 	fi
