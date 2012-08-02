@@ -68,7 +68,7 @@ test_for_uid(){
 	local my_uid=$(id -u $my_user)
 	echo $my_uid
 }
-
+test_for_user(){
 	local path=$2
 	if [[ $path ]]; then
         	local chroot_path="chroot $path"
