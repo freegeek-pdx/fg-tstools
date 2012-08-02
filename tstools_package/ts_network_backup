@@ -43,6 +43,7 @@ packages that have been installed (via apt-get, Ubuntu Software Center etc).
 				Use this if you want to backup something
 				other than the home directory.
 				Suggests the use of -A for restoring backups.
+	-f 			Force the backup of a single file rather than a directory
 	-A /path/to/directory	Use this to restore the backup to somewhere
 				other than the default (/home)
                                 Can be used with or without -u or -d 
@@ -72,7 +73,7 @@ if [[ -z $1 ]]; then
                 exit 1
         fi
 
-while getopts ":hc:r:l:t:a:A:p:du" option; do
+while getopts ":hc:r:l:t:a:A:p:duf" option; do
        case $option in
                 h) help
                    exit 0
@@ -101,6 +102,7 @@ while getopts ":hc:r:l:t:a:A:p:du" option; do
 		a) no_apt="true"
                    no_user_passwords="true"
                    data_only="true"
+		   alt_path="true"
 		   path="$OPTARG"
 		;;
 		A) path="$OPTARG"
@@ -110,6 +112,8 @@ while getopts ":hc:r:l:t:a:A:p:du" option; do
 		   ext_path=$cut_path
 		   path="${cut_path}/home"
 		   chroot_path="chroot $ext_path"
+		;;
+		f) force_file="true"
 		;;
         	\?)
       		   echo "Invalid option: -$OPTARG" >&2
@@ -134,6 +138,9 @@ elif [[ ! $create_backup && ! $restore_backup ]]; then
 elif [[ $data_only  &&  $users_and_data_only ]]; then
         echo "The -d or -a and -u options are mutually exclusive";
         exit 3
+elif [[ $force_file &&  ! $alt_path ]]; then
+	echo "the -a option must be used with -f"
+	exit 3
 else
 	# set paths etc
 	if [[ ! $path ]]; then 
@@ -160,6 +167,25 @@ if ! test_for_root ; then
                 echo "Could not proceed!"
                 echo "Are you root?"
                 exit 3
+fi
+
+# check to see if path is actually a directory etc
+
+if ! check_dir_read $path; then
+	error=$?
+	if [[ $error == "5" ]] ; then 
+		echo "$path does not exist!"
+		exit $error
+	elif [[ $error == "4" ]] ; then
+		echo "$path is not readable!"
+		exit $error
+	elif [[ $error == "6"  ]] ; then
+		if [[ ! $force_file ]] 
+		echo "$path is not a directory! This is probably not what you meamt to do"
+		echo "if you really meant to use back up a single file use -f option with -a"
+		exit $error
+		fi
+	fi
 fi
 
 # test for valid ticket number
