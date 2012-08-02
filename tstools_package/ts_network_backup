@@ -170,21 +170,19 @@ if ! test_for_root ; then
 fi
 
 # check to see if path is actually a directory etc
-
-if ! check_dir_read $path; then
-	error=$?
-	if [[ $error == "5" ]] ; then 
-		echo "$path does not exist!"
-		exit $error
-	elif [[ $error == "4" ]] ; then
-		echo "$path is not readable!"
-		exit $error
-	elif [[ $error == "6"  ]] ; then
-		if [[ ! $force_file ]] ; then
-		echo "$path is not a directory! This is probably not what you meamt to do"
-		echo "if you really meant to use back up a single file use -f option with -a"
-		exit $error
-		fi
+check_dir_read $path
+error=$?
+if [[ $error == "5" ]] ; then 
+	echo "$path does not exist!"
+	exit $error
+elif [[ $error == "4" ]] ; then
+	echo "$path is not readable!"
+	exit $error
+elif [[ $error == "6"  ]] ; then
+	if [[ ! $force_file ]] ; then
+	echo "$path is not a directory! This is probably not what you meamt to do"
+	echo "if you really meant to use back up a single file use -f option with -a"
+	exit $error
 	fi
 fi
 
