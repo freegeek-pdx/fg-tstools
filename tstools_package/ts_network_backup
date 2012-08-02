@@ -180,7 +180,7 @@ if ! check_dir_read $path; then
 		echo "$path is not readable!"
 		exit $error
 	elif [[ $error == "6"  ]] ; then
-		if [[ ! $force_file ]] 
+		if [[ ! $force_file ]] ; then
 		echo "$path is not a directory! This is probably not what you meamt to do"
 		echo "if you really meant to use back up a single file use -f option with -a"
 		exit $error
