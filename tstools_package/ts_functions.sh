@@ -34,7 +34,7 @@ check_dir_read(){
                 return 5
         elif [[ ! -r $dir ]]; then
                 return 4
-        elif [[ ! -d r $dir ]]; then
+        elif [[ ! -d $dir ]]; then
 		return 6
 	else
                 return 0
