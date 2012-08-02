@@ -43,7 +43,7 @@ fi
 if ! test_for_root; then
         echo "You are not root! exiting..."
         exit 3
-elif ! test_for_user $usera $path; then
+elif ! test_for_user $user $path; then
         echo "$user not found! exiting..."
         exit 3      
 ### reset ownership ###
