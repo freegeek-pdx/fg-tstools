@@ -144,7 +144,7 @@ elif [[ $force_file &&  ! $alt_path ]]; then
 else
 	# set paths etc
 	if [[ ! $path ]]; then 
-		path="/home"
+		path="/home/"
 		# ext_path is only need if we are working relative to something other than /
 		# i.e. is null
 	fi
@@ -212,14 +212,22 @@ DIRECTORY YOU WISH TO BACKUP WHEN YOU ARE ON TSDATA!!!'
 	exit 3
 fi
  
-# Set Common paths
-group_file="/${path}/groups"
-password_file="/${path}/passwords"
-shadow_file="/${path}/shadows"
-dpkg_file="/${path}/dpkg.out"
-sources_path="${path}/apt/"
-
-
+if [[ ! $force_file ]]; then
+	# ensure path has / on the end
+	if [[ ${path:${#path}-1} != "/" ]]; then
+		path="${path}/"
+	fi
+	# Set Common paths
+	if [[ ! $no_user_passwords ]]; then 
+	group_file="${path}groups"
+	password_file="${path}passwords"
+	shadow_file="${path}shadows"
+	fi
+	if [[ ! $no_apt ]]; then
+	dpkg_file="${path}dpkg.out"
+	sources_path="${path}apt/"
+	fi
+fi
 #################
 # Create Backup #
 #################
