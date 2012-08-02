@@ -27,6 +27,21 @@ check_file_read(){
         fi
 }
 
+
+check_dir_read(){
+        dir=$1
+        if [[ ! -e $dir ]]; then
+                return 5
+        elif [[ ! -r $dir ]]; then
+                return 4
+        elif [[ ! -d r $dir]]; then
+		return 6
+	else
+                return 0
+        fi
+}
+
+
 choose_username(){
 	local path=$1
 	while read line  ; do
@@ -54,8 +69,6 @@ test_for_uid(){
 	echo $my_uid
 }
 
-test_for_user(){
-	local my_user=$1
 	local path=$2
 	if [[ $path ]]; then
         	local chroot_path="chroot $path"
