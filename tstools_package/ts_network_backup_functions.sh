@@ -146,16 +146,16 @@ restore_users(){
         # note that copying files back across is not sufficient 
         # need to extract values from files and added to new copies
 	for file in passwd group shadow; do
-	check_file_read "$path/$file"
-	local retval=$?	
-	if [[ $retval -ne 0 ]] ; then
-			if (( $retval == 5 )); then
-				echo "$path/$file does not exist!" 
-			elif (( $retval == 4 )); then
-				echo "Can not read $path/$file!"
-			fi
-			local break_value=1
-	fi
+		check_file_read "$path/$file"
+		local retval=$?	
+		if [[ $retval -ne 0 ]] ; then
+				if (( $retval == 5 )); then
+					echo "$path/$file does not exist!" 
+				elif (( $retval == 4 )); then
+					echo "Can not read $path/$file!"
+				fi
+				local break_value=1
+		fi
 	done
 	# checks if value is set
 	if declare -p break_value; then
@@ -171,7 +171,7 @@ restore_users(){
 			echo "$user_restore"
 			return 3
 		fi
-	done < ${path/passwd}
+	done < ${path}/passwd
 	return 0
 }
 
