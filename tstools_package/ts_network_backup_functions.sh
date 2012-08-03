@@ -7,10 +7,10 @@ check_for_backup_dir(){
 	local backuppath=$3
 	local backupdir=$4
 	# success if finds backupdir
-	if ssh $backupuser@$backuphost ls $backuppath/$backupdir; then
-		exit 0
+	if ssh $backupuser@$backuphost ls $backuppath/$backupdir &> /dev/nul; then
+		return 0
 	else
-		exit 1
+		return 1
 	fi
 }
 
