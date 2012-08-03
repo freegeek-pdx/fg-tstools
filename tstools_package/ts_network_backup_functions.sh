@@ -146,6 +146,7 @@ restore_users(){
         # note that copying files back across is not sufficient 
         # need to extract values from files and added to new copies
 	for file in passwd group shadow; do
+		echo "p/f $path/$file"
 		check_file_read "$path/$file"
 		local retval=$?	
 		if [[ $retval -ne 0 ]] ; then
