@@ -1,6 +1,20 @@
 #!/bin/bash
 #functions for ts_network_backup
 #split out for convinience
+check_for_backup_dir(){
+	local backupuser=$1
+	local backuphost=$2
+	local backuppath=$3
+	local backupdir=$4
+	# success if finds backupdir
+	if ssh $backupuser@$backuphost:$backuppath/$backupdir; then
+		exit 0
+	else
+		exit 1
+	fi
+}
+
+
 backup_users_test(){
         local path=$1        
 	# check we can wrtite to the backup files
