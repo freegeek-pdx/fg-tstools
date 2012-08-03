@@ -334,7 +334,7 @@ elif [[ $restore_backup ]] ; then
 	if ! restorebackup=$(restore_backup $backup_user $backup_host $backup_path $backup_dir $path); then
 		restore_check=$?
 		echo "log $log_file"
-		write_msg $restorebackup $log_file
+		write_msg "$restorebackup" $log_file
                 write_msg "WARNING! Could not restore backup!!!" $log_file
                 exit $restore_check
 	else
