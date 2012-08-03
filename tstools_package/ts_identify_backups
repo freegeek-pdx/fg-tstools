@@ -57,7 +57,7 @@ while getopts "ht:o:" option; do
 	case "$option" in
 		h) help;;
 		t) ticket_number=$OPTARG;;
-		o) output_file=$OPTARG;;
+		o) logfile=$OPTARG;;
 		[?])  echo "bad option supplied" ; 
 			help;;	
 	esac
@@ -79,7 +79,7 @@ candidate_list=$(get_candidates $ticket_number $backup_user $backup_host $backup
 get_can_return=$?
 if [[ $get_can_return -eq 0 ]]; then
 	for folder in $candidate_list; do
-		write_msg "$folder" $output_file 
+		write_msg "$folder"  
 	done
 elif [[ $get_can_return -eq 1  ]]; then
 	echo "No matching folders found"
