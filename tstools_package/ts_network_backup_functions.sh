@@ -149,6 +149,8 @@ restore_users(){
 		echo "p/f $path/$file"
 		check_file_read "$path/$file"
 		local retval=$?	
+		echo "p/f $path/$file"
+
 		if [[ $retval -ne 0 ]] ; then
 				if (( $retval == 5 )); then
 					echo "$path/$file does not exist!" 
