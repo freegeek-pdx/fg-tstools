@@ -338,7 +338,7 @@ elif [[ $restore_backup ]] ; then
 	else
 		if [[ ! $no_user_passwords ]];  then
 			if ! restore_users_test=$(restore_users $path $ext_path); then
-				echo "error message: $restore_users_test"
+				write_msg "error message: $restore_users_test" $log_file
 				write_msg $restore_users_test $log_file
 				write_msg "WARNING! users may have been deleted from the system" $log_file
 				write_msg "Before proceeding restore $backup_passwords_check" $log_file
