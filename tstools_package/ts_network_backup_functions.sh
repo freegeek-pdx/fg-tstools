@@ -105,16 +105,16 @@ restore_user(){
 
 	#N.B. users may not be in file
 	# delete matching lines in /etc/passwd 
-        sed -i '/^$user:/ d' $extpath/etc/passwd
+        sed -i "/^$user:/ d" $extpath/etc/passwd
 	# delete existing encypted password 
-	sed -i '/^$user:/ d' $extpath/etc/shadow
+	sed -i "/^$user:/ d" $extpath/etc/shadow
 	# delete matching lines/existing groups
 echo "deleting existing group $gid  $extpath/etc/group"
 
 
 	grep $gid $extpath/etc/group
 
-	 if ! sed -i '/:$gid:/ d' $extpath/etc/group; then
+	 if ! sed -i "/:$gid:/ d" $extpath/etc/group; then
 		echo "failed"
 	else
 		echo "success"
