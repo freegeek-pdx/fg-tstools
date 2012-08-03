@@ -205,15 +205,14 @@ local msg="$@"  # <------- works to transmit msg but break log !!!
 #fi
 for line in $msg; do 
 	echo "$line"
+	if [[ $logfile ]]; then
+		if ! echo "$line" >>$logfile; then 
+		# should not hit here as already checked
+		echo "Could not write to Log File: $logfile"
+                exit 3
+		fi
+	fi
 done
-if [[ $logfile ]]; then
-	for line in $msg; do 
-        	if ! echo "$line" >>$logfile; then
-        		echo "Could not write to Log File: $logfile"
-        		exit 3
-        	fi
-	done
-fi
 return 0
 }
 
