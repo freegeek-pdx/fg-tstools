@@ -7,7 +7,7 @@ check_for_backup_dir(){
 	local backuppath=$3
 	local backupdir=$4
 	# success if finds backupdir
-	if ssh $backupuser@$backuphost:$backuppath/$backupdir; then
+	if ssh $backupuser@$backuphost ls $backuppath/$backupdir; then
 		exit 0
 	else
 		exit 1
