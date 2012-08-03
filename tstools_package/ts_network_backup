@@ -241,7 +241,8 @@ fi
 if [[  ! $force_overwrite ]]; then
 	if check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir; then
 		write_msg "Backup dir already exists!" $log_file  
-	exit 3
+		exit 3
+	fi
 fi
 
 
