@@ -230,6 +230,7 @@ if [[ $restore_backup ]]; then
 	if ! check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir; then
 		write_msg "Backup directory does not exist" $log_file 
 		write_msg "Cowardly refusing to restore from non-existant backup" $log_file
+		exit 3
 	fi
 fi
 # if this machine is tsdata a path must be supplied
