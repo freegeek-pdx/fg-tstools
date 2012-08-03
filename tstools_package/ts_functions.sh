@@ -198,7 +198,7 @@ reset_gconf(){
 # write to error log and/or standard out 
 write_msg(){
 local msg="$@"  
-for line in $msg; do 
+for line in "$msg"; do 
 	echo "$line"
 	if [[ $logfile ]]; then
 		if ! echo "$line" >>$logfile; then 
