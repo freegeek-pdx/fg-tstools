@@ -109,6 +109,8 @@ restore_user(){
 	# delete existing encypted password 
 	sed -i '/^$user:/ d' $extpath/etc/shadow
 	# delete matching lines/existing groups
+echo "deleting existing group gid  $extpath/etc/group"
+
 	sed -i '/:$gid:/ d' $extpath/etc/group
 
 	if ! $chroot_path addgroup --gid $gid $user; then
