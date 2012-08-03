@@ -176,40 +176,54 @@ if ! test_for_root ; then
 fi
 
 # check to see if path is actually a directory etc
-check_dir_read $path
-error=$?
-if [[ $error == "5" ]] ; then 
-	write_msg "$path does not exist!" $log_file
-	exit $error
-elif [[ $error == "4" ]] ; then
-	write_msg "$path is not readable!" $log_file
-	exit $error
-elif [[ $error == "6"  ]] ; then
-	if [[ ! $force_file ]] ; then
-		write_msg "$path is not a directory! This is probably not what you meamt to do" $log_file
-		write_msg "if you really meant to use back up a single file use -f option with -a" $log_file
+if [[ $path ]] ; then 
+	check_dir_read $path
+	error=$?
+	if [[ $error == "5" ]] ; then 
+		write_msg "$path does not exist!" $log_file
 		exit $error
+	elif [[ $error == "4" ]] ; then
+		write_msg "$path is not readable!" $log_file
+		exit $error
+	elif [[ $error == "6"  ]] ; then
+		if [[ ! $force_file ]] ; then
+			write_msg "$path is not a directory! This is probably not what you meamt to do" $log_file
+			write_msg "if you really meant to use back up a single file use -f option with -a" $log_file
+			exit $error
+		fi
 	fi
-fi
-
-# test for valid ticket number
-#N.B. actually tests for 5 digits
-if ! check_ticket_number $ticket_number  ; then
-		write_msg "$ticket_number is not a valid ticket number" $log_file
-		exit 3
-fi
-
-# add addendum to ticket number if present
-if [[ $addendum ]]; then
-	
-	if ! check_valid_chars $addendum; then 
-		write_msg "Only nubers, letters and _ can be added to a ticket number" $log_file
-		write_msg "You do not need to use - it will will be added automatically" $log_file
+	if ! check_file_write $path; then
+		write_msg "$path is not writeable" $log_file
 		exit 3
 	fi
 fi
 
-
+# create backup checks
+if [[ $create_backup ]] ; then
+	# test for valid ticket number
+	#N.B. actually tests for 5 digits
+	if ! check_ticket_number $ticket_number; then
+			write_msg "$ticket_number is not a valid ticket number" $log_file
+			exit 3
+	fi
+	# if overwriting of backups not forced with -F 
+	if [[  ! $force_overwrite ]]; then
+		if check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir; then
+			write_msg "Backup dir already exists!" $log_file  
+			write_msg "Cowardly refusing to overwrite it" $log_file
+			exit 3
+		fi
+	fi
+	# add addendum to ticket number if present
+	if [[ $addendum ]]; then
+		
+		if ! check_valid_chars $addendum; then 
+			write_msg "Only nubers, letters and _ can be added to a ticket number" $log_file
+			write_msg "You do not need to use - it will will be added automatically" $log_file
+			exit 3
+		fi
+	fi
+fi
 # if this machine is tsdata a path must be supplied
 # otherwise some dumbass will back up the wrong thing
 if [[ ! $ext_path && $HOSTNAME = "tsdata" ]]; then
@@ -234,15 +248,6 @@ if [[ ! $force_file ]]; then
 	if [[ ! $no_apt ]]; then
 	dpkg_file="${path}dpkg.out"
 	sources_path="${path}apt/"
-	fi
-fi
-
-# if overwriting of backups not forced with -F 
-if [[  ! $force_overwrite ]]; then
-	if check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir; then
-		write_msg "Backup dir already exists!" $log_file  
-		write_msg "Cowardly refusing to overwrite it" $log_file
-		exit 3
 	fi
 fi
 
