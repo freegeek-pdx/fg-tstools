@@ -197,12 +197,7 @@ reset_gconf(){
 
 # write to error log and/or standard out 
 write_msg(){
-local msg="$@"  # <------- works to transmit msg but break log !!!
-		# quoting message misses line returns
-		# need global logfile
-#if [[ $2 ]]; then
-#        local logfile=$2
-#fi
+local msg="$@"  
 for line in $msg; do 
 	echo "$line"
 	if [[ $logfile ]]; then
