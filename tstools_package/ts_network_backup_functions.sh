@@ -142,15 +142,11 @@ restore_user(){
 restore_users(){
 	local path=$1
 	local extpath=$2
-	echo "path: $path"
         # note that copying files back across is not sufficient 
         # need to extract values from files and added to new copies
 	for file in passwd group shadow; do
-		echo "p/f $path/$file"
 		check_file_read "$path/$file"
 		local retval=$?	
-		echo "p/f $path/$file"
-
 		if [[ $retval -ne 0 ]] ; then
 				if (( $retval == 5 )); then
 					echo "$path/$file does not exist!" 
@@ -161,7 +157,7 @@ restore_users(){
 		fi
 	done
 	# checks if value is set
-	if declare -p break_value; then
+		if declare -p break_value &> /dev/null; then
 		exit 3
 	fi
         # read /home/password file or equivalent)
