@@ -11,13 +11,13 @@ test_for_root(){
 }
 
 check_file_write(){
-        file=$1
+        local file=$1
 	touch $file &>/dev/null
 	return $?
 }
 
 check_file_read(){
-        file=$1
+        local file=$1
         if [[ ! -e $file ]]; then
                 return 5
         elif [[ ! -r $file ]]; then
@@ -29,7 +29,7 @@ check_file_read(){
 
 
 check_dir_read(){
-        dir=$1
+        local dir=$1
         if [[ ! -e $dir ]]; then
                 return 5
         elif [[ ! -r $dir ]]; then
