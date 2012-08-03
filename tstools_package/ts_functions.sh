@@ -116,7 +116,7 @@ backup_passwords(){
                 done
                 return 3
 	else
-	echo "password files backed up with extension .fregeek_ts_backup.$isotime"
+	echo "password files backed up with extension .freegeek_ts_backup.$isotime"
         exit 0
 	fi
 }
