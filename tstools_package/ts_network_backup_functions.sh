@@ -111,6 +111,9 @@ restore_user(){
 	# delete matching lines/existing groups
 echo "deleting existing group $gid  $extpath/etc/group"
 
+
+	grep $gid $extpath/etc/group
+
 	 if ! sed -i '/:$gid:/ d' $extpath/etc/group; then
 		echo "failed"
 	else
