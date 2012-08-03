@@ -103,7 +103,7 @@ restore_user(){
         	local chroot_path="chroot $extpath"
 	fi
 
-			echo "here"
+			echo "r u here"
 
 	#N.B. users may not be in file
 	# delete matching lines in /etc/passwd 
@@ -160,6 +160,7 @@ restore_users(){
 	done
 	# checks if value is set
 	if declare -p break_value; then
+		echo "here"
 		exit 3
 	fi
         # read /home/password file or equivalent)
