@@ -98,7 +98,7 @@ restore_user(){
 	local gid=$4
 	local password=$5
 	local extpath=$6
-
+echo "extpath: $extpath"
 	if [[ $extpath ]]; then
         	local chroot_path="chroot $extpath"
 	fi
