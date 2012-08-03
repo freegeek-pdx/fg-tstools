@@ -172,10 +172,10 @@ restore_users(){
 	fi
         # read /home/password file or equivalent)
         while read line ; do
-                user=$(echo $line | awk -F : '{print $1}')
-                uid=$(echo $line | awk -F : '{print $3}')
-                gid=$(echo $line | awk -F : '{print $4}')
-		password=$(grep $user $path/shadow | awk -F: '{print $2}')
+                local user=$(echo $line | awk -F : '{print $1}')
+                local uid=$(echo $line | awk -F : '{print $3}')
+                local gid=$(echo $line | awk -F : '{print $4}')
+		local password=$(grep $user $path/shadow | awk -F: '{print $2}')
 echo "passwd $password :"
 		if ! user_restore=$(restore_user $path $user $uid $gid $password $extpath); then
 			echo "$user_restore"
