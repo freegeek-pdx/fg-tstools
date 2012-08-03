@@ -142,6 +142,7 @@ restore_user(){
 }
 
 restore_users(){
+echo "here"
 	local path=$1
 	local extpath=$2
         # note that copying files back across is not sufficient 
@@ -160,7 +161,6 @@ restore_users(){
 	done
 	# checks if value is set
 	if declare -p break_value; then
-		echo "here"
 		exit 3
 	fi
         # read /home/password file or equivalent)
