@@ -42,6 +42,8 @@ Should only back up users and data:
    	This needs to be tested with a disk on TSDATA
 
 restore backup							FAIL -- needs checks for if group/user (i.e. oem)  already exists
+NEED TO GET RSYNC TO PRESERVE OWNERSHIP i.e. not 1001 
+
 restore backup with no ticket number				PASS
 restore backup with ../../foo for ticket number
 restore backup with - u
