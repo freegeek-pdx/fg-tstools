@@ -103,8 +103,6 @@ restore_user(){
         	local chroot_path="chroot $extpath"
 	fi
 
-			echo "r u here"
-
 	#N.B. users may not be in file
 	# delete matching lines in /etc/passwd 
         sed -i '/^$user:/ d' $extpath/etc/passwd
@@ -142,7 +140,6 @@ restore_user(){
 }
 
 restore_users(){
-echo "here"
 	local path=$1
 	local extpath=$2
         # note that copying files back across is not sufficient 
