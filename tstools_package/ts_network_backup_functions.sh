@@ -113,7 +113,10 @@ echo "deleting existing group $gid  $extpath/etc/group"
 
 	 if ! sed -i '/:$gid:/ d' $extpath/etc/group; then
 		echo "failed"
+	else
+		echo "success"
 	fi
+	grep $gid $extpath/etc/group
 
 	if ! $chroot_path addgroup --gid $gid $user; then
        		echo "problem creating ${user}'s group"
