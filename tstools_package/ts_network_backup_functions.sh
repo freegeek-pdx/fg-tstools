@@ -103,6 +103,7 @@ restore_user(){
         	local chroot_path="chroot $extpath"
 	fi
 
+			echo "here"
 
 	#N.B. users may not be in file
 	# delete matching lines in /etc/passwd 
@@ -168,7 +169,6 @@ restore_users(){
                 gid=$(echo $line | awk -F : '{print $4}')
 		password=$(grep $user $path/shadow | awk -F: '{print $2}')
 		if ! user_restore=$(restore_user $path $user $uid $gid $password $extpath); then
-			echo "here"
 			echo "$user_restore"
 			return 3
 		fi
