@@ -142,6 +142,7 @@ restore_user(){
 restore_users(){
 	local path=$1
 	local extpath=$2
+	echo "path: $path"
         # note that copying files back across is not sufficient 
         # need to extract values from files and added to new copies
 	for file in passwd group shadow; do
