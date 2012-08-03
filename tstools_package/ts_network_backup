@@ -95,7 +95,7 @@ while getopts ":hc:r:l:t:a:A:p:dufF" option; do
                    users_and_data_only="true"
                 ;;        
 		l) use_log="true"
-		   log_file="$OPTARG"
+		   logfile="$OPTARG" # N.B. truly global read inside function
 		;;
 		t)
 		   addendum=$OPTARG
@@ -119,11 +119,11 @@ while getopts ":hc:r:l:t:a:A:p:dufF" option; do
 		F) force_overwrite="true"
 		;;
         	\?)
-      		   echo "Invalid option: -$OPTARG" >&2
+      		   write_msg "Invalid option: -$OPTARG" >&2
       		   exit 1
       		;;
     		:)
-      		   echo "Option -$OPTARG requires an argument." >&2
+      		   write_msg "Option -$OPTARG requires an argument." >&2
       		   exit 1
       		;;
 		esac
@@ -131,13 +131,13 @@ done
 
 # process options
 if [[ $use_log ]]; then	
-	if [[ ! $log_file ]]; then
-		echo "You forgot to specify a logfile!"
+	if [[ ! $logfile ]]; then
+		echo  "You forgot to specify a logfile!"
 		echo "Using ts_backup.log in the current directory."
 		log_file="ts_backup.log"
 	fi
-	if [[ $(check_file_write "$log_file") -ne 0 ]]; then
-		echo "Couldn't write to $log_file"
+	if [[ $(check_file_write "$logfile") -ne 0 ]]; then
+		echo "Couldn't write to $logfile"
 		echo "Is it on a writable file system?"
 		exit 3
 	fi
@@ -146,18 +146,18 @@ fi
 
 
 if [[ $create_backup  &&  $restore_backup ]]; then 
-	write_msg "Only one of the -c or -r options can be used" $log_file
-	exit 3
+	write_msg "Only one of the -c or -r options can be used" 
+	exit 
 
 elif [[ ! $create_backup && ! $restore_backup ]]; then 
-        write_msg "One of the -c or -r (or -h help) options must  be used. Arguments must be supplied with -c & -r." $log_file
+        write_msg "One of the -c or -r (or -h help) options must  be used. Arguments must be supplied with -c & -r." 
         exit 3
 
 elif [[ $data_only  &&  $users_and_data_only ]]; then
-        write_msg "The -d or -a and -u options are mutually exclusive" $log_file
+        write_msg "The -d or -a and -u options are mutually exclusive" 
         exit 3
 elif [[ $force_file &&  ! $alt_path ]]; then
-	write_msg "the -a option must be used with -f" $log_file
+	write_msg "the -a option must be used with -f" 
 	exit 3
 else
 	# set paths etc
@@ -170,8 +170,8 @@ fi
 
 #sanity checks
 if ! test_for_root ; then
-                write_msg "Could not proceed!" $log_file
-                write_msg "Are you root?" $log_file
+                write_msg "Could not proceed!" 
+                write_msg "Are you root?" 
                 exit 3
 fi
 
@@ -180,20 +180,20 @@ if [[ $path ]] ; then
 	check_dir_read $path
 	error=$?
 	if [[ $error == "5" ]] ; then 
-		write_msg "$path does not exist!" $log_file
+		write_msg "$path does not exist!" 
 		exit $error
 	elif [[ $error == "4" ]] ; then
-		write_msg "$path is not readable!" $log_file
+		write_msg "$path is not readable!" 
 		exit $error
 	elif [[ $error == "6"  ]] ; then
 		if [[ ! $force_file ]] ; then
-			write_msg "$path is not a directory! This is probably not what you meamt to do" $log_file
-			write_msg "if you really meant to use back up a single file use -f option with -a" $log_file
+			write_msg "$path is not a directory! This is probably not what you meamt to do" 
+			write_msg "if you really meant to use back up a single file use -f option with -a" 
 			exit $error
 		fi
 	fi
 	if ! check_file_write $path; then
-		write_msg "$path is not writeable" $log_file
+		write_msg "$path is not writeable" 
 		exit 3
 	fi
 fi
@@ -203,14 +203,14 @@ if [[ $create_backup ]] ; then
 	# test for valid ticket number
 	#N.B. actually tests for 5 digits
 	if ! check_ticket_number $ticket_number; then
-			write_msg "$ticket_number is not a valid ticket number" $log_file
+			write_msg "$ticket_number is not a valid ticket number" 
 			exit 3
 	fi
 	# if overwriting of backups not forced with -F 
 	if [[  ! $force_overwrite ]]; then
 		if check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir; then
-			write_msg "Backup directory already exists!" $log_file  
-			write_msg "Cowardly refusing to overwrite it" $log_file
+			write_msg "Backup directory already exists!"   
+			write_msg "Cowardly refusing to overwrite it" 
 			exit 3
 		fi
 	fi
@@ -218,8 +218,8 @@ if [[ $create_backup ]] ; then
 	if [[ $addendum ]]; then
 		
 		if ! check_valid_chars $addendum; then 
-			write_msg "Only nubers, letters and _ can be added to a ticket number" $log_file
-			write_msg "You do not need to use - it will will be added automatically" $log_file
+			write_msg "Only nubers, letters and _ can be added to a ticket number" 
+			write_msg "You do not need to use - it will will be added automatically" 
 			exit 3
 		fi
 	fi
@@ -228,8 +228,8 @@ fi
 # restore backup checks
 if [[ $restore_backup ]]; then
 	if ! check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir; then
-		write_msg "Backup directory does not exist" $log_file 
-		write_msg "Cowardly refusing to restore from non-existant backup" $log_file
+		write_msg "Backup directory does not exist"  
+		write_msg "Cowardly refusing to restore from non-existant backup" 
 		exit 3
 	fi
 fi
@@ -237,7 +237,7 @@ fi
 # otherwise some dumbass will back up the wrong thing
 if [[ ! $ext_path && $HOSTNAME = "tsdata" ]]; then
 	write_msg "YOU MUST USE THE -p OPTION TO SPECIFY THE PATH OF THE 
-DIRECTORY YOU WISH TO BACKUP WHEN YOU ARE ON TSDATA!!!"	$log_file
+DIRECTORY YOU WISH TO BACKUP WHEN YOU ARE ON TSDATA!!!"	
 	exit 3
 fi
  
@@ -270,17 +270,17 @@ if [[ $create_backup ]]; then
 	# unless no_apt is set back up record of packages installed
 	if [[ ! $no_apt ]]; then
                 if ! backup_sources_msg="$(backup_sources $sources_path $ext_path)" ; then
-	                write_msg "Encountered problem backing up software sources" $log_file        
-			write_msg "$backup_sources_msg" $log_file
+	                write_msg "Encountered problem backing up software sources"         
+			write_msg "$backup_sources_msg" 
                         exit 3
 		else
-			write_msg "$backup_sources_msg" $log_file
+			write_msg "$backup_sources_msg" 
 		fi
 
 		if ! aptbackup="$(backup_apt $dpkg_file $ext_path)"; then
-			write_msg "Backing up package files list failed!" $log_file
-                        write_msg "$aptbackup" $log_file	
-			write_msg "dpkg --get-selections exited with error code $aptbackup_return" $log_file 
+			write_msg "Backing up package files list failed!" 
+                        write_msg "$aptbackup" 	
+			write_msg "dpkg --get-selections exited with error code $aptbackup_return"  
 			exit 3
 		else
 			write_msg "Backed up a list of installed packages" $log_fiile
@@ -289,20 +289,20 @@ if [[ $create_backup ]]; then
 
 	if [[ ! $no_user_passwords ]]; then
 		if ! backup_users_check="$(backup_users_test "$path")"; then
-			write_msg "$backup_users_check" $log_file
+			write_msg "$backup_users_check" 
 			exit 3		  
 		elif ! user_backup=$(backup_users "$path" "$ext_path");then
-			write_msg "$user_backup" $log_file
+			write_msg "$user_backup" 
 			exit 3
 		else
-			write_msg "$user_backup" $log_file
+			write_msg "$user_backup" 
 		fi
 	fi
 	
 	# backs up /etc, don't run if backing up alternate path or data only
 	if [[ ! data_only ]]; then
 		if ! config_check=$(backup_config $path $ext_path); then
-			write_msg "Could not backup /etc" $log_file
+			write_msg "Could not backup /etc" 
 			exit $config_check
 		fi
 	fi
@@ -310,10 +310,10 @@ if [[ $create_backup ]]; then
 	echo "Preparing to rsync network backup..."
 
 	if ! make_backup="$(create_backup $path $backup_user $backup_host $backup_path $backup_dir )"; then
-		write_msg "$make_backup" $log_file
+		write_msg "$make_backup" 
 		exit 2
 	else
-		write_msg "Successfully created network backup on $backup_host at ${backup_path}/${backup_dir}" $log_file
+		write_msg "Successfully created network backup on $backup_host at ${backup_path}/${backup_dir}" 
 	fi
 
 ##################
@@ -322,30 +322,30 @@ if [[ $create_backup ]]; then
 elif [[ $restore_backup ]] ; then
         # not the same as backup_password_files
         if ! backup_passwords_check=$(backup_passwords $ext_path); then
-		write_msg "$backup_passwords_check" $log_file
-		write_msg "Failed to backup password files ..exiting" $log_file
+		write_msg "$backup_passwords_check" 
+		write_msg "Failed to backup password files ..exiting" 
 		exit 3
 	else
-		write_msg "$backup_passwords_check" $log_file
+		write_msg "$backup_passwords_check" 
 	fi
 
         
 	if ! restorebackup=$(restore_backup $backup_user $backup_host $backup_path $backup_dir $path); then
 		restore_check=$?
-		write_msg "$restorebackup" $log_file
-                write_msg "WARNING! Could not restore backup!!!" $log_file
+		write_msg "$restorebackup" 
+                write_msg "WARNING! Could not restore backup!!!" 
                 exit $restore_check
 	else
 		if [[ ! $no_user_passwords ]];  then
 			if ! restore_users_test=$(restore_users $path $ext_path); then
-				write_msg "error message: $restore_users_test" $log_file
-				write_msg $restore_users_test $log_file
-				write_msg "WARNING! users may have been deleted from the system" $log_file
-				write_msg "Before proceeding restore $backup_passwords_check" $log_file
-				write_msg "to /etc/passwd /etc/shadow /etc/group" $log_file
+				write_msg "error message: $restore_users_test" 
+				write_msg $restore_users_test 
+				write_msg "WARNING! users may have been deleted from the system" 
+				write_msg "Before proceeding restore $backup_passwords_check" 
+				write_msg "to /etc/passwd /etc/shadow /etc/group" 
 				exit 3
 			else 
-				write_msg "Restored users" $log_file
+				write_msg "Restored users" 
 			fi
 		fi
 
@@ -367,20 +367,20 @@ elif [[ $restore_backup ]] ; then
 			if (( $multiverse_test == 0 )); then
 			#identify and comment out  relevant lines 
 				if ! multiverse_restore=$(restore_multiverse $codename $ext_path); then	
-					write_msg "WARNING: unable to add multiverse to sources list" $log_file
-					write_msg "$multiverse_restore" $log_file
+					write_msg "WARNING: unable to add multiverse to sources list" 
+					write_msg "$multiverse_restore" 
 					exit 3
 				fi
 			else
-				write_msg "Added multiverse to software sources" $log_file
+				write_msg "Added multiverse to software sources" 
 			fi
 
 			if (( $partner_test == 0 )); then
 			 #identify and comment out  relevant lines 
 				if ! restore_partners $codename $ext_path; then
-					write_msg "unable to add Canonical partners to software sources" $log_file
+					write_msg "unable to add Canonical partners to software sources" 
 				else
-					write_msg "Added Canonical partners to software sources" $log_file
+					write_msg "Added Canonical partners to software sources" 
 				fi
       			fi
 
@@ -388,18 +388,18 @@ elif [[ $restore_backup ]] ; then
 			if [[ -n "$(ls -A $sources_path/sources.list.d)" ]]; then
 				cp -R "$sources_path/sources.list.d/*" $ext_path/etc/apt/sources.list.d
 			else
-                        	write_msg "Added PPA's to software sources" $log_file
+                        	write_msg "Added PPA's to software sources" 
 			fi
 		
 			if ! packagerestore=$(restore_packages $dpkg_file $ext_path); then
-				write_msg "$packagerestore" $log_file
+				write_msg "$packagerestore" 
 				exit 3
 			else
-				write_msg "$packagerestore" $log_file
+				write_msg "$packagerestore" 
 			fi
 		fi # End no-apt
 
-	write_msg "Backup successfully restored" $log_file
+	write_msg "Backup successfully restored" 
 	fi
 
 #######################
