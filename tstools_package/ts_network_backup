@@ -43,7 +43,8 @@ packages that have been installed (via apt-get, Ubuntu Software Center etc).
 				Use this if you want to backup something
 				other than the home directory.
 				Suggests the use of -A for restoring backups.
-	-f 			Force the backup of a single file rather than a directory
+	-f 			force the backup of a single file rather than a directory 
+	-F			Force the overwriting an existing backup
 	-A /path/to/directory	Use this to restore the backup to somewhere
 				other than the default (/home)
                                 Can be used with or without -u or -d 
@@ -73,7 +74,7 @@ if [[ -z $1 ]]; then
                 exit 1
         fi
 
-while getopts ":hc:r:l:t:a:A:p:duf" option; do
+while getopts ":hc:r:l:t:a:A:p:dufF" option; do
        case $option in
                 h) help
                    exit 0
@@ -115,6 +116,7 @@ while getopts ":hc:r:l:t:a:A:p:duf" option; do
 		;;
 		f) force_file="true"
 		;;
+		F) force_overwrite="true"
         	\?)
       		   echo "Invalid option: -$OPTARG" >&2
       		   exit 1
@@ -127,19 +129,34 @@ while getopts ":hc:r:l:t:a:A:p:duf" option; do
 done
 
 # process options
+if [[ $use_log ]]; then	
+	if [[ ! $log_file ]]; then
+		echo "You forgot to specify a logfile!"
+		echo "Using ts_backup.log in the current directory."
+		log_file="ts_backup.log"
+	fi
+	if [[ $(check_file_write "$log_file") -ne 0 ]]; then
+		echo "Couldn't write to $log_file"
+		echo "Is it on a writable file system?"
+		exit 3
+	fi
+fi
+
+
+
 if [[ $create_backup  &&  $restore_backup ]]; then 
-	echo "Only one of the -c or -r options can be used";
+	write_msg "Only one of the -c or -r options can be used" $log_file
 	exit 3
 
 elif [[ ! $create_backup && ! $restore_backup ]]; then 
-        echo "One of the -c or -r (or -h help) options must  be used. Arguments must be supplied with -c & -r.";
+        write_msg "One of the -c or -r (or -h help) options must  be used. Arguments must be supplied with -c & -r." $log_file
         exit 3
 
 elif [[ $data_only  &&  $users_and_data_only ]]; then
-        echo "The -d or -a and -u options are mutually exclusive";
+        write_msg "The -d or -a and -u options are mutually exclusive" $log_file
         exit 3
 elif [[ $force_file &&  ! $alt_path ]]; then
-	echo "the -a option must be used with -f"
+	write_msg "the -a option must be used with -f" $log_file
 	exit 3
 else
 	# set paths etc
@@ -148,24 +165,12 @@ else
 		# ext_path is only need if we are working relative to something other than /
 		# i.e. is null
 	fi
-	if [[ $use_log ]]; then	
-		if [[ ! $log_file ]]; then
-			echo "You forgot to specify a logfile!"
-			echo "Using ts_backup.log in the current directory."
-			log_file="ts_backup.log"
-		fi
-		if [[ $(check_file_write "$log_file") -ne 0 ]]; then
-			echo "Couldn't write to $log_file"
-			echo "Is it on a writable file system?"
-			exit 3
-		fi
-	fi
 fi
 
 #sanity checks
 if ! test_for_root ; then
-                echo "Could not proceed!"
-                echo "Are you root?"
+                write_msg "Could not proceed!" $log_file
+                write_msg "Are you root?" $log_file
                 exit 3
 fi
 
@@ -173,23 +178,23 @@ fi
 check_dir_read $path
 error=$?
 if [[ $error == "5" ]] ; then 
-	echo "$path does not exist!"
+	write_msg "$path does not exist!" $log_file
 	exit $error
 elif [[ $error == "4" ]] ; then
-	echo "$path is not readable!"
+	write_msg "$path is not readable!" $log_file
 	exit $error
 elif [[ $error == "6"  ]] ; then
 	if [[ ! $force_file ]] ; then
-	echo "$path is not a directory! This is probably not what you meamt to do"
-	echo "if you really meant to use back up a single file use -f option with -a"
-	exit $error
+		write_msg "$path is not a directory! This is probably not what you meamt to do" $log_file
+		write_msg "if you really meant to use back up a single file use -f option with -a" $log_file
+		exit $error
 	fi
 fi
 
 # test for valid ticket number
 #N.B. actually tests for 5 digits
 if ! check_ticket_number $ticket_number  ; then
-		echo "$ticket_number is not a valid ticket number" 
+		write_msg "$ticket_number is not a valid ticket number" $log_file
 		exit 3
 fi
 
@@ -197,8 +202,8 @@ fi
 if [[ $addendum ]]; then
 	
 	if ! check_valid_chars $addendum; then 
-		echo "Only nubers, letters and _ can be added to a ticket number"
-		echo "You do not need to use - it will will be added automatically"
+		write_msg "Only nubers, letters and _ can be added to a ticket number" $log_file
+		write_msg "You do not need to use - it will will be added automatically" $log_file
 		exit 3
 	fi
 fi
@@ -207,11 +212,13 @@ fi
 # if this machine is tsdata a path must be supplied
 # otherwise some dumbass will back up the wrong thing
 if [[ ! $ext_path && $HOSTNAME = "tsdata" ]]; then
-	echo 'YOU MUST USE THE -p OPTION TO SPECIFY THE PATH OF THE 
-DIRECTORY YOU WISH TO BACKUP WHEN YOU ARE ON TSDATA!!!'
+	write_msg "YOU MUST USE THE -p OPTION TO SPECIFY THE PATH OF THE 
+DIRECTORY YOU WISH TO BACKUP WHEN YOU ARE ON TSDATA!!!"	$log_file
 	exit 3
 fi
  
+
+# if -f (force backup of single file) not used
 if [[ ! $force_file ]]; then
 	# ensure path has / on the end
 	if [[ ${path:${#path}-1} != "/" ]]; then
@@ -228,6 +235,15 @@ if [[ ! $force_file ]]; then
 	sources_path="${path}apt/"
 	fi
 fi
+
+# if overwriting of backups not forced with -F 
+if [[  ! $force_overwrite ]]; then
+	if check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir then
+	write_msg "Backup dir already exists!" $log_file  
+	exit 3
+fi
+
+
 #################
 # Create Backup #
 #################
@@ -278,7 +294,7 @@ if [[ $create_backup ]]; then
 
 	if ! make_backup="$(create_backup $path $backup_user $backup_host $backup_path $backup_dir )"; then
 		write_msg "$make_backup" $log_file
-		exit $backup_check
+		exit 2
 	else
 		write_msg "Successfully created network backup on $backup_host at ${backup_path}/${backup_dir}" $log_file
 	fi
