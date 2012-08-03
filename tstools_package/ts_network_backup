@@ -320,7 +320,7 @@ if [[ $create_backup ]]; then
 # Restore Backup #
 ##################
 elif [[ $restore_backup ]] ; then
-	echo "Path: $path"
+	echo "Path: $backup_path"
 
         # not the same as backup_password_files
         if ! backup_passwords_check=$(backup_passwords $ext_path); then
