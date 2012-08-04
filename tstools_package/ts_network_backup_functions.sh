@@ -210,7 +210,7 @@ restore_multiverse(){
 			echo $line >>$tmpfile
 		elif [[ $line =~ main ]] ; then
 			echo "# $line" >> $tmpfile
-			if [[ $line =~ $dist_version  && $line ! =~ freegeek && $line =~ main && $line =~ multiverse ]]; then
+			if [[ $line =~ $dist_version  && ! $line =~ freegeek && $line =~ main && ! $line =~ multiverse ]]; then
 				echo "$line multiverse" >>$tmpfile
 			else
 				old_version=$(echo $line | awk '{print $3}' | awk -F- '{print $1}')
