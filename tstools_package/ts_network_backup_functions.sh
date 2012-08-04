@@ -98,7 +98,6 @@ restore_user(){
 	local gid=$4
 	local password=$5
 	local extpath=$6
-echo "extpath: $extpath"
 	if [[ $extpath ]]; then
         	local chroot_path="chroot $extpath"
 	fi
@@ -109,17 +108,7 @@ echo "extpath: $extpath"
 	# delete existing encypted password 
 	sed -i "/^$user:/ d" $extpath/etc/shadow
 	# delete matching lines/existing groups
-echo "deleting existing group $gid  $extpath/etc/group"
-
-
-	grep $gid $extpath/etc/group
-
-	 if ! sed -i "/:$gid:/ d" $extpath/etc/group; then
-		echo "failed"
-	else
-		echo "success"
-	fi
-	grep $gid $extpath/etc/group
+	sed -i "/:$gid:/ d" $extpath/etc/group 
 
 	if ! $chroot_path addgroup --gid $gid $user; then
        		echo "problem creating ${user}'s group"
@@ -175,8 +164,7 @@ restore_users(){
                 local user=$(echo $line | awk -F : '{print $1}')
                 local uid=$(echo $line | awk -F : '{print $3}')
                 local gid=$(echo $line | awk -F : '{print $4}')
-		local password=$(grep $user $path/shadow | awk -F: '{print $2}')
-echo "passwd $password :"
+		local password=$(grep -m 1 $user $path/shadow | awk -F: '{print $2}')
 		if ! user_restore=$(restore_user $path $user $uid $gid $password $extpath); then
 			echo "$user_restore"
 			return 3
