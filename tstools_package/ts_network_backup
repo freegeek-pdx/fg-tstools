@@ -33,7 +33,7 @@ packages that have been installed (via apt-get, Ubuntu Software Center etc).
 	-t [addendum]		Normally this script checks to see if a ticket
 				number looks like a "real" ticket number. 
 				(i.e. it has the correct number of numbers). 
-				This option lets you add an additional number. 
+				This option lets you add things to this number. 
 				It's useful if you are backing up more than one
 				computer and want to store them in different 
 				folders referring to the same ticket.
