@@ -223,13 +223,26 @@ cleanup(){
 #N.B. actually tests for 5 digits, will stop working at some distant point in the future
 check_ticket_number(){
 	local ticketnumber=$1
-	regex="^[0-9]{5}$"
+	local regex="^[0-9]{5}$"
 	if [[ ! $ticketnumber =~ $regex ]] ; then
                 return 1
 	else
 		return 0
 	fi
 }
+
+#test for valid backup directory
+#N.B. tests for 8 digits a dash then 5 digits, will stop working at some distant point in the future
+check_valid_backup_dir(){
+	local backupdir=$1
+	local regex="^[0-9]{8}-[0-9]{5}$"
+        if [[ ! $backupdir =~ $regex ]] ; then
+                return 1
+        else
+                return 0
+        fi
+}
+
 
 
 #checks to see if any characters other than numbers letters and underscores are present
