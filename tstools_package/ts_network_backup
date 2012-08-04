@@ -227,6 +227,12 @@ fi
 
 # restore backup checks
 if [[ $restore_backup ]]; then
+
+	if ! check_valid_backup_dir $backup_dir; then
+		write_msg "This doesn't look like a valid backup directory, sorry. exiting..."
+		exit 3
+	fi
+
 	if ! check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir; then
 		write_msg "Backup directory does not exist"  
 		write_msg "Cowardly refusing to restore from non-existant backup" 
