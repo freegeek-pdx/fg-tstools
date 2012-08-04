@@ -158,8 +158,8 @@ restore_users(){
 	# checks if value is set
 		if declare -p break_value &> /dev/null; then
 echo "HERE: HERE: HERE"
-		exit 3
-	fi
+			exit 3
+		fi
         # read /home/password file or equivalent)
         while read line ; do
                 local user=$(echo $line | awk -F : '{print $1}')
