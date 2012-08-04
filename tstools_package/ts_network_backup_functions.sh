@@ -208,14 +208,22 @@ restore_multiverse(){
 	while read line; do
 		if [[ $line =~ ^# ]]; then
 			echo $line >>$tmpfile
-		elif [[ $line =~ main ]] ; then
+		elif [[ $line =~ main && ! $line =~ freegeek ]] ; then
 			echo "# $line" >> $tmpfile
-			if [[ $line =~ $dist_version  && ! $line =~ freegeek && $line =~ main && ! $line =~ multiverse ]]; then
-				echo "$line multiverse" >>$tmpfile
+			if [[ $line =~ $dist_version  ]]; then
+				if [[ ! $line =~ multiverse ]]; then
+					echo "$line multiverse" >>$tmpfile
+				else
+					echo "$line" >>$tmpfile
+				fi
 			else
 				old_version=$(echo $line | awk '{print $3}' | awk -F- '{print $1}')
 				newline=$(echo line | sed "s/$old_version/$dist_version/")
-				echo "$newline multiverse" >>$tmpfile	
+				if [[ ! $newline =~ multiverse ]]; then
+					echo "$newline multiverse" >>$tmpfile
+				else 
+					echo "$newline" >>$tmpfile
+				fi	
 			fi
 		else
 			echo $line >>$tmpfile  
