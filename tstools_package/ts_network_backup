@@ -238,7 +238,7 @@ if [[ $restore_backup ]]; then
 		write_msg "Backup directory does not exist"  
 		write_msg "Cowardly refusing to restore from non-existant backup" 
 		exit 3
-	fi
+
 fi
 # if this machine is tsdata a path must be supplied
 # otherwise some dumbass will back up the wrong thing
@@ -345,8 +345,8 @@ elif [[ $restore_backup ]] ; then
 	else
 		if [[ ! $no_user_passwords ]];  then
 			if ! restore_users_test=$(restore_users $path $ext_path); then
-				write_msg "error message: $restore_users_test" 
-				write_msg $restore_users_test 
+				write_msg "error message: $?" 
+				write_msg "$restore_users_test" 
 				write_msg "WARNING! users may have been deleted from the system" 
 				write_msg "Before proceeding restore $backup_passwords_check" 
 				write_msg "to /etc/passwd /etc/shadow /etc/group" 
