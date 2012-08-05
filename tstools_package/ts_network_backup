@@ -364,6 +364,7 @@ elif [[ $restore_backup ]] ; then
 				write_msg "No software will be restored"
 				write_msg "This is a warning only"
 				write_msg "the rest of the restoration will not be affected"
+				no_apt="true"
 			else
 				
 				
