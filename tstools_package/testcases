@@ -1,11 +1,11 @@
-no options - Pass
-invalid option - Pass
-valid option with no argument - Pass
+no options - 											PASS
+invalid option - 										PASS
+valid option with no argument - 								PASS
 
-1:create backup - Pass
-create backup with no ticket number - Pass
-2: create backup with ../../foo for ticket number - Fail --- now fixed pass
-3: create backup with - u - Pass actually FAIL as errors outputted
+1:create backup - 										PASS
+create backup with no ticket number - 								PASS
+2: create backup with ../../foo for ticket number - Fail --- now fixed 				PASS
+3: create backup with - u - PASS actually FAIL as errors outputted
 Should only back up users and data:
 	test for files
 	test for passwd, shadow, group  
@@ -13,9 +13,9 @@ Should only back up users and data:
    rm: cannot remove `/home/apt': No such file or directory
    rm: cannot remove `/home/dpkg.out': No such file or directory
 
-							        now fixed PASS
+							        now fixed 			PASS
 
-4: create backup with -d - Pass  actually FAIL as errors outputted
+4: create backup with -d - PASS  actually FAIL as errors outputted
    errors:
    rm: cannot remove `/home/apt': No such file or directory
    rm: cannot remove `/home/passwd': No such file or directory
@@ -23,36 +23,47 @@ Should only back up users and data:
    rm: cannot remove `/home/group': No such file or directory
    rm: cannot remove `/home/dpkg.out': No such file or directory
 
-								now fixed PASS
+								now fixed 			PASS
 
-5: create backup with -ud - FAILED Actually PASS -- correctly detects mutally exclusive options
+5: create backup with -ud - FAILED Actually PASS -- correctly detects mutally exclusive options PASS
    The -u or -d options are mutually exclusive
 
 6: create backup with -a  -
    Could not backup /etc
    ./ts_network_backup: line 207: exit: tar:: numeric argument required
-								now fixed PASS
-7: backup with -f, -a -f
-									PASS
+								now fixed 			PASS
+7: backup with -f, -a -f	
+												PASS
 8: backup with/out -F
-									PASS
+												PASS
 
 
 7: create backup with -p 
    	This needs to be tested with a disk on TSDATA
 
-restore backup							FAIL -- needs checks for if group/user (i.e. oem)  already exists
-NEED TO GET RSYNC TO PRESERVE OWNERSHIP i.e. not 1001 
-
-restore backup with no ticket number				PASS
+restore backup											PASS	
+-- needs checks for if group/user (i.e. oem)  already exists -- FIXED				
+NEED TO GET RSYNC TO PRESERVE OWNERSHIP i.e. not 1001 		DONE				
+												PASS
+test on fresh machine				
+restore backup with no ticket number								PASS
 restore backup with ../../foo for ticket number
-restore backup with - u
-restore backup with -d
-restore backup with -ud
-restore backup created iwth u/d without u/d  
+		didn't back up for wrong reasons	
+		need to add validity check DONE							PASS
+restore backup with - u										PASS
+restore backup with -d										PASS
+restore backup with -ud										PASS
+restore backup created with d without d								PASS
+restore backup created with u without u								PASS  
 restore backup with -A created with -a
 restore backup with -A created without -a
-restore backup with -A without -u/d
+restore backup with -A without -u/d 
 restore backup from -p
 
 -l logfile option
+
+
+
+TO DO / TO ADD
+==============
+Option allowing user to resume backup with existing ticket number (to cover interupted backups)
