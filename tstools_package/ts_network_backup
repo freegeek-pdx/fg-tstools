@@ -397,7 +397,7 @@ elif [[ $restore_backup ]] ; then
 						write_msg "Added Canonical partners to software sources" 
 					fi
 				fi
-
+echo "here <--"
 				# check to see if any PPA files in sources.list.d
 				if [[ -n "$(ls -A $sources_path/sources.list.d)" ]]; then
 					cp -R "$sources_path/sources.list.d/*" $ext_path/etc/apt/sources.list.d
