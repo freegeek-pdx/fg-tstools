@@ -177,7 +177,7 @@ restore_users(){
 backup_other_sources(){
 	local extpath=$1
 	local sourcespath=$2
-	for file in $extpath/etc/apt/sources.list.d/*.list; do
+	for file in $extpath/etc/apt/sources.list.d/* ; do
 echo "file: $file"
 		if [[ -L $file ]]; then
 			file=$(readlink -f $file)
