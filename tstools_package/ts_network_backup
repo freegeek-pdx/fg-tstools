@@ -75,6 +75,10 @@ if [[ -z $1 ]]; then
                 exit 1
         fi
 
+# redirect stderr to /dev/null for the duration of this script
+# as we have our own error messages
+exec 2>/dev/null 
+
 while getopts ":hc:r:l:t:a:A:p:dufF" option; do
        case $option in
                 h) help
@@ -361,8 +365,7 @@ elif [[ $restore_backup ]] ; then
 			# does it exist, if not probably  -d or -u
 			if [[ ! -e $sources_file ]]; then
 				write_msg "The backup was probably created with -u or -d"
-				write_msg "No software will be restored"
-				write_msg "This is a warning only"
+				write_msg "No software will be restored. This is a warning only"
 				write_msg "the rest of the restoration will not be affected"
 				no_apt="true"
 			else

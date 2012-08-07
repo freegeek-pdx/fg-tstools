@@ -27,9 +27,11 @@ ascii=(
 '                                                                '
 )
 IFS='%'
+source ts_functions.sh
+bomb(){
 for line in "${ascii[@]}"; do
-	echo $line
+	echo "$line"
 	sleep 0.1s
 done
-
-
+}
+bomb
