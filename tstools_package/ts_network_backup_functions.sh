@@ -203,7 +203,7 @@ backup_sources(){
 	local sourcespath=$1
 	local path=$2
 	local extpath=$3
-	if ! mkdir $sourcespath; then
+	if ! mkdir -p $sourcespath/sources.list.d; then
 		echo "Couldn't make $sourcespath"
 		return 3
 	elif ! check_file_write $sourcespath ; then
