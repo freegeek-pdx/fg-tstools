@@ -332,6 +332,7 @@ if [[ $create_backup ]]; then
 ##################
 elif [[ $restore_backup ]] ; then
         # not the same as backup_password_files
+echo "here <-- 0"
         if ! backup_passwords_check=$(backup_passwords $ext_path); then
 		write_msg "$backup_passwords_check" 
 		write_msg "Failed to backup password files ..exiting" 
