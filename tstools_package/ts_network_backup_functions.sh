@@ -183,7 +183,6 @@ backup_other_sources(){
 		path=/etc/apt/sources.list.d/
 	fi
 	for file in $path/* ; do
-echo "file: $file"
 		if [[ -L $file ]]; then
 			file=$(readlink -f $file)
 		fi	
