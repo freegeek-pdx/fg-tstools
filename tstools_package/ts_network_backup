@@ -413,7 +413,8 @@ echo "here <--4"
 					exit 3
 				else
 					write_msg "$packagerestore" 
-echo "here <--5"				fi
+				fi
+echo "here <--5"				
 			fi
 		fi # End no-apt
 echo "here <--6"
