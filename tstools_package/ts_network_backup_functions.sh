@@ -202,6 +202,8 @@ backup_sources(){
 	local sourcespath=$1
 	local path=$2
 	local extpath=$3
+	echo "sources: $sourcespath ext:$extpath"
+
 	if ! mkdir $sourcespath; then
 		echo "Couldn't make $sourcespath"
 		return 3
