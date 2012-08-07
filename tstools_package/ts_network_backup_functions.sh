@@ -175,8 +175,8 @@ restore_users(){
 }
 
 backup_other_sources(){
-	local extpath=$1
-	local sourcespath=$2
+	local sourcespath=$1
+	local extpath=$2
 	 echo "sources: $sourcespath ext:$extpath"
 
 	path=$extpath/etc/apt/sources.list.d/
@@ -210,7 +210,7 @@ backup_sources(){
 	elif ! check_file_write $sourcespath ; then
 		echo "Couldn't write to $sourcespath Check permissions?" 
 		return 3
-	elif ! backup_other_sources $extpath $sourcespath  ; then
+	elif ! backup_other_sources $sourcespath $extpath  ; then
 		echo "Problem copying over /etc/apt/sources.list.d"
         	return 3
 	elif ! cp  $extpath/etc/apt/sources.list $sourcespath  ; then
