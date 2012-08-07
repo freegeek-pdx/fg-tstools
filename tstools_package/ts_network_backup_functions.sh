@@ -174,6 +174,25 @@ restore_users(){
 	return 0
 }
 
+backup_other_sources(){
+	local extpath=$1
+	local sourcespath=$2
+	for local file in $extpath/etc/apt/sources.list.d/*.list; do
+		if [[ -L $file ]]; then
+			file=$(readlink -f $file)
+		fi	
+		if ! cp $file $sourcespath; then
+			echo "Couldn't copy $file to $sourcespath"
+			local returnval=1
+		fi 
+	done
+
+	if [[ $returnval ]]; then
+		return $returnval
+	else
+		return 0
+	fi
+}
 
 backup_sources(){
 	local sourcespath=$1
@@ -185,7 +204,7 @@ backup_sources(){
 	elif ! check_file_write $sourcespath ; then
 		echo "Couldn't write to $sourcespath Check permissions?" 
 		return 3
-	elif ! cp -R $extpath/etc/apt/sources.list.d/ $sourcespath  ; then
+	elif ! backup_other_sources $extpath $sourcespath  ; then
 		echo "Problem copying over /etc/apt/sources.list.d"
         	return 3
 	elif ! cp  $extpath/etc/apt/sources.list $sourcespath  ; then
