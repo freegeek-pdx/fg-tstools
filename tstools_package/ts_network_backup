@@ -77,7 +77,7 @@ if [[ -z $1 ]]; then
 
 # redirect stderr to /dev/null for the duration of this script
 # as we have our own error messages
-exec 2>/dev/null 
+#exec 2>/dev/null 
 
 while getopts ":hc:r:l:t:a:A:p:dufF" option; do
        case $option in
