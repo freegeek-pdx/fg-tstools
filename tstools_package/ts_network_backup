@@ -212,6 +212,7 @@ if [[ $create_backup ]] ; then
 			exit 3
 	fi
 	# if overwriting of backups not forced with -F 
+	echo "checking to see if the backup directroy already exists..."
 	if [[  ! $force_overwrite ]]; then
 		if check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir; then
 			write_msg "Backup directory already exists!"   
@@ -223,7 +224,7 @@ if [[ $create_backup ]] ; then
 	if [[ $addendum ]]; then
 		
 		if ! check_valid_chars $addendum; then 
-			write_msg "Only nubers, letters and _ can be added to a ticket number" 
+			write_msg "Only numbers, letters and _ can be added to a ticket number" 
 			write_msg "You do not need to use - it will will be added automatically" 
 			exit 3
 		fi
@@ -332,7 +333,6 @@ if [[ $create_backup ]]; then
 ##################
 elif [[ $restore_backup ]] ; then
         # not the same as backup_password_files
-echo "here <-- 0"
         if ! backup_passwords_check=$(backup_passwords $ext_path); then
 		write_msg "$backup_passwords_check" 
 		write_msg "Failed to backup password files ..exiting" 
