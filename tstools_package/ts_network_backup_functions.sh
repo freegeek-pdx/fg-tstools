@@ -177,9 +177,11 @@ restore_users(){
 backup_other_sources(){
 	local sourcespath=$1
 	local extpath=$2
-	 echo "sources: $sourcespath ext:$extpath"
-
-	path=$extpath/etc/apt/sources.list.d/
+	if [ $extpath]; then  
+		path=$extpath/etc/apt/sources.list.d/
+	else
+		path=/etc/apt/sources.list.d/
+	fi
 	for file in $path/* ; do
 echo "file: $file"
 		if [[ -L $file ]]; then
@@ -202,8 +204,6 @@ backup_sources(){
 	local sourcespath=$1
 	local path=$2
 	local extpath=$3
-	echo "sources: $sourcespath ext:$extpath"
-
 	if ! mkdir $sourcespath; then
 		echo "Couldn't make $sourcespath"
 		return 3
