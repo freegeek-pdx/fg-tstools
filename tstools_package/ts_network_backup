@@ -372,10 +372,10 @@ elif [[ $restore_backup ]] ; then
 				
 				
 				# if user had multiverse enabled
-				grep multiverse $sources_file
+				grep multiverse $sources_file &>/dev/null
 				multiverse_test=$?
 				# if user had partner software enabled
-				grep partner $sources_file
+				grep partner $sources_file &>/dev/null
 				partner_test=$?
 				codename=$($chroot_path lsb_release -c |  awk '{print $2}') # lucid etc
 				if (( $multiverse_test == 0 )); then
