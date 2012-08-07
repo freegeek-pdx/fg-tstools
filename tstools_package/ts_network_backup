@@ -280,6 +280,7 @@ if [[ $create_backup ]]; then
 
 	# unless no_apt is set back up record of packages installed
 	if [[ ! $no_apt ]]; then
+		echo "sources: $sources_path ext:$ext_path"
                 if ! backup_sources_msg="$(backup_sources $sources_path $ext_path)" ; then
 	                write_msg "Encountered problem backing up software sources"         
 			write_msg "$backup_sources_msg" 
