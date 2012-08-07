@@ -186,7 +186,7 @@ backup_other_sources(){
 		if [[ -L $file ]]; then
 			file=$(readlink -f $file)
 		fi	
-		if ! cp $file $sourcespath; then
+		if ! cp $file $sourcespath/sources.list.d/; then
 			echo "Couldn't copy $file to $sourcespath"
 			local returnval=1
 		fi 
