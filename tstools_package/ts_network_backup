@@ -401,7 +401,7 @@ echo "here <-- 1"
 				# check to see if any PPA files in sources.list.d
 				if [[ -d $sources_path/sources.list.d &&  $(ls -A $sources_path/sources.list.d) ]]; then
 echo "here <--2"
-					if ! cp -R "${sources_path}sources.list.d/*" $ext_path/etc/apt/sources.list.d/; then
+					if ! cp -R ${sources_path}sources.list.d/* $ext_path/etc/apt/sources.list.d/; then
 						write_msg "unable to restore PPA's. This is a warning only"
 						write_msg "The rest of the restoration will proceed as normal"
 					else
