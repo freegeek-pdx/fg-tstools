@@ -397,10 +397,8 @@ elif [[ $restore_backup ]] ; then
 						write_msg "Added Canonical partners to software sources" 
 					fi
 				fi
-echo "here <-- 1" 
 				# check to see if any PPA files in sources.list.d
 				if [[ -d $sources_path/sources.list.d &&  $(ls -A $sources_path/sources.list.d) ]]; then
-echo "here <--2"
 					if ! cp -R ${sources_path}sources.list.d/* $ext_path/etc/apt/sources.list.d/; then
 						write_msg "unable to restore PPA's. This is a warning only"
 						write_msg "The rest of the restoration will proceed as normal"
@@ -408,18 +406,14 @@ echo "here <--2"
 						write_msg "Added PPA's to software sources" 
 					fi
 				fi
-echo "here <--3"			
 				if ! packagerestore=$(restore_packages $dpkg_file $ext_path); then
-echo "here <--4"
 					write_msg "$packagerestore" 
 					exit 3
 				else
 					write_msg "$packagerestore" 
 				fi
-echo "here <--5"				
 			fi
 		fi # End no-apt
-echo "here <--6"
 	write_msg "Backup successfully restored" 
 	fi
 
