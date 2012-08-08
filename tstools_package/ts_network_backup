@@ -45,11 +45,11 @@ packages that have been installed (via apt-get, Ubuntu Software Center etc).
 				other than the home directory.
 				Suggests the use of -A for restoring backups.
 	-f 			force the backup of a single file rather than a directory 
-	-F			Force the overwriting an existing backup
-	-A /path/to/directory	Use this to restore the backup to somewhere
-				other than the default (/home)
-                                Can be used with or without -u or -d 
-				suggests the later (required if needed). 
+	-F			Force the overwriting an existing backup 
+				or restoring with -A and not -d 
+	-A /path/to/directory	Use this to restore the backup to somewhereother than /home
+                                Can be used with or without -u or -d suggests the later 
+				(required if needed) -F must be used if -d isn't. 
 	-p /path/to/home	Use this if the home folder you want to
 				backup is not in its usual place i.e. if you
 				to backup an external/mounted drive 
@@ -112,6 +112,7 @@ while getopts ":hc:r:l:t:a:A:p:dufF" option; do
 		   path="$OPTARG"
 		;;
 		A) path="$OPTARG"
+		   alt_restore_path="true"
 		;;
 		p) 
 		   cut_path=$(echo "$OPTARG" |sed -r -e 's:/home/?$::' -e 's/\/*$//') 
@@ -152,18 +153,23 @@ fi
 
 if [[ $create_backup  &&  $restore_backup ]]; then 
 	write_msg "Only one of the -c or -r options can be used" 
-	exit 
-
+	exit 2
 elif [[ ! $create_backup && ! $restore_backup ]]; then 
         write_msg "One of the -c or -r (or -h help) options must  be used. Arguments must be supplied with -c & -r." 
-        exit 3
-
+        exit 2
 elif [[ $data_only  &&  $users_and_data_only ]]; then
         write_msg "The -d or -a and -u options are mutually exclusive" 
-        exit 3
+        exit 2
+elif [[ $alt_path && ! $create_backup ]]; then
+	write_msg "-a can only be used with -c" 
+	exit 2
+elif [[ $alti_restore_path && ! $restore_backup ]]; then
+         write_msg "-A can only be used with -r"
+         exit 2
+
 elif [[ $force_file &&  ! $alt_path ]]; then
 	write_msg "the -a option must be used with -f" 
-	exit 3
+	exit 2
 else
 	# set paths etc
 	if [[ ! $path ]]; then 
@@ -231,11 +237,17 @@ if [[ $create_backup ]] ; then
 	# if backup alternate path leave message
 	if [[ $alt_path && ! $force_file ]] ; then
 		echo "Directory backup was $path" >>$path/DIRECTORY_BACKED_UP
+		write_msg "Directory backup was $path"
+		write_msg "a message to this effect will stored in the file DIRECTORY_BACKED_UP"
 	fi 
 fi
 
 # restore backup checks
 if [[ $restore_backup ]]; then
+	if [[ $alt_restore_path && ! $data_only && ! $force_overwrite ]]; then
+	write_msg "-F must be used with -A if -d is not used"
+		exit 2
+	fi
 	write_msg "checking to see if backup directory already exists"
 	if ! check_valid_backup_dir $backup_dir; then
 		write_msg "This doesn't look like a valid backup directory, sorry. exiting..."
