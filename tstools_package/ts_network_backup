@@ -228,6 +228,10 @@ if [[ $create_backup ]] ; then
 			exit 3
 		fi
 	fi
+	# if backup alternate path leave message
+	if [[ $alt_path && ! $force_file ]] ; then
+		echo "Directory backup was $path" >>$path/DIRECTORY_BACKED_UP
+	fi 
 fi
 
 # restore backup checks
@@ -349,11 +353,16 @@ elif [[ $restore_backup ]] ; then
 	else
 		if [[ ! $no_user_passwords ]];  then
 			if ! restore_users_test=$(restore_users $path $ext_path); then
+				restore_users_return=$?
 				write_msg "$restore_users_test" 
-				write_msg "WARNING! users may have been deleted from the system" 
-				write_msg "Before proceeding restore $backup_passwords_check" 
-				write_msg "to /etc/passwd /etc/shadow /etc/group" 
-				exit 3
+				if [[ "$restore_users_return" !=  "2" ]]; then
+					write_msg "WARNING! users may have been deleted from the system" 
+					write_msg "Before proceeding  you should consider restoring $backup_passwords_check" 
+					write_msg "to /etc/passwd /etc/shadow /etc/group" 
+					exit 3
+				else
+					exit 2
+				fi
 			else 
 				write_msg "Restored users" 
 			fi
