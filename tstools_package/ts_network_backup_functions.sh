@@ -333,7 +333,7 @@ restore_packages(){
                 echo "Could not set package selection when attempting to restore packages"	
 		echo "$dpkg_msg"
 		return 3
-        elif ! local upgrade_mdg=$($chroot_path apt-get -u dselect-upgrade   2>&1); then
+        elif ! local upgrade_mdg=$($chroot_path apt-get -y -u dselect-upgrade   2>&1); then
 		echo "apt-get -u dselect-upgrade  while attempting to restore packages"
 		echo "$upgrade_msg"
 	else
