@@ -182,6 +182,10 @@ backup_other_sources(){
 	else
 		path=/etc/apt/sources.list.d/
 	fi
+	if ! mkdir -p $sourcespath/sources.list.d; then
+                 echo "Couldn't make $sourcespath/sources.list.d"
+                 return 3
+	fi
 	for file in $path/* ; do
 		if [[ -L $file ]]; then
 			realfile=$(readlink -f $file)
@@ -189,6 +193,7 @@ backup_other_sources(){
 			realfile=$file
 		fi		
 		filename=$(echo $realfile | awk -F/ '{ print $NF }')
+echo "cp $realfile $sourcespath/sources.list.d/$filename"
 		if ! cp $realfile $sourcespath/sources.list.d/$filename; then
 			echo "Couldn't copy $file to $sourcespath"
 			local returnval=1
@@ -206,7 +211,7 @@ backup_sources(){
 	local sourcespath=$1
 	local path=$2
 	local extpath=$3
-	if ! mkdir -p $sourcespath/sources.list.d; then
+	if ! mkdir -p $sourcespath; then
 		echo "Couldn't make $sourcespath"
 		return 3
 	elif ! check_file_write $sourcespath ; then
