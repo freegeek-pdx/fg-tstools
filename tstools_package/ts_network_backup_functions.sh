@@ -187,7 +187,7 @@ backup_other_sources(){
 			 echo "Couldn't make $sourcespath/sources.list.d"
 			 return 3
 		fi
-		if $(ls -A $path); then
+		if [[ $(ls -A $path) ]]; then
 			for file in $path/* ; do
 				filename=$(echo $file | awk -F/ '{ print $NF }')
 				if [[ -L $file ]]; then
