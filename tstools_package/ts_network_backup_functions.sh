@@ -187,8 +187,9 @@ backup_other_sources(){
 			realfile=$(readlink -f $file)
 		else
 			realfile=$file
-		fi	
-		if ! cp $realfile $sourcespath/sources.list.d/$file; then
+		fi		
+		filename=$(echo $realfile | awk -F/ '{ print $NF }')
+		if ! cp $realfile $sourcespath/sources.list.d/$filename; then
 			echo "Couldn't copy $file to $sourcespath"
 			local returnval=1
 		fi 
