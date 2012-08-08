@@ -403,7 +403,7 @@ echo "here <-- 1"
 echo "here <--2"
 					if ! cp -R "${sources_path}sources.list.d/*" $ext_path/etc/apt/sources.list.d/; then
 						write_msg "unable to restore PPA's. This is a warning only"
-						write_msg "The rest of the restoration will procedd as normal"
+						write_msg "The rest of the restoration will proceed as normal"
 					else
 						write_msg "Added PPA's to software sources" 
 					fi
