@@ -399,9 +399,11 @@ elif [[ $restore_backup ]] ; then
 				fi
 echo "here <-- 1" 
 				# check to see if any PPA files in sources.list.d
-				if [[ -n "$(ls -A $sources_path/sources.list.d)" ]]; then
+				if [[ -d $sources_path/sources.list.d &&  $(ls -A $sources_path/sources.list.d) ]]; then
 echo "here <--2"
-					cp -R "$sources_path/sources.list.d/*" $ext_path/etc/apt/sources.list.d
+					if ! cp -R "$sources_path/sources.list.d/*" $ext_path/etc/apt/sources.list.d/; then
+					write_msg "unable to restore PPA's. This is a warning only"
+					write_msg "The rest of the restoration will procedd as normal"
 				else
 					write_msg "Added PPA's to software sources" 
 				fi
