@@ -212,7 +212,7 @@ if [[ $create_backup ]] ; then
 			exit 3
 	fi
 	# if overwriting of backups not forced with -F 
-	echo "checking to see if the backup directroy already exists..."
+	write_msg "checking to see if the backup directroy already exists..."
 	if [[  ! $force_overwrite ]]; then
 		if check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir; then
 			write_msg "Backup directory already exists!"   
@@ -221,8 +221,7 @@ if [[ $create_backup ]] ; then
 		fi
 	fi
 	# add addendum to ticket number if present
-	if [[ $addendum ]]; then
-		
+	if [[ $addendum ]]; then	
 		if ! check_valid_chars $addendum; then 
 			write_msg "Only numbers, letters and _ can be added to a ticket number" 
 			write_msg "You do not need to use - it will will be added automatically" 
@@ -233,12 +232,12 @@ fi
 
 # restore backup checks
 if [[ $restore_backup ]]; then
-
+	write_msg "checking to see if backup directory already exists"
 	if ! check_valid_backup_dir $backup_dir; then
 		write_msg "This doesn't look like a valid backup directory, sorry. exiting..."
 		exit 3
 	fi
-
+	echo 
 	if ! check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir; then
 		write_msg "Backup directory does not exist"  
 		write_msg "Cowardly refusing to restore from non-existant backup" 
