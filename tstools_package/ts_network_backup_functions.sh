@@ -158,7 +158,7 @@ restore_users(){
 	# checks if value is set
 		if declare -p break_value &> /dev/null; then
 			echo "This backup may have been created with the -d option, if so rerun with -d"
-			return 3
+			return 2
 		fi
         # read /home/password file or equivalent)
         while read line ; do
