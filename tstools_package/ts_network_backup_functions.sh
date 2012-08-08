@@ -187,6 +187,7 @@ backup_other_sources(){
                  return 3
 	fi
 	for file in $path/* ; do
+echo "$file"
 		if [[ -L $file ]]; then
 			realfile=$(readlink -f $file)
 		else
