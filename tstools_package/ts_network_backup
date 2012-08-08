@@ -402,10 +402,11 @@ echo "here <-- 1"
 				if [[ -d $sources_path/sources.list.d &&  $(ls -A $sources_path/sources.list.d) ]]; then
 echo "here <--2"
 					if ! cp -R "$sources_path/sources.list.d/*" $ext_path/etc/apt/sources.list.d/; then
-					write_msg "unable to restore PPA's. This is a warning only"
-					write_msg "The rest of the restoration will procedd as normal"
-				else
-					write_msg "Added PPA's to software sources" 
+						write_msg "unable to restore PPA's. This is a warning only"
+						write_msg "The rest of the restoration will procedd as normal"
+					else
+						write_msg "Added PPA's to software sources" 
+					fi
 				fi
 echo "here <--3"			
 				if ! packagerestore=$(restore_packages $dpkg_file $ext_path); then
