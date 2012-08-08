@@ -206,7 +206,7 @@ backup_other_sources(){
 			echo "The backup will proceed as normal" 
 		fi
 	else
-		echo "$path does not exist. This is a warning only."
+		echo "$path does not exist. This is a warning only." 
 		echo "The backup will proceed as normal"	
 	fi
 	if [[ $returnval ]]; then
