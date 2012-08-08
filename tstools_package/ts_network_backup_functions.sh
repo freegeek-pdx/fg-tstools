@@ -180,27 +180,35 @@ backup_other_sources(){
 	if [ $extpath]; then  
 		path=$extpath/etc/apt/sources.list.d
 	else
-		path=/etc/apt/sources.list.d
+		path=/etc/apt/sources.list.d/
 	fi
-	if ! mkdir -p $sourcespath/sources.list.d; then
-                 echo "Couldn't make $sourcespath/sources.list.d"
-                 return 3
-	fi
-	for file in $path/* ; do
-echo "$file"
-		if [[ -L $file ]]; then
-			realfile=$(readlink -f $file)
+	if [[ -d $path ]]; then
+		if ! mkdir -p $sourcespath/sources.list.d; then
+			 echo "Couldn't make $sourcespath/sources.list.d"
+			 return 3
+		fi
+		if $(ls -A $path); then
+			for file in $path/* ; do
+				filename=$(echo $file | awk -F/ '{ print $NF }')
+				if [[ -L $file ]]; then
+					realfile=$(readlink -f $file)
+				else
+					realfile=$file
+				fi		
+		echo "cp $realfile $sourcespath/sources.list.d/$filename"
+				if ! cp $realfile $sourcespath/sources.list.d/$filename; then
+					echo "Couldn't copy $file to $sourcespath"
+					local returnval=3
+				fi 
+			done
 		else
-			realfile=$file
-		fi		
-		filename=$(echo $realfile | awk -F/ '{ print $NF }')
-echo "cp $realfile $sourcespath/sources.list.d/$filename"
-		if ! cp $realfile $sourcespath/sources.list.d/$filename; then
-			echo "Couldn't copy $file to $sourcespath"
-			local returnval=1
-		fi 
-	done
-
+			echo "$path is empty. This is a warning only." 
+			echo "The backup will proceed as normal" 
+		fi
+	else
+		echo "$path does not exist. This is a warning only."
+		echo "The backup will proceed as normal"	
+	fi
 	if [[ $returnval ]]; then
 		return $returnval
 	else
