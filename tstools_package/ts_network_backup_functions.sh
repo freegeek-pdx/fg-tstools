@@ -178,9 +178,9 @@ backup_other_sources(){
 	local sourcespath=$1
 	local extpath=$2
 	if [ $extpath]; then  
-		path=$extpath/etc/apt/sources.list.d/
+		path=$extpath/etc/apt/sources.list.d
 	else
-		path=/etc/apt/sources.list.d/
+		path=/etc/apt/sources.list.d
 	fi
 	if ! mkdir -p $sourcespath/sources.list.d; then
                  echo "Couldn't make $sourcespath/sources.list.d"
