@@ -55,7 +55,7 @@ restore backup with -d										PASS
 restore backup with -ud										PASS
 restore backup created with d without d								PASS
 restore backup created with u without u								PASS  
-restore backup with -A created with -a
+restore backup with -A created with -a								PASS
 restore backup with -A created without -a
 restore backup with -A without -u/d 
 restore backup from -p
