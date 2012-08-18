@@ -190,13 +190,11 @@ backup_other_sources(){
 		if [[ $(ls -A $path) ]]; then
 			for file in $path/* ; do
 				filename=$(echo $file | awk -F/ '{ print $NF }')
-echo "File: $filename"
 				if [[ -L $file ]]; then
 					realfile=$(readlink -f $file)
 				else
 					realfile=$file
 				fi		
-		echo "cp $realfile $sourcespath/sources.list.d/$filename"
 				if ! cp $realfile $sourcespath/sources.list.d/$filename; then
 					echo "Couldn't copy $file to $sourcespath"
 					local returnval=3
