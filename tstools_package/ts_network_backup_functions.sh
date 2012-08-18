@@ -113,7 +113,7 @@ restore_user(){
 	if ! $chroot_path addgroup --gid $gid $user; then
        		echo "problem creating ${user}'s group"
 		return 3
- 	elif ! $chroot_path useradd -N --gid $gid --uid $uid -d /home/$user --password $password $user; then
+ 	elif ! $chroot_path useradd -N --gid $gid --uid $uid -d /home/$user --password $password --shell /bin/bash $user; then
 		echo "problem creating user: $user"
 		return 3
 	else
