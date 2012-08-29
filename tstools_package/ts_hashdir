@@ -87,4 +87,11 @@ def GetHashofDirs(directory, verbose=0):
 ### END OF FUNCTIONS ###
 
 directory = get_arg()
-print GetHashofDirs(directory, 0)
+dirhash = GetHashofDirs(directory, 0)
+if dirhash == -1:
+    print 'Directory:' + directory + ' does not exist!'
+    exit(1)
+elif dirhash == -2:
+    exit(2)
+else:
+    print dirhash
