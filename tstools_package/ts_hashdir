@@ -46,7 +46,7 @@ else:
         args = parser.parse_args()
         if len(args) != 1:
             parser.error("wrong number of arguments")
-         else:
+        else:
             return args[0]
 
 def GetHashofDirs(directory, verbose=0):
