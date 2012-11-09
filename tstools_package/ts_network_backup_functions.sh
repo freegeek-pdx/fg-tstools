@@ -298,9 +298,9 @@ backup_apt(){
 	local dpkgfile=$1
 	local extpath=$2
         if [[ $extpath ]]; then
-        	local chroot_path="chroot $extpath"
+        	local aptdir="--admindir=${extpath}/var/lib/dpkg"
 	fi
-	$chroot_path dpkg --get-selections > $dpkgfile 2>&1 
+	dpkg --get-selections $aptdir > $dpkgfile 2>&1 
         return $?
 }
 
