@@ -453,9 +453,9 @@ fi
 
 if [[ ! $data_only ]]; then
  	if [[ ! $no_apt ]]; then
-		to_remove="/home/apt /home/dpkg.out /home/passwd /home/shadow /home/group"
+            to_remove="$source_path $dpkg_file $password_file  $shadow_file $group_file"
 	else
-		to_remove="${toremove} /home/passwd /home/shadow /home/group"
+	    to_remove="$password_file $shadow_file $group_file"
 	fi
 	# runs rm -r on files/dirs
 	if ! cleanup $to_remove; then
