@@ -16,10 +16,9 @@ check_for_backup_dir(){
 
 
 backup_users_test(){
-        local path=$1        
-	# check we can wrtite to the backup files
+	# check we can write to the backup files
         declare -a failarray
-        for file in "${path}/group" "${path}/passwd" "${path}/shadow"; do
+        for file in $@; do
                  if [[ $(check_file_write "${file}") -ne 0 ]]; then
                         # if we cant write to file add to array         
                         failarray=( ${failarray[@]-} $(echo "$file") ) 
