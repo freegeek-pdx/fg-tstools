@@ -168,7 +168,7 @@ elif [[ $data_only  &&  $users_and_data_only ]]; then
 elif [[ $alt_path && ! $create_backup ]]; then
 	write_msg "-a can only be used with -c" 
 	exit 2
-elif [[ $alti_restore_path && ! $restore_backup ]]; then
+elif [[ $alt_restore_path && ! $restore_backup ]]; then
          write_msg "-A can only be used with -r"
          exit 2
 
