@@ -65,8 +65,13 @@ EOF
 }
  
 # source common functions
-source $MAIN_FUNCTIONS
-source $NB_FUNCTIONS
+if ! source $MAIN_FUNCTIONS; then
+    echo "could not find needed functions file"
+    exit 3
+elif !  source $NB_FUNCTIONS; then
+    echo "could not find needed functions file"
+    exit 3
+fi
 
 ### MAIN ###
 
