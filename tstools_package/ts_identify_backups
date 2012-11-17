@@ -10,12 +10,13 @@ source $CONFIG_FILE
 help(){
 cat <<EOF 
 
-usage: $0 [OPTION] 
+usage: $0 [OPTION] ticket_number 
 Indentifies backups for ticket
-Example: $0 -t 12345
+Example: $0 [-t] 12345
 
 -h			prints this message
--t [ticket number]	Ticket number to look up (won't work without this).
+-t [ticket number]	Ticket number to look up.
+                        Optional unless -o is used.
 -o [file]		Saves a list of backups to [file]
  
 This script will attempt to identify existing backups on $backup_host from 
@@ -30,6 +31,7 @@ else
 	exit 0
 fi
 }
+
 # source common functions
 source $MAIN_FUNCTIONS
 
@@ -63,10 +65,17 @@ while getopts "ht:o:" option; do
 	esac
 done
 
+
+
 # Check  for valid ticket number
 if ! [[ -n $ticket_number ]]; then
-	echo "You must supply a valid ticket number with the -t option"
-	help 3
+        # if we have only 1 argument assume it is a ticket number
+        if [[ $# -eq 1 ]]; then
+            ticket_number=$1
+        else
+	    echo "You must supply a valid ticket number with the -t option"
+	    help 3
+        fi
 fi
 if ! check_ticket_number $ticket_number; then
 	echo "This doesn't look like a valid ticket number!"
@@ -74,7 +83,7 @@ if ! check_ticket_number $ticket_number; then
 	exit 3
 fi
 
-# get a list of folders and check return value, thne ouyt put folders or error message 
+# get a list of folders and check return value, thne output folders or error message 
 candidate_list=$(get_candidates $ticket_number $backup_user $backup_host $backup_path)
 get_can_return=$?
 if [[ $get_can_return -eq 0 ]]; then
