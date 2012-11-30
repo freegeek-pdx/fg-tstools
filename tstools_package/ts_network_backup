@@ -269,7 +269,7 @@ fi
 # otherwise some dumbass will back up the wrong thing
 if [[ ! $ext_path ]]; then
     for host in $external_hosts; do
-	if [[ $HOSTNAME == $host ]] then
+	if [[ $HOSTNAME == $host ]]; then
             write_msg "YOU MUST USE THE -p OPTION TO SPECIFY THE PATH OF THE 
 DIRECTORY YOU WISH TO BACKUP/RESTORE TO WHEN YOU ARE ON THIS MACHINE!!!"	
 	    exit 3
