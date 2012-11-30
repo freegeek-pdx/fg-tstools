@@ -299,7 +299,7 @@ backup_apt(){
         if [[ $extpath ]]; then
         	local aptdir="--admindir=${extpath}/var/lib/dpkg"
 	fi
-	dpkg --get-selections $aptdir > $dpkgfile 2>&1 
+	dpkg --get-selections $aptdir > $dpkgfile  
         return $?
 }
 
