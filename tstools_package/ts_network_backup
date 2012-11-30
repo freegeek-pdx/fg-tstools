@@ -311,6 +311,7 @@ if [[ $create_backup ]]; then
 		fi
 
 		if ! aptbackup="$(backup_apt $dpkg_file $ext_path)"; then
+                        aptbackup_return=$?
 			write_msg "Backing up package files list failed!" 
                         write_msg "$aptbackup" 	
 			write_msg "dpkg --get-selections exited with error code $aptbackup_return"  
