@@ -21,6 +21,14 @@ ts_login_as_user, ts_make_tsuser, ts_revert_passwords
 
 ================================================================================
 
+For a standard backup ts_network_backup -c [TICKET NO] to backup is sufficient.
+To restore first identify the backup folder 
+ts_identify [TICKET NO] 
+this will reurn the backup folderm, then
+ts_network_backup -r [BACKUP_FOLDER].
+
+N.B. on tsdata you MUST use the -p option to specify the path to the mounted disc.
+
 
 Help for ts_network_backup
 ===========================
