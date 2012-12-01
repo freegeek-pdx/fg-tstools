@@ -10,7 +10,7 @@ help(){
 	
 	Resets various gnome configurations to their default settings, 
         e.g. a users panel.
-        Obsolete: only works with Ubuntu 10.04 
+        Currently obsolete: works only with Ubuntu 10.04 
 EOF
 }
 
