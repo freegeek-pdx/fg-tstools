@@ -7,7 +7,7 @@ check_for_backup_dir(){
 	local backuppath=$3
 	local backupdir=$4
 	# success if finds backupdir
-	if ssh $backupuser@$backuphost ls $backuppath/$backupdir &> /dev/nul; then
+	if ssh $backupuser@$backuphost ls $backuppath/$backupdir &> /dev/null; then
 		return 0
 	else
 		return 1
@@ -37,6 +37,19 @@ backup_users_test(){
 	fi
 }
 
+get_groups(){
+        local user=$1
+        local extpath=$2
+        local group
+        local groups
+        for group in $(grep $user ${extpath}/etc/group | awk -F: '{print $1}'); do
+                if [[ $group != $user ]]; then
+                        groups="${groups},${group}" 
+                fi  
+        done 
+        echo "$groups"
+} 
+
 backup_users(){
         local path=$1
 	local extpath=$2
@@ -53,7 +66,8 @@ backup_users(){
                         # unless user is a nobody :)
                         if [[ ! $user == "nobody" ]]; then
                                 # gets lists of groups user belongs to
-                                echo "$user: $(id $user)" >>"${path}/group"
+                                #echo "$user: $(id $user)" >>"${path}/group"
+                                echo "$user: $(get_groups $user)" >>"${path}/group"
 				if (( $? != 0 )); then
 					fail="${fail} ${path}/group "
 				fi
@@ -116,23 +130,27 @@ restore_user(){
 		echo "problem creating user: $user"
 		return 3
 	else
-        # read /home/group usermod to addusers to groups        
-		local groups=$(grep -e "\<$user\>" $path/group | cut -f1 -d: -)
-                	for entry in $groups; do
-                        	if [[ $entry != $user ]]; then
-                                	if [[ ! $usergroups ]]; then
-                                        	usergroups=$entry
-	                                else
-        	                                usergroups="$entry,$usergroups"
-                	                fi
-	                        fi
-	                done
-			if [[ ${#usergroups} -ne 0 ]] ; then
-				if ! $chroot_path usermod -a -G "$usergroups" $user; then
-				echo "problem adding ${user}'s groups"
-				return 3
- 				fi
-			fi
+                # read /home/group usermod to addusers to groups        
+                #local groups=$(grep -e "\<$user\>" $path/group | cut -f1 -d: -)
+                # line above printed only 1st field , we wanted all but 1st
+                local usergroups=$(grep -e "\<$user\>" mygroup | cut -f2- -d: -)
+
+#               superfluous: get_groups produces correctly formatted entry
+#                 	for entry in $groups; do
+#                         	if [[ $entry != $user ]]; then
+#                                 	if [[ ! $usergroups ]]; then
+#                                         	usergroups=$entry
+# 	                                else
+#         	                                usergroups="$usergroups,$entry"
+#                 	                fi
+# 	                        fi
+# 	                done
+                if [[ ${#usergroups} -ne 0 ]] ; then
+                        if ! $chroot_path usermod -a -G "$usergroups" $user; then
+                                echo "problem adding ${user}'s groups"
+                                return 3
+                        fi
+                fi
 		return 0
 	fi
 }
