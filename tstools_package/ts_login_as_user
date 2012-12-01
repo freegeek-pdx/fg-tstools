@@ -3,11 +3,14 @@
 help(){
 	cat <<EOF 
 	usage ts_login_as_user [OPTION]
-	-h		prints this message
-	-u [USERNAME]	specify the user whose password will be changed. 
-        -p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
+	-h		        prints this message
+	-u [USERNAME]	        specify the user whose password will be changed.
+        -p /path/to/mountpoint  The directory where the target file system is
+                                 mounted. Use this if you are working on an
+                                 externally mounted  drive
 
-	Resets a users password to the standard (oem) password. to enable you to login as that user.
+Resets a users password to the standard (oem) password. to enable you to login as that user.
+Considered obsolete, mostly. Rooting a box is preferable.
 EOF
 }
 
@@ -58,14 +61,11 @@ elif ! reset_password $user $phash $path; then
 	exit 3
 else 
 	echo "password for $user has been reset."
-	if [[ ! $path ]]; then
-		cat <<EOF
- It will revert to the user's original password next time the machine is rebooted or shutdown.
+	cat <<EOF
 
 You may now exit recovery mode and log in as that user.
+You will need to run ts_revert_passwords when you are finished
+
 EOF
-	else
-		echo "You will need to run ts_revert_passwords when you are finished"	
-	fi
 	exit 0
 fi
