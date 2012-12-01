@@ -3,7 +3,10 @@ help(){
         cat <<EOF 
         usage: ts_getid [-p]
         
-	-p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
+	-p /path/to/mountpoint          The directory where the target file 
+                                        system is mounted. Use this if you are
+                                        working on an externally mounted drive
+                                    
 
         returns the system id if present.
 EOF
