@@ -2,13 +2,16 @@
 help(){
         cat <<EOF 
         usage ts_reset_panel [OPTION]
-        -h              prints this message
-        -u [USERNAME]   specify the user whose panels will be reset,
-			defaults to the user running the command.
-        -p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd. 	Implies -u 
+        -h                      prints this message
+        -u [USERNAME]           specify the user whose panels will be reset,
+			        defaults to the user running the command.
+        -p /path/to/mountpoint  The directory where the target file system is
+                                 mounted. Use this if you are working on an 
+                                 externally mounted  drive 
 
 
 	Resets gnome panels to their default state. 
+        Currently obsolete. Works only with Ubuntu 10.04
 EOF
 }
 
