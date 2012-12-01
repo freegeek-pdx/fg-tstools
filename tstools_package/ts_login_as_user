@@ -10,7 +10,8 @@ help(){
                                  externally mounted  drive
 
 Resets a users password to the standard (oem) password. to enable you to login as that user.
-Considered obsolete, mostly. Rooting a box is preferable.
+You will need to run ts_revert_passwords when you are done.
+Considered obsolete, mostly. Rooting a box is preferable. Maybe useful to fix issues related to users longin.
 EOF
 }
 
