@@ -40,15 +40,18 @@ packages that have been installed (via apt-get, Ubuntu Software Center etc).
 				e.g. 00001-A and 00001-B
 				Takes letters, numbers and _only. - is added automatically.  
 	-a /path/to/directory   Alternative directory to backup. Implies  -d 
-				i.e. does not backup/restore users or packages.
+				i.e. does not backup users or packages.
 				Use this if you want to backup something
-				other than the home directory.
+			        other than the home directory.
+                                e.g. an external windows drive.
 				Suggests the use of -A for restoring backups.
 	-f 			force the backup of a single file rather than a directory 
 	-F			Force the overwriting an existing backup 
 				or restoring with -A and not -d 
-	-A /path/to/directory	Use this to restore the backup to somewhereother than /home
-                                Can be used with or without -u or -d suggests the later 
+	-A /path/to/directory	Use this to restore the backup to somewhere
+                                other than /home
+                                Can be used with or without -u or -d,
+                                suggests the later 
 				(required if needed) -F must be used if -d isn't. 
 	-p /path/to/home	Use this if the home folder you want to
 				backup is not in its usual place i.e. if you
@@ -58,7 +61,7 @@ packages that have been installed (via apt-get, Ubuntu Software Center etc).
 				script does not mind either way. 
 				Can be used with or without -u or -d. 	
 	
-	Use this to create or restore network backups. By default it will attempt to restore users, their data and settings, and the progams installed on the machine. 
+Use this to create or restore network backups. By default it will attempt to restore users, their data and settings, and the progams installed on the machine. 
 
 
 EOF
