@@ -350,6 +350,7 @@ if [[ $create_backup ]]; then
 	fi
 
 	echo "Preparing to rsync network backup..."
+        echo "this may take some time..."
 
 	if ! make_backup="$(create_backup $path $backup_user $backup_host $backup_path $backup_dir )"; then
 		write_msg "$make_backup" 
@@ -371,7 +372,9 @@ elif [[ $restore_backup ]] ; then
 		write_msg "$backup_passwords_check" 
 	fi
 
-        
+	echo "Preparing to rsync network backup..."
+        echo "this may take some time..."
+
 	if ! restorebackup=$(restore_backup $backup_user $backup_host $backup_path $backup_dir $path); then
 		restore_check=$?
 		write_msg "$restorebackup" 
