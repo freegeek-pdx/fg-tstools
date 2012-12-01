@@ -2,11 +2,14 @@
 help(){
         cat <<EOF 
         usage: ts_rechown[OPTION]
-        -h              prints this message
-        -u [USERNAME]   specify the user.
-        -p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
+        -h                          prints this message
+        -u [USERNAME]               specify the user.
+        -p /path/to/mountpoint      The directory where the target file system i
+                                    is mounted. Use this if you are working on 
+                                    an externally mounted  drive 
 	
-	Restores correct ownership  of a users files.
+	Restores correct ownership of a users files. Should not be needed when
+        using ts_network_backup.
 EOF
 }
 
