@@ -2,8 +2,11 @@
 help(){
 	cat <<EOF 
 	usage ts_reset_passwd [OPTION]
-	-h		prints this message
-	-u [USERNAME]	specify the user whose password will be reset.         		-p /path/to/mountpoint        The directory where the target file system is mounted. Use this if you are working on an external or mounted  drive e.g. a drive mounted from a system rescue cd.
+	-h	        	prints this message
+	-u [USERNAME]	        specify the user whose password will be reset.
+        -p /path/to/mountpoint  The directory where the target file system is 
+                                mounted. Use this if you are working on an
+                                externally mounted  drive 
 	
 	Resets a users password to the standard oem password and sets it to expire on the next login, causing the system to prompt the users for a new passowrd. 
 EOF
