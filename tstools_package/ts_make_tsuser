@@ -8,7 +8,8 @@ help(){
                                     an externally or mounted  drive 
 
 Adds tsuser to a system with root privileges. 
-You will need to run ts_revert_passwords when you are finished
+You will need to run ts_revert_passwords when you are finished.
+This is considered obsolete. Root the box instead.
 
 EOF
 }
