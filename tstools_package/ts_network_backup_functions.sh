@@ -103,6 +103,18 @@ backup_users(){
 		return 0
 	fi
 }
+delete_user(){
+        local user=$1 
+        local gid=$2
+        local extpath=$3
+	#N.B. users may not be in file
+	# delete matching lines in /etc/passwd 
+        sed -i "/^$user:/ d" $extpath/etc/passwd
+	# delete existing encypted password 
+	sed -i "/^$user:/ d" $extpath/etc/shadow
+	# delete matching lines/existing groups
+	sed -i "/:$gid:/ d" $extpath/etc/group 
+}
 
 restore_user(){
         local path=$1        
@@ -115,15 +127,12 @@ restore_user(){
         	local chroot_path="chroot $extpath"
 	fi
 
-	#N.B. users may not be in file
-	# delete matching lines in /etc/passwd 
-        sed -i "/^$user:/ d" $extpath/etc/passwd
-	# delete existing encypted password 
-	sed -i "/^$user:/ d" $extpath/etc/shadow
-	# delete matching lines/existing groups
-	sed -i "/:$gid:/ d" $extpath/etc/group 
 
-	if ! $chroot_path addgroup --gid $gid $user; then
+	#N.B. users may not be in file
+	# delete matching lines in /etc/passwd etc
+	delete_user $user $gid $extpath
+        
+        if ! $chroot_path addgroup --gid $gid $user; then
        		echo "problem creating ${user}'s group"
 		return 3
  	elif ! $chroot_path useradd -N --gid $gid --uid $uid -d /home/$user --password $password --shell /bin/bash $user; then
@@ -183,7 +192,13 @@ restore_users(){
                 local uid=$(echo $line | awk -F : '{print $3}')
                 local gid=$(echo $line | awk -F : '{print $4}')
 		local password=$(grep -m 1 $user $path/shadow | awk -F: '{print $2}')
-		if ! user_restore=$(restore_user $path $user $uid $gid $password $extpath); then
+		# trying to restore a user with UID =1000 causes issues
+                # if they are not oem. So delete oem first.
+                if [[ $uid -eq 1000 && $user != "oem" ]]; then
+                       delete_user oem 1000 $extpath
+                fi
+
+                if ! user_restore=$(restore_user $path $user $uid $gid $password $extpath); then
 			echo "$user_restore"
 			return 3
 		fi
