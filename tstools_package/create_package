@@ -1,0 +1,62 @@
+#!/bin/bash
+# this file has the following standard layout
+# CONFIGURATION
+# help function
+# INCLUDES
+#FUNCTIONS
+# process option arguments
+# MAIN
+
+# CONFIGURATION
+path_to_src="/home/paulm/tstools/tstools_package/"
+path_to_out="/home/paulm/"
+version_file="${path_to_src}.version"
+help(){
+cat <<EOF 
+
+usage: $0 [OPTION]...
+Builds a tarball of the tstools package and updates the webpage. 
+-h              Prints this message
+-n [VERSION]    New version number. Otherwise auto increments.
+-m [message]    A description of the changes for this version. 
+-t              Ony build tarball.
+-d              Only update documentation.
+-D              Dryrun. Run any tests but do not update anything.
+
+This script builds a tarball of a new version of the TStools package 
+and updates the documentation. It will first run any tests and will complete 
+only if they are sucessful. 
+
+If you do not supply a version number it will auto-increment the last part
+of the old version (e.g. 0.1.9 to 0.1.10).
+
+You will be prompted for a description of the changes if you do not supply one.
+
+EOF
+
+# if $1 exists and is a number 0..255 return that otherwise return 0
+if [[ -n $1 && $(echo {0..255}) =~ $1 ]]; then
+        exit $1
+else
+    exit 0
+fi
+}
+# INCLUDES
+#FUNCTIONS
+
+# process option arguments
+while getopts "h" option; do        # w: place variable following w in $OPTARG
+    case "$option" in
+        h) help;;
+        [?])  echo "bad option supplied" ;
+            help;;
+    esac
+done
+
+#MAIN
+
+
+if [[ -n $1 ]]; 
+    then new_version=$1
+elif [[ -e ./version_file ]]; then
+    old_version=$(cat $version_file)
