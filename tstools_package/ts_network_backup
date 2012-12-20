@@ -289,10 +289,10 @@ if [[ ! $force_file ]]; then
 	fi
 	# Set Common paths
 	if [[ ! $no_user_passwords ]]; then 
-            group_file="${path}group"
+        group_file="${path}group"
 	    password_file="${path}password"
 	    shadow_file="${path}shadow"
-            gshadow_file=="${path}gshadow"
+        gshadow_file="${path}gshadow"
 	fi
 	if [[ ! $no_apt ]]; then
 	    dpkg_file="${path}dpkg.out"
