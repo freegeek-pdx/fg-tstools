@@ -142,7 +142,7 @@ restore_user(){
                 # read /home/group usermod to addusers to groups        
                 #local groups=$(grep -e "\<$user\>" $path/group | cut -f1 -d: -)
                 # line above printed only 1st field , we wanted all but 1st
-                local usergroups=$(grep -e "\<$user\>" mygroup | cut -f2- -d: -)
+                local usergroups=$(grep -e "\<$user\>" $path/group | cut -f2- -d: -)
 
 #               superfluous: get_groups produces correctly formatted entry
 #                 	for entry in $groups; do
