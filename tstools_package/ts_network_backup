@@ -268,18 +268,19 @@ if [[ $restore_backup ]]; then
 		exit 3
 	fi
 fi
-# if this machine is tsdata a path must be supplied
-# otherwise some dumbass will back up the wrong thing
-if [[ ! $ext_path ]]; then
-    for host in $external_hosts; do
-	if [[ $HOSTNAME == $host ]]; then
-            write_msg "YOU MUST USE THE -p OPTION TO SPECIFY THE PATH OF THE 
-DIRECTORY YOU WISH TO BACKUP/RESTORE TO WHEN YOU ARE ON THIS MACHINE!!!"	
-	    exit 3
+
+for host in $external_hosts; do
+    if [[ $HOSTNAME == $host ]]; then
+        if [[ $ext_path || $alt_path || $alt_restore_path ]]; then
+            true # do nothing
+        else
+            write_msg "YOU MUST USE ONE OF THE -p -a OR -A OPTIONS"
+           write_msg "TO SPECIFY THE PATH OF THE DIRECTORY YOU WISH TO BACKUP" 
+           write_msg "OR RESTORE TO WHEN YOU ARE ON THIS MACHINE!!!"
+            exit 3
         fi
-    done
-fi
- 
+    fi
+done
 
 # if -f (force backup of single file) not used
 if [[ ! $force_file ]]; then
