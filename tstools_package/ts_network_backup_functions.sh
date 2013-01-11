@@ -51,13 +51,14 @@ get_groups(){
 } 
 
 backup_users(){
-        local path=$1
+    local path=$1
 	local extpath=$2
 	local user
 	local user_uid
 	local userlist
 	local fail
 	local fail_list
+    # 
         while read line ; do
                 user=$(echo $line | awk -F : '{print $1}')
                 user_uid=$(echo $line | awk -F : '{print $3}')
