@@ -42,9 +42,15 @@ get_groups(){
         local extpath=$2
         local group
         local groups
+        local gcount=0
         for group in $(grep $user ${extpath}/etc/group | awk -F: '{print $1}'); do
                 if [[ $group != $user ]]; then
+                    if (( $gcount < 1 )); then
+                        groups=${group}
+                    else
                         groups="${groups},${group}" 
+                    fi
+                    let gcount++
                 fi  
         done 
         echo "$groups"
