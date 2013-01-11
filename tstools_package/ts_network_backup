@@ -335,7 +335,7 @@ if [[ $create_backup ]]; then
 			write_msg "$backup_users_check" 
 			exit 3		 
         else
-            for file in "password" "shadow" "group" "shadow"; do
+            for file in "passwd" "shadow" "group" "gshadow"; do
                 cp $ext_path/etc/$file ${path}/${file}.bak.$(date +%Y%m%d) 
                 if ! user_backup=$(backup_users "$path" "$ext_path");then
 			        write_msg "$user_backup" 
