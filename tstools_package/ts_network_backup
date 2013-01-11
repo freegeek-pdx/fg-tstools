@@ -333,13 +333,17 @@ if [[ $create_backup ]]; then
 	if [[ ! $no_user_passwords ]]; then
 		if ! backup_users_check="$(backup_users_test "$password_file" "$shadow_file" "$group_file" "$gshadow_file")"; then
 			write_msg "$backup_users_check" 
-			exit 3		  
-		elif ! user_backup=$(backup_users "$path" "$ext_path");then
-			write_msg "$user_backup" 
-			exit 3
-		else
-			write_msg "$user_backup" 
-		fi
+			exit 3		 
+    else
+       for file in "$password_file" "$shadow_file" "$group_file" "$gshadow_file"; do
+            cp ${ext_path}/${file} $path/${file}.bak.$(date +%Y%m%d) 
+            if ! user_backup=$(backup_users "$path" "$ext_path");then
+			    write_msg "$user_backup" 
+			    exit 3
+		    else
+			    write_msg "$user_backup" 
+            fi
+        done
 	fi
 	
 	# backs up /etc, don't run if backing up alternate path or data only
@@ -472,9 +476,9 @@ fi
 
 if [[ ! $data_only ]]; then
  	if [[ ! $no_apt ]]; then
-            to_remove="$source_path $dpkg_file $password_file  $shadow_file $group_file $gshadow_file" 
+            to_remove="$source_path $dpkg_file $password_file  $shadow_file $group_file" 
 	else
-	    to_remove="$password_file $shadow_file $group_file $ghadow_file"
+	    to_remove="$password_file $shadow_file $group_file"
 	fi
 	# runs rm -r on files/dirs
 	if ! cleanup $to_remove; then
