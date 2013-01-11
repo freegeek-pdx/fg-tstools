@@ -291,7 +291,7 @@ if [[ ! $force_file ]]; then
 	# Set Common paths
 	if [[ ! $no_user_passwords ]]; then 
         group_file="${path}group"
-	    password_file="${path}password"
+	    password_file="${path}passwd"
 	    shadow_file="${path}shadow"
         gshadow_file="${path}gshadow"
 	fi
@@ -331,7 +331,7 @@ if [[ $create_backup ]]; then
 	fi
 
 	if [[ ! $no_user_passwords ]]; then
-		if ! backup_users_check="$(backup_users_test "$password_file" "$shadow_file" "$group_file" "$ghadow_file")"; then
+		if ! backup_users_check="$(backup_users_test "$password_file" "$shadow_file" "$group_file" "$gshadow_file")"; then
 			write_msg "$backup_users_check" 
 			exit 3		  
 		elif ! user_backup=$(backup_users "$path" "$ext_path");then
