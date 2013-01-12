@@ -73,32 +73,33 @@ backup_users(){
                         # unless user is a nobody :)
                         # N.B. 12.04 has guest users need to account for these
                         if [[ ! $user == "nobody" ]]; then
-                                # gets lists of groups user belongs to
-                                #echo "$user: $(id $user)" >>"${path}/group"
-                                echo "$user: $(get_groups $user)" >>"${path}/group"
-                        fi
-				        if (( $? != 0 )); then
-					        fail="${fail} ${path}/group "
-				        fi
-                        echo $line >>${path}/passwd
-				        if (( $? != 0 )); then
-                            fail="${fail} ${path}/passwd "
-                        fi
+                            # gets lists of groups user belongs to
+                            #echo "$user: $(id $user)" >>"${path}/group"
+                            echo "$user: $(get_groups $user)" >>"${path}/group"
+                            if (( $? != 0 )); then
+                                fail="${fail} ${path}/group "
+                            fi
+                            echo $line >>${path}/passwd
+                            if (( $? != 0 )); then
+                                fail="${fail} ${path}/passwd "
+                            fi
 
-                        # /etc/shadow contains the date of last password
-                        # change. Having this be older than the install
-                        # should not be a problem, but noting just in case
-                        grep -e ^$user: $extpath/etc/shadow >>"${path}/shadow"
-				        if (( $? != 0 )); then
-                            fail="${fail} ${path}/shadow "
+                            # /etc/shadow contains the date of last password
+                            # change. Having this be older than the install
+                            # should not be a problem, but noting just in case
+                            grep -e ^$user: $extpath/etc/shadow >>"${path}/shadow"
+                            if (( $? != 0 )); then
+                                fail="${fail} ${path}/shadow "
+                            fi
+                            if [[ $fail ]]; then 
+                                for file in $fail; do
+                                    fail_list="${failist}\n${user}:${file}"
+                                done
+                            else
+                                userlist="$userlist $user"
+                            fi
+                            unset $fail
                         fi
-				    if [[ $fail ]]; then 
-					for file in $fail; do
-						fail_list="${failist}\n${user}:${file}"
-					    done
-				    else
-                        userlist="$userlist $user"
-				        fi
                 fi
         done < $extpath/etc/passwd
 	if [[ $userlist ]]; then
