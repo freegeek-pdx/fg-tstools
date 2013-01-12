@@ -184,7 +184,7 @@ else
 		path="/home/"
 		# ext_path is only need if we are working relative to something other than /
 		# i.e. is null
-	fi
+    fi
 fi
 
 #sanity checks
@@ -349,7 +349,7 @@ if [[ $create_backup ]]; then
 	
 	# backs up /etc, don't run if backing up alternate path or data only
 	if [[ ! data_only ]]; then
-		if ! config_check=$(backup_config $path $ext_path); then
+		if ! config_check=$(backup_config "$path" "$ext_path"); then
 			write_msg "Could not backup /etc" 
 			exit $config_check
 		fi
@@ -358,7 +358,7 @@ if [[ $create_backup ]]; then
 	echo "Preparing to rsync network backup..."
         echo "this may take some time..."
 
-	if ! make_backup="$(create_backup $path $backup_user $backup_host $backup_path $backup_dir )"; then
+	if ! make_backup="$(create_backup "$path" "$backup_user" "$backup_host" "$backup_path" "$backup_dir" )"; then
 		write_msg "$make_backup" 
 		exit 2
 	else
@@ -370,7 +370,7 @@ if [[ $create_backup ]]; then
 ##################
 elif [[ $restore_backup ]] ; then
         # not the same as backup_password_files
-        if ! backup_passwords_check=$(backup_passwords $ext_path); then
+        if ! backup_passwords_check=$(backup_passwords "$ext_path"); then
 		write_msg "$backup_passwords_check" 
 		write_msg "Failed to backup password files ..exiting" 
 		exit 3
@@ -381,14 +381,14 @@ elif [[ $restore_backup ]] ; then
 	echo "Preparing to rsync network backup..."
         echo "this may take some time..."
 
-	if ! restorebackup=$(restore_backup $backup_user $backup_host $backup_path $backup_dir $path); then
+	if ! restorebackup=$(restore_backup "$backup_user" "$backup_host" "$backup_path" "$backup_dir" "$path"); then
 		restore_check=$?
 		write_msg "$restorebackup" 
                 write_msg "WARNING! Could not restore backup!!!" 
                 exit $restore_check
 	else
 		if [[ ! $no_user_passwords ]];  then
-			if ! restore_users_test=$(restore_users $path $ext_path); then
+			if ! restore_users_test=$(restore_users "$path" "$ext_path"); then
 				restore_users_return=$?
 				write_msg "$restore_users_test" 
 				if [[ "$restore_users_return" !=  "2" ]]; then
@@ -425,7 +425,7 @@ elif [[ $restore_backup ]] ; then
 				codename=$($chroot_path lsb_release -c |  awk '{print $2}') # lucid etc
 				if (( $multiverse_test == 0 )); then
 				#identify and comment out  relevant lines 
-					if ! multiverse_restore=$(restore_multiverse $codename $ext_path); then	
+					if ! multiverse_restore=$(restore_multiverse "$codename" "$ext_path"); then	
 						write_msg "WARNING: unable to add multiverse to sources list" 
 						write_msg "$multiverse_restore" 
 						exit 3
@@ -436,7 +436,7 @@ elif [[ $restore_backup ]] ; then
 
 				if (( $partner_test == 0 )); then
 				 #identify and comment out  relevant lines 
-					if ! restore_partners $codename $ext_path; then
+					if ! restore_partners "$codename" "$ext_path"; then
 						write_msg "unable to add Canonical partners to software sources" 
 					else
 						write_msg "Added Canonical partners to software sources" 
@@ -451,7 +451,7 @@ elif [[ $restore_backup ]] ; then
 						write_msg "Added PPA's to software sources" 
 					fi
 				fi
-				if ! packagerestore=$(restore_packages $dpkg_file $ext_path); then
+				if ! packagerestore=$(restore_packages "$dpkg_file" "$ext_path"); then
 					write_msg "$packagerestore" 
 					exit 3
 				else
