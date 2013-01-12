@@ -244,7 +244,7 @@ if [[ $create_backup ]] ; then
 	fi
 	# if backup alternate path leave message
 	if [[ $alt_path && ! $force_file ]] ; then
-		echo "Directory backup was $path" >>$path/DIRECTORY_BACKED_UP
+		echo "Directory backup was $path" >> "${path}/DIRECTORY_BACKED_UP"
 		write_msg "Directory backup was $path"
 		write_msg "a message to this effect will stored in the file DIRECTORY_BACKED_UP"
 	fi 
