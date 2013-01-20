@@ -178,6 +178,10 @@ elif [[ $alt_restore_path && ! $restore_backup ]]; then
 elif [[ $force_file &&  ! $alt_path ]]; then
 	write_msg "the -a option must be used with -f" 
 	exit 2
+elif [[ $restore_backup && $addendum]]; then
+        write_msg "-t option is not valid with -r"
+        write_msg "Please supply the full name of the directory"
+        exit 2
 else
 	# set paths etc
 	if [[ ! $path ]]; then 
@@ -225,7 +229,19 @@ if [[ $create_backup ]] ; then
 			write_msg "$ticket_number is not a valid ticket number" 
 			exit 3
 	fi
-	# if overwriting of backups not forced with -F 
+	# add addendum to ticket number if present
+	if [[ $addendum ]]; then	
+		if ! check_valid_chars $addendum; then 
+			write_msg "Only numbers, letters and _ can be added to a ticket number" 
+			write_msg "You do not need to use - it will will be added automatically" 
+			exit 3
+        else
+            # add addendum
+            backup_dir=${backupdir}-${addendum}
+		fi
+	fi	
+    
+    # if overwriting of backups not forced with -F 
 	write_msg "checking to see if the backup directory already exists..."
 	if [[  ! $force_overwrite ]]; then
 		if check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir; then
@@ -234,14 +250,7 @@ if [[ $create_backup ]] ; then
 			exit 3
 		fi
 	fi
-	# add addendum to ticket number if present
-	if [[ $addendum ]]; then	
-		if ! check_valid_chars $addendum; then 
-			write_msg "Only numbers, letters and _ can be added to a ticket number" 
-			write_msg "You do not need to use - it will will be added automatically" 
-			exit 3
-		fi
-	fi
+
 	# if backup alternate path leave message
 	if [[ $alt_path && ! $force_file ]] ; then
 		echo "Directory backup was $path" >> "${path}/DIRECTORY_BACKED_UP"

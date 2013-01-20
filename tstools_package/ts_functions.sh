@@ -236,10 +236,13 @@ check_ticket_number(){
 check_valid_backup_dir(){
 	local backupdir=$1
 	local regex="^[0-9]{8}-[0-9]{5}$"
-        if [[ ! $backupdir =~ $regex ]] ; then
-                return 1
-        else
+    local regex2="^[0-9]{8}-[0-9]{5}-[A-Za-z0-9_].*$"
+        if [[  $backupdir =~ $regex  ]] ; then
                 return 0
+        elif [[  $backupdir =~ $regex2 ]]; then
+                return 0 
+        else
+                return 1
         fi
 }
 
