@@ -248,7 +248,7 @@ check_valid_backup_dir(){
 #checks to see if any characters other than numbers letters and underscores are present
 check_valid_chars(){
 	local input=$1
-	regex="[^A-Za-z0-9_]"
+	regex="[A-Za-z0-9_]"
 	if [[ ! $input =~ $regex ]]; then
 		return 1
 	else
