@@ -242,8 +242,8 @@ if [[ $create_backup ]] ; then
 	fi	
     
     # if overwriting of backups not forced with -F 
-	write_msg "checking to see if the backup directory already exists..."
 	if [[  ! $force_overwrite ]]; then
+	write_msg "checking to see if the backup directory already exists..."
 		if check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir; then
 			write_msg "Backup directory already exists!"   
 			write_msg "Cowardly refusing to overwrite it" 
