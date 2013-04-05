@@ -178,7 +178,8 @@ elif [[ $alt_restore_path && ! $restore_backup ]]; then
 elif [[ $force_file &&  ! $alt_path ]]; then
 	write_msg "the -a option must be used with -f" 
 	exit 2
-elif [[ $restore_backup && $addendum]]; then
+
+elif [[ $restore_backup && $addendum ]]; then
         write_msg "-t option is not valid with -r"
         write_msg "Please supply the full name of the directory"
         exit 2
