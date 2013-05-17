@@ -146,7 +146,7 @@ revert_passwords(){
 	local extension=$2
 	if [[ ! $extension ]] ; then
 		extension='freegeek_ts_bak'
-	fi 
+	fi
         for file in passwd group shadow gshadow ; do
                 if ! cp $path/etc/$file.${extension} $path/etc/$file ;then
                         local failarray=( ${failarray[@]-} $(echo "$file") )
@@ -169,7 +169,7 @@ revert_passwords(){
 # gconf related
 reset_gconf(){
 	# checks to see if we are changing our own or somebody elses settings
-	# --direct option can only be used if gconfd is not running as that 
+	# --direct option can only be used if gconfd is not running as that
 	# users session
 	local my_user=$1
 	local setting=$2
@@ -195,13 +195,13 @@ reset_gconf(){
 }
 
 
-# write to error log and/or standard out 
+# write to error log and/or standard out
 write_msg(){
-local msg="$@"  
-for line in "$msg"; do 
+local msg="$@"
+for line in "$msg"; do
 	echo "$line"
 	if [[ $logfile ]]; then
-		if ! echo "$line" >>$logfile; then 
+		if ! echo "$line" >>$logfile; then
 		# should not hit here as already checked
 		echo "Could not write to Log File: $logfile"
                 exit 3
@@ -240,7 +240,7 @@ check_valid_backup_dir(){
         if [[  $backupdir =~ $regex  ]] ; then
                 return 0
         elif [[  $backupdir =~ $regex2 ]]; then
-                return 0 
+                return 0
         else
                 return 1
         fi
