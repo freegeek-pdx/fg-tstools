@@ -230,8 +230,8 @@ if [[ $create_backup ]] ; then
 			write_msg "$ticket_number is not a valid ticket number" 
 			exit 3
 	fi
-	# add addendum to ticket number if present
-	if [[ $addendum ]]; then	
+    # add addendum to ticket number if present
+	if [[ $addendum ]]; then
 		if ! check_valid_chars "$addendum"; then 
 			write_msg "Only numbers, letters and _ can be added to a ticket number" 
 			write_msg "You do not need to use - it will will be added automatically" 
