@@ -201,7 +201,7 @@ fi
 
 # check to see if path is actually a directory etc
 if [[ $path ]] ; then 
-	check_dir_read $path
+	check_dir_read "$path"
 	error=$?
 	if [[ $error == "5" ]] ; then 
 		write_msg "$path does not exist!" 
@@ -216,7 +216,7 @@ if [[ $path ]] ; then
 			exit $error
 		fi
 	fi
-	if ! check_file_write $path; then
+	if ! check_file_write "$path"; then
 		write_msg "$path is not writeable" 
 		exit 3
 	fi
@@ -232,19 +232,20 @@ if [[ $create_backup ]] ; then
 	fi
 	# add addendum to ticket number if present
 	if [[ $addendum ]]; then	
-		if ! check_valid_chars $addendum; then 
+		if ! check_valid_chars "$addendum"; then 
 			write_msg "Only numbers, letters and _ can be added to a ticket number" 
 			write_msg "You do not need to use - it will will be added automatically" 
 			exit 3
         else
             # add addendum
-            backup_dir=${backupdir}-${addendum}
+            backup_dir="${backupdir}-${addendum}"
 		fi
 	fi	
     
     # if overwriting of backups not forced with -F 
 	if [[  ! $force_overwrite ]]; then
 	write_msg "checking to see if the backup directory already exists..."
+        # leaving off quotes as we doen't want dirs with speaces in name
 		if check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir; then
 			write_msg "Backup directory already exists!"   
 			write_msg "Cowardly refusing to overwrite it" 
@@ -262,16 +263,17 @@ fi
 
 # restore backup checks
 if [[ $restore_backup ]]; then
-	if [[ $alt_restore_path && ! $data_only && ! $force_overwrite ]]; then
+	if [[ "$alt_restore_path" && ! $data_only && ! $force_overwrite ]]; then
 	write_msg "-F must be used with -A if -d is not used"
 		exit 2
 	fi
 	write_msg "checking to see if backup directory already exists"
-	if ! check_valid_backup_dir $backup_dir; then
+	if ! check_valid_backup_dir "$backup_dir"; then
 		write_msg "This doesn't look like a valid backup directory, sorry. exiting..."
 		exit 3
 	fi
 	echo 
+    # leaving off quotes as we doen't want dirs with speaces in name
 	if ! check_for_backup_dir $backup_user $backup_host $backup_path $backup_dir; then
 		write_msg "Backup directory does not exist"  
 		write_msg "Cowardly refusing to restore from non-existant backup" 
