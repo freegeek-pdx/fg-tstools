@@ -20,8 +20,8 @@ backup_users_test(){
         declare -a failarray
         for file in $@; do
                  if [[ $(check_file_write "${file}") -ne 0 ]]; then
-                        # if we cant write to file add to array         
-                        failarray=( ${failarray[@]-} $(echo "$file") ) 
+                        # if we cant write to file add to array
+                        failarray=( ${failarray[@]-} $(echo "$file") )
 	fi
         done
         # check length of failarray if >0 then something failed
@@ -48,13 +48,13 @@ get_groups(){
                     if (( $gcount < 1 )); then
                         groups=${group}
                     else
-                        groups="${groups},${group}" 
+                        groups="${groups},${group}"
                     fi
                     let gcount++
-                fi  
-        done 
+                fi
+        done
         echo "$groups"
-} 
+}
 
 backup_users(){
     local path=$1
@@ -64,7 +64,7 @@ backup_users(){
 	local userlist
 	local fail
 	local fail_list
-    # 
+    #
         while read line ; do
                 user=$(echo $line | awk -F : '{print $1}')
                 user_uid=$(echo $line | awk -F : '{print $3}')
@@ -91,7 +91,7 @@ backup_users(){
                             if (( $? != 0 )); then
                                 fail="${fail} ${path}/shadow "
                             fi
-                            if [[ $fail ]]; then 
+                            if [[ $fail ]]; then
                                 for file in $fail; do
                                     fail_list="${failist}\n${user}:${file}"
                                 done
@@ -113,20 +113,20 @@ backup_users(){
 	fi
 }
 delete_user(){
-        local user=$1 
+        local user=$1
         local gid=$2
         local extpath=$3
 	#N.B. users may not be in file
-	# delete matching lines in /etc/passwd 
+	# delete matching lines in /etc/passwd
         sed -i "/^$user:/ d" $extpath/etc/passwd
-	# delete existing encypted password 
+	# delete existing encypted password
 	sed -i "/^$user:/ d" $extpath/etc/shadow
 	# delete matching lines/existing groups
-	sed -i "/:$gid:/ d" $extpath/etc/group 
+	sed -i "/:$gid:/ d" $extpath/etc/group
 }
 
 restore_user(){
-        local path=$1        
+        local path=$1
 	local user=$2
 	local uid=$3
 	local gid=$4
@@ -140,7 +140,7 @@ restore_user(){
 	#N.B. users may not be in file
 	# delete matching lines in /etc/passwd etc
 	delete_user $user $gid $extpath
-        
+
         if ! $chroot_path addgroup --gid $gid $user; then
        		echo "problem creating ${user}'s group"
 		return 3
@@ -148,7 +148,7 @@ restore_user(){
 		echo "problem creating user: $user"
 		return 3
 	else
-                # read /home/group usermod to addusers to groups        
+                # read /home/group usermod to addusers to groups
                 #local groups=$(grep -e "\<$user\>" $path/group | cut -f1 -d: -)
                 # line above printed only 1st field , we wanted all but 1st
                 local usergroups=$(grep -e "\<$user\>" $path/group | cut -f2- -d: -)
@@ -176,14 +176,14 @@ restore_user(){
 restore_users(){
 	local path=$1
 	local extpath=$2
-        # note that copying files back across is not sufficient 
+        # note that copying files back across is not sufficient
         # need to extract values from files and added to new copies
 	for file in passwd group shadow; do
 		check_file_read "$path/$file"
-		local retval=$?	
+		local retval=$?
 		if [[ $retval -ne 0 ]] ; then
 				if (( $retval == 5 )); then
-					echo "$path/$file does not exist!" 
+					echo "$path/$file does not exist!"
 				elif (( $retval == 4 )); then
 					echo "Can not read $path/$file!"
 				fi
@@ -218,7 +218,7 @@ restore_users(){
 backup_other_sources(){
 	local sourcespath=$1
 	local extpath=$2
-	if [ $extpath]; then  
+	if [ $extpath]; then
 		path=$extpath/etc/apt/sources.list.d
 	else
 		path=/etc/apt/sources.list.d/
@@ -235,19 +235,19 @@ backup_other_sources(){
 					realfile=$(readlink -f $file)
 				else
 					realfile=$file
-				fi		
+				fi
 				if ! cp $realfile $sourcespath/sources.list.d/$filename; then
 					echo "Couldn't copy $file to $sourcespath"
 					local returnval=3
-				fi 
+				fi
 			done
 		else
-			echo "$path is empty. This is a warning only." 
-			echo "The backup will proceed as normal" 
+			echo "$path is empty. This is a warning only."
+			echo "The backup will proceed as normal"
 		fi
 	else
-		echo "$path does not exist. This is a warning only." 
-		echo "The backup will proceed as normal"	
+		echo "$path does not exist. This is a warning only."
+		echo "The backup will proceed as normal"
 	fi
 	if [[ $returnval ]]; then
 		return $returnval
@@ -264,7 +264,7 @@ backup_sources(){
 		echo "Couldn't make $sourcespath"
 		return 3
 	elif ! check_file_write $sourcespath ; then
-		echo "Couldn't write to $sourcespath Check permissions?" 
+		echo "Couldn't write to $sourcespath Check permissions?"
 		return 3
 	elif ! backup_other_sources $sourcespath $extpath  ; then
 		echo "Problem copying over /etc/apt/sources.list.d"
@@ -303,19 +303,19 @@ restore_multiverse(){
 				newline=$(echo line | sed "s/$old_version/$dist_version/")
 				if [[ ! $newline =~ multiverse ]]; then
 					echo "$newline multiverse" >>$tmpfile
-				else 
+				else
 					echo "$newline" >>$tmpfile
-				fi	
+				fi
 			fi
 		else
-			echo $line >>$tmpfile  
-		fi 
+			echo $line >>$tmpfile
+		fi
 	done < $extpath/etc/apt/sources.list
-	
+
 	if ! cp $tmpfile $extpath/etc/apt/sources.list; then
 		echo "could not overwrite /etc/apt/sources.list, new version stored at $tmpfile"
 		return 3
-	else 
+	else
 		rm $tmpfile
 		return 0
 	fi
@@ -327,10 +327,10 @@ restore_partners(){
 	if ! echo "deb http://archive.canonical.com/ubuntu $dist_version partner" >>$extpath/etc/apt/sources.list; then
 		echo "could not add partners to /etc/apt/sources.list"
 		return 3
-	else 
+	else
 		echo "deb-src http://archive.canonical.com/ubuntu $dist_version partner" >>$extpath/etc/apt/sources.list
 		return 0
-	fi 
+	fi
 }
 
 ####
@@ -341,7 +341,7 @@ backup_apt(){
         if [[ $extpath ]]; then
         	local aptdir="--admindir=${extpath}/var/lib/dpkg"
 	fi
-	dpkg --get-selections $aptdir > $dpkgfile  
+	dpkg --get-selections $aptdir > $dpkgfile
         return $?
 }
 
@@ -349,16 +349,16 @@ backup_apt(){
 restore_packages(){
         local dpkgfile=$1
 	local extpath=$2
-        
+
 	check_file_read "$dpkgfile"
         local retval=$?
         if [[ $retval -ne 0 ]] ; then
 		if (( $retval == 5 )); then
-			echo "$dpkgfile does not exist!" 
+			echo "$dpkgfile does not exist!"
 		elif (( $retval == 4 )); then
 			echo "Can not read $dpkgfile!"
 		fi
-        	exit 3       
+        	exit 3
 	fi
 
 	if [[ $extpath ]] ; then
@@ -369,7 +369,7 @@ restore_packages(){
 		echo "$update_msg"
 		return 3
         elif ! local dpkg_msg=$($chroot_path dpkg --set-selections < $dpkgfile  2>&1);then
-                echo "Could not set package selection when attempting to restore packages"	
+                echo "Could not set package selection when attempting to restore packages"
 		echo "$dpkg_msg"
 		return 3
         elif ! local upgrade_mdg=$($chroot_path apt-get -y -u dselect-upgrade   2>&1); then
@@ -395,7 +395,7 @@ create_backup(){
 	local bpath=$4
 	local bdir="$5"
         rsync --rsync-path="sudo rsync" -azh --exclude=".gvfs" "${cpath}" "${user}@${host}:${bpath}/${bdir}" 2>&1
-	return $?	
+	return $?
 }
 
 restore_backup(){
@@ -406,5 +406,5 @@ restore_backup(){
         local rpath=$5
                 rsync --rsync-path="sudo rsync" -azh --exclude=".gvfs" "${user}@${host}:${spath}/${backupdir}/" "${rpath}/"
 	return $?
-	
+
 }
