@@ -104,7 +104,7 @@ backup_passwords(){
 	local path=$1
 	local isotime=$(date +%Y%m%d%H%M)
 	for file in passwd group shadow gshadow; do
-		if ! cp $path/etc/$file $path/etc/$file.fregeek_ts_backup.$isotime;then
+		if ! cp $path/etc/$file $path/etc/$file.freegeek_ts_backup.$isotime;then
 			local failarray=( ${failarray[@]-} $(echo "$file") )
 		fi
 	done
