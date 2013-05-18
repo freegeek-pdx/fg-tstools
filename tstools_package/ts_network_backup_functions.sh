@@ -394,7 +394,7 @@ create_backup(){
 	local host=$3
 	local bpath=$4
 	local bdir="$5"
-        rsync --rsync-path="sudo rsync" -azh --exclude=".gvfs" "${cpath}" "${user}@${host}:${bpath}/${bdir}" 2>&1
+        rsync --rsync-path="sudo rsync" -azh --exclude-from="ts_exclude.txt" "${cpath}" "${user}@${host}:${bpath}/${bdir}" 2>&1
 	return $?
 }
 
