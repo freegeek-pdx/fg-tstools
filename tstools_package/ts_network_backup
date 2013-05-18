@@ -18,50 +18,50 @@ packages that have been installed (via apt-get, Ubuntu Software Center etc).
 
     -h              	    Prints this message
     -c [ticket number] 	    Create network backup
-	-r [backup directory] 	Restore network backup. The backup directory
-				            should be in the format date-ticket_number.
-	-d 			            Data only. Does not backup/restore users or
-				            packages.
-				            Use of this option is strongly discouraged.
-	-u 			            Users and data only. Does not backup/restore
-				            packages.
-				            Use of this option is discouraged.
-	-l [log file]		    Log messages to file rather than stdout.
-				            Be careful not to use the same path for backing
-				            up and restoring, or the  log file may get
-				            overwritten.
-	-t [addendum]		    Normally this script checks to see if a ticket
-				            number looks like a "real" ticket number.
-				            (i.e. it has the correct number of numbers).
-				            This option lets you add things to this number.
-				            It's useful if you are backing up more than one
-				            computer and want to store them in different
-				            folders referring to the same ticket.
-				            e.g. 00001-A and 00001-B
-				            Takes letters, numbers and _only. 
+    -r [backup directory]   Restore network backup. The backup directory
+                            should be in the format date-ticket_number.
+    -d                      Data only. Does not backup/restore users or
+                            packages.
+                            Use of this option is strongly discouraged.
+    -u                      Users and data only. Does not backup/restore
+                            packages.
+                            Use of this option is discouraged.
+    -l [log file]           Log messages to file rather than stdout.
+                            Be careful not to use the same path for backing
+                            up and restoring, or the  log file may get
+                            overwritten.
+    -t [addendum]           Normally this script checks to see if a ticket
+                            number looks like a "real" ticket number.
+                            (i.e. it has the correct number of numbers).
+                            This option lets you add things to this number.
+                            It's useful if you are backing up more than one
+                            computer and want to store them in different
+                            folders referring to the same ticket.
+                            e.g. 00001-A and 00001-B
+                            Takes letters, numbers and _only. 
                             - is added automatically.
-	-a /path/to/directory   Alternative directory to backup. Implies  -d
-				            i.e. does not backup users or packages.
-				            Use this if you want to backup something
-			                other than the home directory.
+    -a /path/to/directory   Alternative directory to backup. Implies  -d
+                            i.e. does not backup users or packages.
+                            Use this if you want to backup something
+                            other than the home directory.
                             e.g. an external windows drive.
-				            Suggests the use of -A for restoring backups.
-	-f 			            force the backup of a single file rather 
+                            Suggests the use of -A for restoring backups.
+    -f                      force the backup of a single file rather 
                             than a directory
-	-F			            Force the overwriting an existing backup
-				            or restoring with -A and not -d
-	-A /path/to/directory	Use this to restore the backup to somewhere
+    -F                      Force the overwriting an existing backup
+                            or restoring with -A and not -d
+    -A /path/to/directory   Use this to restore the backup to somewhere
                             other than /home
                             Can be used with or without -u or -d,
                             suggests the later (required if needed) 
                             -F must be used if -d isn't.
-	-p /path/to/home	    Use this if the home folder you want to
-				            backup is not in its usual place i.e. if you
-				            to backup an external/mounted drive
-				            rather than /home.
-				            You do not need to add home on the end but the
-				            script does not mind either way.
-				            Can be used with or without -u or -d.
+    -p /path/to/home        Use this if the home folder you want to
+                            backup is not in its usual place i.e. if you
+                            to backup an external/mounted drive
+                            rather than /home.
+                            You do not need to add home on the end but the
+                            script does not mind either way.
+                            Can be used with or without -u or -d.
 
 Use this to create or restore network backups. By default it will attempt to restore users, their data and settings, and the progams installed on the machine.
 
