@@ -50,6 +50,13 @@ packages that have been installed (via apt-get, Ubuntu Software Center etc).
                             than a directory
     -F                      Force the overwriting an existing backup
                             or restoring with -A and not -d
+    -R                      Read only file system.
+                            Use this if you are backing up a read only file
+                            system e.g. form a dd image
+                            This prevents the backup process from writing files
+                            prior to backup. if used without -a it adds an
+                            implicit -d. -a normally writes a file to the backup
+                            listing the directory backed up. This is skipped.
     -A /path/to/directory   Use this to restore the backup to somewhere
                             other than /home
                             Can be used with or without -u or -d,
@@ -61,7 +68,7 @@ packages that have been installed (via apt-get, Ubuntu Software Center etc).
                             rather than /home.
                             You do not need to add home on the end but the
                             script does not mind either way.
-                            Can be used with or without -u or -d.
+                            Can be used with or without -u or -d
 
 Use this to create or restore network backups. By default it will attempt to restore users, their data and settings, and the progams installed on the machine.
 
@@ -89,63 +96,63 @@ if [[ -z $1 ]]; then
 # as we have our own error messages
 #exec 2>/dev/null
 
-while getopts ":hc:r:l:t:a:A:p:dufF" option; do
+while getopts ":hc:r:l:t:a:A:p:dufFR" option; do
        case $option in
                 h) help
                    exit 0
                 ;;
-                c) create_backup="true"
-                   ticket_number="$OPTARG"
-		   backup_dir="$(date +%Y%m%d)-${ticket_number}"
-		;;
-		r) restore_backup="true"
-                   backup_dir="$OPTARG"
-		;;
-		d)
-		   data_only="true"
-                   no_apt="true"
-                   no_user_passwords="true"
-                ;;
-                u) no_apt="true"
-                   users_and_data_only="true"
-                ;;
-		l) use_log="true"
-		   logfile="$OPTARG" # N.B. truly global read inside function
-		;;
-		t)
-		   addendum=$OPTARG
-		;;
-		a) no_apt="true"
-                   no_user_passwords="true"
-                   data_only="true"
-		   alt_path="true"
-		   path="$OPTARG"
-		;;
-		A) path="$OPTARG"
-		   alt_restore_path="true"
-		;;
-		p)
-		   cut_path=$(echo "$OPTARG" |sed -r -e 's:/home/?$::' -e 's/\/*$//')
-		   ext_path=$cut_path
-		   path="${cut_path}/home"
-		   chroot_path="chroot $ext_path"
-		;;
-		f) force_file="true"
-		;;
-		F) force_overwrite="true"
-		;;
-        	\?)
-      		   write_msg "Invalid option: -$OPTARG" >&2
-      		   exit 1
-      		;;
-    		:)
-      		   write_msg "Option -$OPTARG requires an argument." >&2
-      		   exit 1
-      		;;
+                c)  create_backup="true"
+                    ticket_number="$OPTARG"
+		            backup_dir="$(date +%Y%m%d)-${ticket_number}"
+		            ;;
+		        r)  restore_backup="true"
+                    backup_dir="$OPTARG"
+		            ;;
+		        d)  data_only="true"
+                    ;;
+                u)  no_apt="true"
+                    users_and_data_only="true"
+                    ;;
+		        l)  use_log="true"
+		            logfile="$OPTARG" # N.B. truly global read inside function
+		            ;;
+		        t)  addendum=$OPTARG
+		            ;;
+		        a)  data_only="true"
+		            alt_path="true"
+		            path="$OPTARG"
+		            ;;
+		        A)  path="$OPTARG"
+		            alt_restore_path="true"
+		            ;;
+		        p) 
+                    cut_path=$(echo "$OPTARG" |sed -r -e 's:/home/?$::' -e 's/\/*$//')
+		            ext_path=$cut_path
+		            path="${cut_path}/home"
+		            chroot_path="chroot $ext_path"
+		            ;;
+		        f)  force_file="true"
+		            ;;
+		        F)  force_overwrite="true"
+		            ;;
+                R)  read_only="true"
+                    data_only="true"
+                    ;;
+                \?) write_msg "Invalid option: -$OPTARG" >&2
+      		        exit 1
+      		        ;;
+    		    :)  write_msg "Option -$OPTARG requires an argument." >&2
+      		        exit 1
+      		        ;;
 		esac
 done
 
 # process options
+if [[ $data_only ]]; then
+    no_apt="true"
+    no_user_passwords="true"
+fi
+
 if [[ $use_log ]]; then
 	if [[ ! $logfile ]]; then
 		echo  "You forgot to specify a logfile!"
@@ -216,7 +223,7 @@ if [[ $path ]] ; then
 			exit $error
 		fi
 	fi
-	if ! check_file_write "$path"; then
+	if [[ ! $read_only ]] && ! check_file_write "$path"; then
 		write_msg "$path is not writeable"
 		exit 3
 	fi
@@ -254,7 +261,7 @@ if [[ $create_backup ]] ; then
 	fi
 
 	# if backup alternate path leave message
-	if [[ $alt_path && ! $force_file ]] ; then
+	if [[ $alt_path && ! $force_file || $read_only ]] ; then
 		echo "Directory backup was $path" >> "${path}/DIRECTORY_BACKED_UP"
 		write_msg "Directory backup was $path"
 		write_msg "a message to this effect will stored in the file DIRECTORY_BACKED_UP"
