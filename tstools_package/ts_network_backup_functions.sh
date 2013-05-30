@@ -75,21 +75,21 @@ backup_users(){
                         if [[ ! $user == "nobody" ]]; then
                             # gets lists of groups user belongs to
                             #echo "$user: $(id $user)" >>"${path}/group"
-                            echo "$user: $(get_groups $user)" >>"${path}/group"
+                            echo "$user: $(get_groups $user)" >>"${path}/ts_group"
                             if (( $? != 0 )); then
-                                fail="${fail} ${path}/group "
+                                fail="${fail} ${path}/ts_group "
                             fi
-                            echo $line >>${path}/passwd
+                            echo $line >>${path}/ts_passwd
                             if (( $? != 0 )); then
-                                fail="${fail} ${path}/passwd "
+                                fail="${fail} ${path}/ts_passwd "
                             fi
 
                             # /etc/shadow contains the date of last password
                             # change. Having this be older than the install
                             # should not be a problem, but noting just in case
-                            grep -e ^$user: $extpath/etc/shadow >>"${path}/shadow"
+                            grep -e ^$user: $extpath/etc/shadow >>"${path}/ts_shadow"
                             if (( $? != 0 )); then
-                                fail="${fail} ${path}/shadow "
+                                fail="${fail} ${path}/ts_shadow "
                             fi
                             if [[ $fail ]]; then
                                 for file in $fail; do
@@ -148,10 +148,15 @@ restore_user(){
 		echo "problem creating user: $user"
 		return 3
 	else
+        if [[ -e $path/ts_group ]]; then
+            group="ts_group"
+        else
+            group="group"
+        fi
                 # read /home/group usermod to addusers to groups
                 #local groups=$(grep -e "\<$user\>" $path/group | cut -f1 -d: -)
                 # line above printed only 1st field , we wanted all but 1st
-                local usergroups=$(grep -e "\<$user\>" $path/group | cut -f2- -d: -)
+                local usergroups=$(grep -e "\<$user\>" $path/$group | cut -f2- -d: -)
 
 #               superfluous: get_groups produces correctly formatted entry
 #                 	for entry in $groups; do
@@ -178,7 +183,15 @@ restore_users(){
 	local extpath=$2
         # note that copying files back across is not sufficient
         # need to extract values from files and added to new copies
-	for file in passwd group shadow; do
+    if [[ -e $path/ts_password ]]; then
+        filelist=(ts_passwd ts_group ts_shadow)
+    else
+        filelist=(passwd group shadow)
+    fi
+    passwd=${filelist[0]}
+    shadow=${filelist[2]}
+
+	for file in ${filelist[@]}; do
 		check_file_read "$path/$file"
 		local retval=$?
 		if [[ $retval -ne 0 ]] ; then
@@ -200,7 +213,7 @@ restore_users(){
                 local user=$(echo $line | awk -F : '{print $1}')
                 local uid=$(echo $line | awk -F : '{print $3}')
                 local gid=$(echo $line | awk -F : '{print $4}')
-		local password=$(grep -m 1 $user $path/shadow | awk -F: '{print $2}')
+		        local password=$(grep -m 1 $user $path/$shadow | awk -F: '{print $2}')
 		# trying to restore a user with UID =1000 causes issues
                 # if they are not oem. So delete oem first.
                 if [[ $uid -eq 1000 && $user != "oem" ]]; then
@@ -211,7 +224,7 @@ restore_users(){
 			echo "$user_restore"
 			return 3
 		fi
-	done < ${path}/passwd
+	done < ${path}/$passwd
 	return 0
 }
 
