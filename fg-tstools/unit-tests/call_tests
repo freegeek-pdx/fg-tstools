@@ -1,0 +1,23 @@
+#!/bin/bash
+total_count=0
+test_count=0
+for file in *; do
+    if !  [[ "$file" == "call_tests" ||  "$file" == "template" ||  "$file" == "ut_functions" ]];
+    then
+        echo "running $file"
+        ./$file
+        return=$?
+        echo "$file failures: $return"
+        total_count=$(( $total_count + $return ))
+        echo "Total failed tests: $total_count"
+        let test_count++
+    fi
+done
+echo "Ran $test_count tests with $total_count failures"
+if [[ $total_count -eq 0 ]]; then
+    echo "All tests passed"
+    exit 0
+else
+    echo "Some tests failed"
+    exit 2
+fi

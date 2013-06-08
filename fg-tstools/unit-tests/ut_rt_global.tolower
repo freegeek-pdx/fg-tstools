@@ -1,0 +1,40 @@
+#!/bin/bash
+source ../ts_rt_request-tracker_functions.sh 
+source ./ut_functions
+
+fail_count=0
+
+echo  "1. test to lower"
+ut.test_output global.tolower FOO foo
+ret=$?
+if [[ $ret -ne 0 ]]; then
+    ut.fail
+else 
+    ut.pass
+fi
+
+echo  "2. test already  lower"
+ut.test_output global.tolower foo foo
+ret=$?
+if [[ $ret -ne 0 ]]; then
+    ut.fail
+else  
+    ut.pass
+fi
+
+echo  "3. test mixed case"
+ut.test_output global.tolower FoO foo
+ret=$?
+if [[ $ret -ne 0 ]]; then
+    ut.fail
+else  
+    ut.pass
+fi
+
+if (( $fail_count > 254 )); then
+    fail_count=255
+    echo "Number of failed tests: 255 or greater"
+else
+    echo "Number of failed tests: $fail_count"
+fi
+exit $fail_count

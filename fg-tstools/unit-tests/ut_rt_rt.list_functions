@@ -1,0 +1,20 @@
+#!/bin/bash
+source ../ts_rt_request-tracker_functions.sh 
+source ./ut_functions
+
+fail_count=0
+
+
+
+
+
+
+
+
+if (( $fail_count > 254 )); then
+    fail_count=255
+    echo "Number of failed tests: 255 or greater"
+else
+    echo "Number of failed tests: $fail_count"
+fi
+exit $fail_count

@@ -1,0 +1,73 @@
+#!/bin/bash
+help(){
+        cat <<EOF 
+        usage ts_reset_panel [OPTION]
+        -h                      prints this message
+        -u [USERNAME]           specify the user whose panels will be reset,
+			        defaults to the user running the command.
+        -p /path/to/mountpoint  The directory where the target file system is
+                                 mounted. Use this if you are working on an 
+                                 externally mounted  drive 
+
+
+	Resets gnome panels to their default state. 
+        Currently obsolete. Works only with Ubuntu 10.04
+EOF
+}
+
+# source common functions
+FUNCTIONS=ts_functions.sh # /path/to../
+source $FUNCTIONS
+
+### MAIN ###
+
+### process options ###
+
+while getopts ":hu:p:" option; do
+        case $option in
+                h) help
+                   exit 0
+                ;;
+                u) user=$OPTARG
+		;;
+                p) path="$OPTARG"
+                ;;
+                \?) help
+                    exit 1
+                ;;
+        esac
+done
+
+#set/check user
+if [[ -z $user ]]; then
+        user=$USER
+elif ! test_for_root; then
+	echo "Could not proceed"
+      	echo "are you root?"
+       	exit 3
+elif ! test_for_user $user $path; then
+       	echo "$user not found! exiting..."
+       	exit 3
+fi
+
+# reset panel second stage maybe unnecessary need to test
+
+# set appropriate command and options
+if ! reset_gconf $user /apps/panel $path; then
+	echo "gconf failed to reset panel" 
+	exit 3
+fi
+#if ! rm -rf /home/$user/.gconf/apps/panel; then
+#        echo "gconf failed to remove /home/$user/.gconf/apps/panel" 
+#        exit 3
+#fi
+
+if [[ ! $path ]] ; then
+	if ! pkill gnome-panel ; then
+        	echo "failed to restart gnome-panel" 
+        	exit 2
+	fi
+else
+	exit 0
+fi
+ 
