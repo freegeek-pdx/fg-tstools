@@ -1,0 +1,41 @@
+#!/bin/bash
+source /home/paulm/tstools/tstools_package/ts_functions.sh 
+source ./ut_functions
+fail_count=0
+#### usage #####
+# ut.fail                           echo fail and increment fail count
+# ut.pass                           echo pass
+#ut.test_true [function] [input]    calls ut.pass if function  return 0 
+#                                   otherwise ut.fail
+#ut.test_false [function] [input]   calls ut.pass if function does notreturn 0 
+#                                   otherwise ut.fail
+#ut.test_output [function] [input] [expected-output]
+#                                   returns 255 if ouput is empty
+#                                   1 if input and output do not match
+#                                   0 if input and output do match
+#                                   it does regex match on [expected-output]
+#ut.assert_equals [got] [expected]  calls ut.pass if got == expected otherwise 
+#                                   ut.fails. Use like this
+#                                   out=$(function) 
+#                                   ut.assert_equals $out 'expected'
+#                                   returns 0 on match, 1 otherwise.
+#ut.assert_matches [got] [expected] as above but does regex match
+
+
+
+out="$(ts.identify_distro)"
+ut.assert_equals  "$out" "12.04"
+
+out="$(ts.identify_distro -d )"
+ut.assert_matches "$out" "Ubuntu 12.04"
+
+ut.test_false ts.is_10.04
+ut.test_true ts.is_12.04
+
+if (( $fail_count > 254 )); then
+    fail_count=255
+    echo "Number of failed tests: 255 or greater"
+else
+    echo "Number of failed tests: $fail_count"
+fi
+exit $fail_count

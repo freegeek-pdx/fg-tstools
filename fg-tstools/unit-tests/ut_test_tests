@@ -1,0 +1,130 @@
+#!/bin/bash
+source ../ts_rt_request-tracker_functions.sh 
+source ./ut_functions
+
+false_test(){
+    return 1
+}
+true_test(){ 
+    return 0
+}
+output_test(){
+    echo $1 | rev
+}
+
+output_null(){
+    true
+}
+
+#start here: do not put any test before next test
+
+ut.fail >> /dev/null
+
+if [[ $fail_count -eq 0 ]]; then
+    echo "test fail: fail"
+    fail_count=1
+elif  [[ $fail_count -eq 1 ]]; then
+    echo "test fail: pass"
+    fail_count=0
+else
+    echo "test fail: fail"
+    fail_count=1
+fi
+
+
+
+
+# other tests start here
+if [[  $(ut.fail) ==  "fail" ]]; then
+    echo "test fail output: pass"
+else
+    echo "test fail output: failed"
+    let fail_count++
+fi
+
+
+
+if [[  $(ut.pass) ==  pass ]]; then
+    echo "test pass: pass"
+else
+    echo "test pass: failed"
+    let fail_count++
+fi 
+
+
+
+ut.test_false false_test  >>/dev/null 
+ft=$?
+if [[ ft -eq 0 ]]; then
+    echo "test_false: fail"
+else
+    echo "test_false: pass"
+fi
+
+
+ut.test_true true_test >>/dev/null
+tt=$?
+if [[ tt -ne 0 ]]; then
+    echo "test_true: fail"
+else
+    echo "test_true: pass"
+fi
+
+
+# should return 0 
+ut.test_output output_test foo oof >>/dev/null
+if [[ $? -ne 0 ]]; then
+    echo "test_output return if true: fail"
+else
+    echo "test_output return if true: pass"
+fi
+
+# should return 1 
+ut.test_output output_test foo foo >>/dev/null
+if [[ $? -ne 1 ]]; then
+    echo "test_output return if true: fail"
+else
+    echo "test_output return if true: pass"
+fi
+
+# should return 1 
+ut.test_output output_null foo foo >>/dev/null
+if [[ $? -ne 255 ]]; then
+    echo "test_output return if empty: fail"
+else
+    echo "test_output return if empty: pass"
+fi
+
+out_true=$(ut.test_output output_test foo oof)
+if [[ $out_true =~ "Output: oof" ]]; then
+    echo "test_output output: fail"
+    let fail_count++
+else
+    echo "test_output output: pass"
+fi
+
+echo "please enter a y"
+ut.check_answer
+if [[ $? -eq 0 ]]; then
+    echo "test check_answer y: pass"
+else
+    echo "test check_answer y: fail"
+    let fail_count++
+fi
+
+echo "please enter a n"
+ut.check_answer
+if [[ $? -eq 1 ]]; then
+    echo "test check_answer n: pass"
+else
+   echo "test check_answer n: fail"
+   let fail_count++
+fi 
+
+if (( $fail_count > 254 )); then
+    fail_count=255
+    echo "Number of failed tests: 255 or greater"
+else
+    echo "Number of failed tests: $fail_count"
+fi
+exit $fail_count

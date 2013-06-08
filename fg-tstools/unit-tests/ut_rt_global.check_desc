@@ -1,0 +1,31 @@
+#!/bin/bash
+source ../ts_rt_request-tracker_functions.sh 
+source ./ut_functions
+
+fail_count=0
+
+
+echo -n "1: "
+# entering anything other than help should result in 1
+ut.test_false global.check_desc foo
+echo -n "2: "
+ut.test_true global.check_desc "help"
+# out put should be blank
+echo -n "3: "
+ut.test_output global.check_desc "help" ""
+if [[ $? -eq 255 ]]; then
+   ut.pass
+else
+   ut.fail
+fi 
+
+echo -n "4: " 
+ut.test_true rt.describe "help"
+#output should match "Prints description of library"
+if ! ut.test_output rt.describe 'help' 'Prints description of library'; then
+    ut.fail
+else
+    ut.pass
+fi
+echo "Number of failed tests: $fail_count"
+exit $fail_count
