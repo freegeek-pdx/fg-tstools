@@ -12,4 +12,4 @@ export DH_VERBOSE=1
 	dh  $@
 
 override_dh_auto_install:
-	$(MAKE) DESTDIR=$$(pwd)/debian/tstools prefix=usr  install 
+	$(MAKE) DESTDIR=$$(pwd)/debian/fg-tstools prefix=usr  install 
