@@ -141,7 +141,7 @@ restore_user(){
 	# delete matching lines in /etc/passwd etc
 	delete_user $user $gid $extpath
 
-        if ! $chroot_path addgroup --gid $gid $user; then
+    if ! $chroot_path addgroup --gid $gid $user; then
        		echo "problem creating ${user}'s group"
 		return 3
  	elif ! $chroot_path useradd -N --gid $gid --uid $uid -d /home/$user --password $password --shell /bin/bash $user; then
@@ -153,10 +153,20 @@ restore_user(){
         else
             group="group"
         fi
-                # read /home/group usermod to addusers to groups
-                #local groups=$(grep -e "\<$user\>" $path/group | cut -f1 -d: -)
-                # line above printed only 1st field , we wanted all but 1st
-                local usergroups=$(grep -e "\<$user\>" $path/$group | cut -f2- -d: -)
+        
+        
+        
+        
+        # read /home/group usermod to addusers to groups
+        #local groups=$(grep -e "\<$user\>" $path/group | cut -f1 -d: -)
+        # line above printed only 1st field , we wanted all but 1st
+        local usergroups=$(grep -e "\<$user\>" $path/$group | cut -f2- -d: -)
+        
+        # 12.04 switched sudo for admin in /etc/groups for root users
+        # admin still works but the group is not present by default
+        # so we swtich to sudo for forward (and backward) compatibility
+        usergroups=$(cat $usergroups | sed s/,admin/,sudo) 
+
 
 #               superfluous: get_groups produces correctly formatted entry
 #                 	for entry in $groups; do
@@ -168,12 +178,12 @@ restore_user(){
 #                 	                fi
 # 	                        fi
 # 	                done
-                if [[ ${#usergroups} -ne 0 ]] ; then
-                        if ! $chroot_path usermod -a -G "$usergroups" $user; then
-                                echo "problem adding ${user}'s groups"
-                                return 3
-                        fi
+        if [[ ${#usergroups} -ne 0 ]] ; then
+                if ! $chroot_path usermod -a -G "$usergroups" $user; then
+                        echo "problem adding ${user}'s groups"
+                        return 3
                 fi
+        fi
 		return 0
 	fi
 }
