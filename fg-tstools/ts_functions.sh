@@ -11,9 +11,19 @@ test_for_root(){
 }
 
 check_file_write(){
-        local file=$1
+    local file=$1
+    if [[ -d $file ]]; then
+        file=${file/.write_test}
+        local remove="true"
+    fi
 	touch $file &>/dev/null
-	return $?
+    local retval=$?
+    if [[ $remove ]]; then
+        if [[ -e $file ]]
+            rm $file
+        fi
+    fi
+	return $retval
 }
 
 check_file_read(){
