@@ -223,7 +223,7 @@ if [[ $path ]] ; then
 			exit $error
 		fi
 	fi
-	if [[ ! $read_only ]] && ! check_file_write "$path"; then
+	if [[ ! $read_only ]] && ! check_file_write "$path/DIRECTORY_BACKED_UP"; then
 		write_msg "$path is not writeable"
 		exit 3
 	fi
