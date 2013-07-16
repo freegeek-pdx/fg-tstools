@@ -1,5 +1,5 @@
 Source: fg-tstools
-Section: ubuntu/unknown
+Section: public/misc
 Priority: extra
 Maintainer: Paul Munday <paulm@freegeek.org>
 Build-Depends: debhelper (>= 8.0.0)
