@@ -1,7 +1,7 @@
 fg-tstools (0.1.14) public; urgency=low
 
   [ Paul Munday ]
-  * Initial Release.
+  * Initial Release. RT#22468
 
   [ Vagrant Cascadian ]
   * Updated packaging.
