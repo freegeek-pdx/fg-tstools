@@ -1,5 +1,9 @@
-fg-tstools (0.1.13) public; urgency=low
+fg-tstools (0.1.14) public; urgency=low
 
+  [ Paul Munday ]
   * Initial Release.
 
- -- Paul Munday <paulm@freegeek.org>  Thu, 30 May 2013 16:55:14 -0700
+  [ Vagrant Cascadian ]
+  * Updated packaging.
+
+ -- Vagrant Cascadian <vagrant@freegeek.org>  Thu, 25 Jul 2013 11:28:27 -0700
