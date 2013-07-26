@@ -19,7 +19,7 @@ check_file_write(){
 	touch $file &>/dev/null
     local retval=$?
     if [[ $remove ]]; then
-        if [[ -e $file ]]
+        if [[ -e $file ]]; then
             rm $file
         fi
     fi
