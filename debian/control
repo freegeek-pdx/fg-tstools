@@ -1,7 +1,8 @@
 Source: fg-tstools
-Section: ubuntu/unknown
+Section: public/misc
 Priority: extra
 Maintainer: Paul Munday <paulm@freegeek.org>
+Uploaders: Vagrant Cascadian <vagrant@freegeek.org>
 Build-Depends: debhelper (>= 8.0.0)
 Standards-Version: 3.9.2
 Homepage: http://tsbackup.fglan
