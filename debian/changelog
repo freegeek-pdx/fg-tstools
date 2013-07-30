@@ -1,3 +1,10 @@
+fg-tstools (0.1.15) public; urgency=low
+
+  [ Paul Munday ]
+  * ts_functions.sh: bug fix in file_read
+
+ -- Vagrant Cascadian <vagrant@freegeek.org>  Tue, 30 Jul 2013 11:15:14 -0700
+
 fg-tstools (0.1.14) public; urgency=low
 
   [ Paul Munday ]
