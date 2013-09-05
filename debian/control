@@ -11,6 +11,6 @@ Vcs-Browser: http://git.freegeek.org/?p=techsupporttools;a=summary
 
 Package: fg-tstools
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, apt, openssh-client, rsync, lsb-release
 Description: Tools for Free Geek Tech Support Techs
  Tools for Free Geek Tech Support Techs including ts_network_backup
