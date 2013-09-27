@@ -10,14 +10,59 @@ help(){
                                  externally mounted  drive 
 
 
-	Resets gnome panels to their default state. 
-        Currently obsolete. Works only with Ubuntu 10.04
+	Resets xfce panels to their default state. 
+        Only works with Xubuntu 12.04
 EOF
 }
 
 # source common functions
 FUNCTIONS=ts_functions.sh # /path/to../
 source $FUNCTIONS
+
+# Functions
+
+local.reset_10.04(){
+# reset panel second stage maybe unnecessary need to test
+
+# set appropriate command and options
+if ! reset_gconf $user /apps/panel $path; then
+    echo "gconf failed to reset panel" 
+    return 3
+fi
+#if ! rm -rf /home/$user/.gconf/apps/panel; then
+#        echo "gconf failed to remove /home/$user/.gconf/apps/panel" 
+#        exit 3
+#fi
+
+if [[ ! $path ]] ; then
+    if ! pkill gnome-panel ; then
+        echo "failed to restart gnome-panel" 
+         return 2
+    fi
+else
+    return 0
+fi
+}
+ 
+local.reset_12.04(){
+pgrep xfce4 >> /dev/null
+if [[ $? ==  0 && $user  == $USER ]]; then
+    echo "You can not run this program if you are logged in as the user"
+    echo "you are attempting to change while xfce4 (the graphic environment"
+    echo " is running"
+    return 4 
+fi
+
+# reset panel second stage maybe unnecessary need to test
+if ! rm -r /home/$user/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml;then
+    return 3
+elif ! rm -r /home/$user/.config/xfce4/panel/; then
+    return 3
+else
+    return 0         
+fi 
+# see ticket #32682
+}
 
 ### MAIN ###
 
@@ -40,34 +85,26 @@ done
 
 #set/check user
 if [[ -z $user ]]; then
-        user=$USER
+    user=$USER
 elif ! test_for_root; then
 	echo "Could not proceed"
-      	echo "are you root?"
-       	exit 3
+    echo "are you root?"
+    exit 3
 elif ! test_for_user $user $path; then
-       	echo "$user not found! exiting..."
-       	exit 3
+    echo "$user not found! exiting..."
+    exit 3
 fi
+version=$(ts.identify_distro -d )
 
-# reset panel second stage maybe unnecessary need to test
-
-# set appropriate command and options
-if ! reset_gconf $user /apps/panel $path; then
-	echo "gconf failed to reset panel" 
-	exit 3
-fi
-#if ! rm -rf /home/$user/.gconf/apps/panel; then
-#        echo "gconf failed to remove /home/$user/.gconf/apps/panel" 
-#        exit 3
-#fi
-
-if [[ ! $path ]] ; then
-	if ! pkill gnome-panel ; then
-        	echo "failed to restart gnome-panel" 
-        	exit 2
-	fi
+if [[ $version =~ "10.04" ]];then
+    local.reset_10.04
+    retval=$?
+    exit $retval
+elif [[ $version =~ "12.04" ]];then
+    local.reset_12.04
+    retval=$?
+    exit $retval
 else
-	exit 0
+    echo "$version is not supported by this program"
+    exit 1
 fi
- 
