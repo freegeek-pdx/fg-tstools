@@ -193,7 +193,7 @@ restore_users(){
 	local extpath=$2
         # note that copying files back across is not sufficient
         # need to extract values from files and added to new copies
-    if [[ -e $path/ts_password ]]; then
+    if [[ -e $path/ts_passwd ]]; then
         filelist=(ts_passwd ts_group ts_shadow)
     else
         filelist=(passwd group shadow)
