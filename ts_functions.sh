@@ -224,10 +224,23 @@ return 0
 
 # remove list of files
 cleanup(){
-	rm -r $@
-	return $?
+	for elem in $@; do
+	    if ! _del $elem; then
+            error+="$elem "
+        fi
+    done
+    if $elem; then
+        echo "could not delete ${elem}"
+        return 1
+    else
+        return 0
+    fi
 }
 
+_del(){
+	rm -r $1
+	return $?
+}
 
 # test for valid ticket number
 #N.B. actually tests for 5 digits, will stop working at some distant point in the future
