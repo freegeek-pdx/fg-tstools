@@ -165,7 +165,7 @@ restore_user(){
         # 12.04 switched sudo for admin in /etc/groups for root users
         # admin still works but the group is not present by default
         # so we swtich to sudo for forward (and backward) compatibility
-        usergroups=$(cat $usergroups | sed s/,admin/,sudo) 
+        usergroups=$(cat $usergroups | sed s/,admin/,sudo/) 
 
 
 #               superfluous: get_groups produces correctly formatted entry
